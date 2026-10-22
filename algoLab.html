@@ -1,0 +1,2859 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AlgoLab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="author" content="Wahiba BOUZYAN">
+<meta name="copyright" content="© 2026 Wahiba BOUZYAN">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<style>
+:root{
+  /* Layout : coque d'IDE — barre d'activité · explorateur · éditeur + panneau bas · panneau d'exécution à droite */
+  color-scheme: dark;
+  --bg:#0e1116; --win:#13171e; --ed:#161b22; --pane:#1a1f28; --bar:#1d232d; --hover:#262d39; --line:#29303c;
+  --fg:#d7dce5; --muted:#8a93a4; --faint:#5c6577;
+  --accent:#3dbba8; --on-accent:#04211c; --amber:#e9a84e; --on-amber:#2b1a02; --err:#f07067; --on-err:#2c0806; --ok:#72c78e;
+  --sel:rgba(61,187,168,.26); --cur:rgba(255,255,255,.04); --exec:rgba(233,168,78,.18); --errbg:rgba(240,112,103,.14);
+  --shadow:0 18px 50px rgba(0,0,0,.35);
+  --k:#cf9cf2; --kd:#f2907a; --io:#5cc3ea; --t:#6fd3bd; --s:#b9d880; --n:#f2b56c; --c:#6a7389; --o:#ec8aa3; --as:#e9a84e; --f:#8eb5ff;
+  --ui:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, "Liberation Mono", monospace;
+  --fs:14px; --lh:22px; --panel-h:240px; --sb-w:252px;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme: light;
+    --bg:#dde1e7; --win:#f3f4f6; --ed:#ffffff; --pane:#f1f3f6; --bar:#e8ebf0; --hover:#dce1e9; --line:#d2d7df;
+    --fg:#1c2230; --muted:#5b6474; --faint:#99a1ae;
+    --accent:#0e8a79; --on-accent:#ffffff; --amber:#b06c16; --on-amber:#ffffff; --err:#c9362e; --on-err:#ffffff; --ok:#2b8a4f;
+    --sel:rgba(14,138,121,.2); --cur:rgba(20,40,70,.045); --exec:rgba(214,146,40,.22); --errbg:rgba(201,54,46,.1);
+    --shadow:0 18px 50px rgba(30,40,60,.16);
+    --k:#8434bf; --kd:#c0401d; --io:#0a72a1; --t:#0b7f68; --s:#4a7810; --n:#ad540e; --c:#8a92a1; --o:#b03360; --as:#b06c16; --f:#2b5dc3;
+  }
+}
+:root[data-theme="light"]{
+  color-scheme: light;
+  --bg:#dde1e7; --win:#f3f4f6; --ed:#ffffff; --pane:#f1f3f6; --bar:#e8ebf0; --hover:#dce1e9; --line:#d2d7df;
+  --fg:#1c2230; --muted:#5b6474; --faint:#99a1ae;
+  --accent:#0e8a79; --on-accent:#ffffff; --amber:#b06c16; --on-amber:#ffffff; --err:#c9362e; --on-err:#ffffff; --ok:#2b8a4f;
+  --sel:rgba(14,138,121,.2); --cur:rgba(20,40,70,.045); --exec:rgba(214,146,40,.22); --errbg:rgba(201,54,46,.1);
+  --shadow:0 18px 50px rgba(30,40,60,.16);
+  --k:#8434bf; --kd:#c0401d; --io:#0a72a1; --t:#0b7f68; --s:#4a7810; --n:#ad540e; --c:#8a92a1; --o:#b03360; --as:#b06c16; --f:#2b5dc3;
+}
+:root[data-theme="dark"]{ color-scheme: dark; }
+
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{height:100%;box-sizing:border-box}
+body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--fg);font:14px/1.45 var(--ui);
+  padding-block:12px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+svg{display:block;flex:none}
+
+.app{height:100%;display:grid;grid-template-rows:40px minmax(0,1fr) 26px;background:var(--win);border:1px solid var(--line);
+  border-radius:10px;overflow:hidden;box-shadow:var(--shadow);position:relative}
+
+/* ---------- barre de titre ---------- */
+.titlebar{display:flex;align-items:center;gap:10px;padding:0 10px 0 12px;background:var(--bar);border-bottom:1px solid var(--line);min-width:0}
+.logo{display:flex;align-items:center;gap:8px;font:700 14px var(--mono);letter-spacing:-.01em;white-space:nowrap}
+.logo .mark{width:24px;height:24px;border-radius:6px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font:700 15px var(--mono)}
+.logo small{font:500 10.5px var(--ui);color:var(--muted);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.menu{display:flex;gap:2px;margin-left:6px}
+.menu button,.icon-btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 9px;border:0;border-radius:6px;background:transparent;color:var(--muted);font-size:12.5px;cursor:pointer;white-space:nowrap}
+.menu button:hover,.icon-btn:hover{background:var(--hover);color:var(--fg)}
+.tb-title{flex:1;min-width:0;text-align:center;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-title b{color:var(--fg);font-weight:500}
+
+/* ---------- espace de travail ---------- */
+.workspace{display:grid;grid-template-columns:46px var(--sb-w) minmax(0,1fr) 300px;min-height:0;position:relative}
+.workspace.sb-closed{grid-template-columns:46px 0 minmax(0,1fr) 300px}
+.activity{grid-column:1;display:flex;flex-direction:column;align-items:center;background:var(--bar);border-right:1px solid var(--line);padding-top:4px}
+.activity button{width:46px;height:46px;display:grid;place-items:center;border:0;background:transparent;color:var(--faint);cursor:pointer;position:relative}
+.activity button:hover{color:var(--fg)}
+.activity button.on{color:var(--fg)}
+.activity button.on::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:2px;background:var(--accent)}
+.sidebar{grid-column:2;background:var(--pane);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+.workspace.sb-closed .sidebar{visibility:hidden;border:0}
+.main{grid-column:3;display:grid;grid-template-rows:36px auto minmax(0,1fr) 5px var(--panel-h);min-width:0;min-height:0}
+.main.panel-min{grid-template-rows:36px auto minmax(0,1fr) 5px 34px}
+.runpanel{grid-column:4;background:var(--pane);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;min-width:0}
+
+/* ---------- barre latérale ---------- */
+.sb-head{height:35px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 16px;font:600 11px var(--ui);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.sb-actions{display:flex;gap:2px}
+.sb-actions .icon-btn{padding:0 6px;height:24px}
+.sb-view{flex:1;min-height:0;overflow:auto}
+.sb-view[hidden]{display:none}
+.tg-head{display:flex;align-items:center;gap:4px;width:100%;height:24px;border:0;background:transparent;padding:0 8px;font:600 11px var(--ui);letter-spacing:.07em;text-transform:uppercase;color:var(--fg);cursor:pointer;text-align:left}
+.tg-head svg{transition:transform .15s}
+.tg.closed .tg-head svg{transform:rotate(-90deg)}
+.tg.closed .tg-body{display:none}
+.tg-sub{padding:8px 0 2px 28px;font:500 10.5px var(--ui);color:var(--faint);letter-spacing:.05em;text-transform:uppercase}
+.row{display:flex;align-items:center;gap:7px;height:26px;padding:0 6px 0 22px;font-size:13px;cursor:pointer;color:var(--fg);position:relative;user-select:none}
+.row:hover{background:var(--hover)}
+.row.active{background:var(--sel)}
+.row .fi{color:var(--accent);font:700 10px var(--mono);width:16px;text-align:center}
+.row .rn{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .ra{display:none;gap:2px}
+.row:hover .ra,.row.active .ra{display:flex}
+@media (hover:none){.row .ra{display:flex}}
+.row .ra button{width:22px;height:22px;display:grid;place-items:center;border:0;border-radius:4px;background:transparent;color:var(--muted);cursor:pointer}
+.row .ra button:hover{background:var(--line);color:var(--fg)}
+.row input{flex:1;min-width:0;height:22px;font:13px var(--ui);background:var(--ed);color:var(--fg);border:1px solid var(--accent);border-radius:3px;padding:0 5px;outline:0}
+.row.confirm{background:var(--errbg)}
+.row.confirm .q{flex:1;font-size:12.5px}
+.row.confirm button{border:0;border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer;background:var(--line)}
+.row.confirm button.yes{background:var(--err);color:var(--on-err)}
+.empty-note{padding:6px 22px 10px;color:var(--faint);font-size:12.5px}
+
+.snips{padding:4px 10px 16px;display:flex;flex-direction:column;gap:6px}
+.snip{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--ed);border-radius:6px;padding:7px 9px;cursor:pointer}
+.snip:hover{border-color:var(--accent)}
+.snip b{display:block;font:600 12.5px var(--ui);margin-bottom:3px}
+.snip pre{margin:0;font:11.5px/1.45 var(--mono);color:var(--muted);white-space:pre;overflow:hidden}
+.snip-hint{padding:0 16px 8px;font-size:12px;color:var(--muted)}
+
+.help{padding:2px 16px 24px;font-size:12.5px;line-height:1.55;color:var(--fg)}
+.help h4{margin:16px 0 6px;font:600 11px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.help p{margin:0 0 6px;color:var(--muted)}
+.help pre{margin:0 0 6px;padding:7px 9px;background:var(--ed);border:1px solid var(--line);border-radius:6px;font:11.5px/1.5 var(--mono);white-space:pre;overflow-x:auto}
+.help table{width:100%;border-collapse:collapse;font-size:12px}
+.help td{padding:3px 0;vertical-align:top;border-bottom:1px solid var(--line)}
+.help td:first-child{font-family:var(--mono);font-size:11.5px;color:var(--f);padding-right:8px;white-space:nowrap}
+.help kbd,.btn kbd{font:600 10.5px var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;color:var(--muted);background:var(--ed)}
+
+/* ---------- onglets ---------- */
+.tabs{display:flex;align-items:stretch;background:var(--bar);border-bottom:1px solid var(--line);overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{display:flex;align-items:center;gap:7px;padding:0 6px 0 12px;font-size:12.5px;color:var(--muted);border-right:1px solid var(--line);cursor:pointer;white-space:nowrap;position:relative;flex:none}
+.tab:hover{color:var(--fg)}
+.tab.on{background:var(--ed);color:var(--fg)}
+.tab.on::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--accent)}
+.tab .fi{color:var(--accent);font:700 10px var(--mono)}
+.tab .ro{font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:3px;padding:0 4px}
+.tab .tx{width:20px;height:20px;display:grid;place-items:center;border:0;border-radius:4px;background:transparent;color:var(--muted);cursor:pointer}
+.tab .tx:hover{background:var(--hover);color:var(--fg)}
+.tab .dot{width:8px;height:8px;border-radius:50%;background:var(--fg);margin:0 6px}
+
+/* ---------- barre d'outils ---------- */
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 10px;background:var(--ed);border-bottom:1px solid var(--line)}
+.btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;border:1px solid var(--line);background:var(--pane);color:var(--fg);font:500 12.5px var(--ui);cursor:pointer;white-space:nowrap}
+.btn:hover:not(:disabled){background:var(--hover)}
+.btn:disabled{opacity:.42;cursor:default}
+.btn.primary{background:var(--accent);border-color:transparent;color:var(--on-accent)}
+.btn.primary:hover:not(:disabled){background:var(--accent);filter:brightness(1.08)}
+.btn.primary kbd{background:transparent;color:inherit;border-color:currentColor;opacity:.7}
+.btn.warn{color:var(--err)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover:not(:disabled){color:var(--fg)}
+.btn.arrow{font:700 16px var(--mono);color:var(--as);padding:0 9px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;height:28px}
+.seg button{border:0;background:transparent;padding:0 10px;font:500 12px var(--ui);color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--hover);color:var(--fg)}
+.speed{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.speed input{width:96px;accent-color:var(--amber)}
+.tb-sep{width:1px;height:18px;background:var(--line);margin:0 2px}
+.tb-spacer{flex:1}
+
+/* ---------- éditeur ---------- */
+.editor{display:grid;grid-template-columns:54px minmax(0,1fr);background:var(--ed);min-height:0;position:relative}
+.gutter{overflow:hidden;position:relative;user-select:none}
+.gutter-inner{padding-top:10px;will-change:transform}
+.gl{font:calc(var(--fs) - 2px)/var(--lh) var(--mono);height:var(--lh);color:var(--faint);text-align:right;padding-right:14px;cursor:pointer;position:relative;font-variant-numeric:tabular-nums}
+.gl:hover{color:var(--muted)}
+.gl.cur{color:var(--fg)}
+.gl.err{color:var(--err)}
+.gl.bp::before{content:"";position:absolute;left:7px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--err)}
+.gl:not(.bp):hover::before{content:"";position:absolute;left:7px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--err);opacity:.3}
+.gl.exec{color:var(--amber);font-weight:700}
+.gl.exec::after{content:"";position:absolute;right:2px;top:50%;margin-top:-5px;border-left:8px solid var(--amber);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.code{position:relative;overflow:hidden;min-width:0}
+.bands{position:absolute;top:0;left:0;right:0;pointer-events:none;will-change:transform}
+.band{position:absolute;left:0;right:0;height:var(--lh)}
+.band.cur{background:var(--cur)}
+.band.exec{background:var(--exec);box-shadow:inset 2px 0 0 var(--amber)}
+.band.err{background:var(--errbg);border-bottom:2px dotted var(--err)}
+.layer{position:absolute;top:0;left:0;pointer-events:none;will-change:transform}
+#hl,#ta{font:var(--fs)/var(--lh) var(--mono);font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;letter-spacing:0;tab-size:3;white-space:pre;padding:10px 18px 60px}
+#hl{margin:0;color:var(--fg)}
+#ta{position:absolute;inset:0;width:100%;height:100%;margin:0;border:0;outline:0;resize:none;overflow:auto;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--fg)}
+#ta::selection{background:var(--sel);color:transparent}
+#ta[readonly]{caret-color:transparent}
+#hl .k{color:var(--k);font-weight:600}
+#hl .kd{color:var(--kd);font-weight:600}
+#hl .io{color:var(--io);font-weight:600}
+#hl .t{color:var(--t)}
+#hl .s{color:var(--s)}
+#hl .n,#hl .b{color:var(--n)}
+#hl .c{color:var(--c);font-style:italic}
+#hl .o{color:var(--o);font-weight:600}
+#hl .as{color:var(--as);font-weight:700}
+#hl .f{color:var(--f)}
+.ro-badge{position:absolute;right:14px;top:8px;font-size:11px;color:var(--amber);background:var(--pane);border:1px solid var(--line);border-radius:4px;padding:1px 7px;pointer-events:none;z-index:3}
+.welcome{position:absolute;inset:0;display:grid;place-items:center;background:var(--ed);z-index:4;padding:20px}
+.welcome div{max-width:380px;text-align:center}
+.welcome h2{margin:0 0 6px;font:700 22px var(--mono)}
+.welcome p{color:var(--muted);margin:0 0 14px}
+.welcome .btn{margin:3px}
+
+/* ---------- panneau bas ---------- */
+.resizer{cursor:row-resize;background:var(--line);opacity:.6;touch-action:none}
+.resizer:hover,.resizer.drag{background:var(--accent);opacity:1}
+.panel{display:grid;grid-template-rows:34px minmax(0,1fr);background:var(--pane);min-height:0}
+.ptabs{display:flex;align-items:center;gap:2px;padding:0 6px 0 10px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.ptabs::-webkit-scrollbar{display:none}
+.ptabs>button.pt{height:34px;border:0;background:transparent;padding:0 10px;font:600 11px var(--ui);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap}
+.ptabs>button.pt:hover{color:var(--fg)}
+.ptabs>button.pt.on{color:var(--fg)}
+.ptabs>button.pt.on::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:1px;background:var(--fg)}
+.pt-vars{display:none}
+.badge{display:inline-block;min-width:16px;padding:0 5px;margin-left:4px;border-radius:8px;background:var(--err);color:var(--on-err);font:600 10px/16px var(--ui);text-align:center;letter-spacing:0}
+.badge:empty{display:none}
+.ptabs .grow{flex:1}
+.pbody{min-height:0;position:relative}
+.pview{position:absolute;inset:0;overflow:auto}
+.console{font:13px/1.6 var(--mono);padding:8px 16px 12px}
+.cl{white-space:pre-wrap;word-break:break-word;min-height:1.6em}
+.cl.info{color:var(--muted)}
+.cl.ok{color:var(--ok)}
+.cl.warn{color:var(--amber)}
+.cl.err{color:var(--err);background:var(--errbg);border-left:2px solid var(--err);padding:3px 8px;margin:4px 0;border-radius:0 4px 4px 0;font-family:var(--ui);font-size:13px;cursor:pointer}
+.cl.err b{font-weight:600}
+.cl.echo{color:var(--accent)}
+.cl.echo .en{color:var(--faint);margin-left:10px}
+.in-row{display:flex;align-items:center;gap:8px;margin:2px 0}
+.in-row .pr{color:var(--accent);font-weight:700}
+.read-in{flex:1;min-width:0;max-width:420px;background:var(--ed);color:var(--fg);border:1px solid var(--accent);border-radius:5px;font:13px var(--mono);padding:4px 8px;outline:0;box-shadow:0 0 0 3px var(--sel)}
+.read-in.bad{border-color:var(--err)}
+.hint-line{color:var(--faint);font-family:var(--ui)}
+
+.vars{padding:6px 12px 14px;font-size:12.5px}
+.vg{margin-bottom:10px}
+.vg-title{font:600 10.5px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 0 4px}
+.var{padding:4px 6px;border-radius:5px;margin:0 -6px}
+.var-h{display:flex;align-items:baseline;gap:8px;min-width:0}
+.vn{font:600 12.5px var(--mono);color:var(--fg)}
+.vt{font-size:11px;color:var(--faint);white-space:nowrap}
+.vv{margin-left:auto;font:12.5px var(--mono);text-align:right;min-width:0;overflow-wrap:anywhere}
+.vv.num{color:var(--n)} .vv.str{color:var(--s)} .vv.bool{color:var(--k)}
+.undef{color:var(--faint)}
+.const-tag{font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:3px;padding:0 4px}
+@keyframes flash{from{background:var(--exec)}to{background:transparent}}
+.chg{animation:flash 1.1s ease-out}
+.var.chg .vv{font-weight:700}
+.arr{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.ac{min-width:34px;border:1px solid var(--line);border-radius:4px;text-align:center;font:12px var(--mono);overflow:hidden;background:var(--ed)}
+.ac .ai{display:block;font-size:10px;color:var(--faint);border-bottom:1px solid var(--line);padding:0 3px}
+.ac .av{display:block;padding:2px 5px;color:var(--n)}
+.ac.chg{border-color:var(--amber)}
+.mat-wrap{overflow-x:auto;margin-top:5px}
+.mat{border-collapse:collapse;font:12px var(--mono)}
+.mat th{font-weight:400;font-size:10px;color:var(--faint);padding:1px 5px}
+.mat td{border:1px solid var(--line);padding:2px 6px;text-align:center;color:var(--n);background:var(--ed);min-width:30px}
+.mat td.chg{outline:1px solid var(--amber)}
+.vars-empty{color:var(--faint);font-size:12.5px;padding:10px 0;line-height:1.5}
+.stack{padding:4px 12px 14px;font-size:12.5px}
+.sf{display:flex;justify-content:space-between;gap:8px;padding:4px 6px;margin:0 -6px;border-radius:4px;font-family:var(--mono)}
+.sf.top{background:var(--exec)}
+.sf span{color:var(--faint);font-family:var(--ui);font-size:11.5px}
+.rp-head{height:35px;flex:none;display:flex;align-items:center;padding:0 16px;font:600 11px var(--ui);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.rp-sec{border-top:1px solid var(--line)}
+.rp-sec h3{margin:0;padding:8px 12px 2px;font:600 11px var(--ui);letter-spacing:.07em;text-transform:uppercase;color:var(--fg)}
+.rp-vars{flex:1;min-height:0;overflow:auto}
+.rp-stack{flex:none;max-height:35%;overflow:auto}
+
+.trace-wrap{min-width:0}
+.trace{border-collapse:collapse;font:12.5px var(--mono);font-variant-numeric:tabular-nums;min-width:100%}
+.trace th{position:sticky;top:0;background:var(--bar);font:600 11px var(--ui);text-align:left;padding:6px 12px;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap;z-index:1}
+.trace th.var-col{font-family:var(--mono);font-size:12px;color:var(--fg);text-align:center}
+.trace td{padding:3px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.trace td.vc{text-align:center;color:var(--muted)}
+.trace td.vc.hit{color:var(--fg);font-weight:700;background:var(--exec)}
+.trace td.ln{color:var(--faint)}
+.trace td.ins{color:var(--fg)}
+.trace tr.out td.ins{color:var(--io)}
+.trace tr.in td.ins{color:var(--accent)}
+.trace-note{padding:10px 16px;color:var(--faint);font-size:12.5px}
+.prob{display:flex;gap:10px;padding:6px 16px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--line)}
+.prob:hover{background:var(--hover)}
+.prob .pi{color:var(--err);font-weight:700}
+.prob .pl{margin-left:auto;color:var(--faint);white-space:nowrap;font-size:12px}
+.no-prob{padding:12px 16px;color:var(--faint);font-size:12.5px}
+
+/* ---------- barre d'état ---------- */
+.statusbar{display:flex;align-items:center;gap:2px;padding:0 6px;font-size:12px;background:var(--bar);color:var(--muted);border-top:1px solid var(--line);white-space:nowrap;overflow:hidden}
+.statusbar .si{display:inline-flex;align-items:center;gap:5px;height:100%;padding:0 8px}
+.statusbar button.si{border:0;background:transparent;color:inherit;cursor:pointer;font-size:12px}
+.statusbar button.si:hover{background:var(--hover)}
+.statusbar .grow{flex:1}
+.statusbar .copy{font-weight:500;color:inherit;opacity:.85}
+.help .credit{margin-top:18px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.welcome .credit{margin-top:16px;font-size:12px;color:var(--faint)}
+.app[data-state="running"] .statusbar,.app[data-state="reading"] .statusbar{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.app[data-state="paused"] .statusbar{background:var(--amber);color:var(--on-amber);border-color:transparent}
+.app[data-state="error"] .statusbar{background:var(--err);color:var(--on-err);border-color:transparent}
+.app[data-state="running"] .statusbar button.si:hover,.app[data-state="paused"] .statusbar button.si:hover,.app[data-state="error"] .statusbar button.si:hover{background:rgba(127,127,127,.2)}
+
+.toast{position:absolute;right:16px;bottom:38px;z-index:50;background:var(--fg);color:var(--win);font-size:13px;padding:8px 14px;border-radius:6px;box-shadow:var(--shadow);opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:none}
+
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--faint);background-clip:padding-box;border:2px solid transparent}
+::-webkit-scrollbar-corner{background:transparent}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .workspace{grid-template-columns:46px var(--sb-w) minmax(0,1fr)}
+  .workspace.sb-closed{grid-template-columns:46px 0 minmax(0,1fr)}
+  .runpanel{display:none}
+  .pt-vars{display:inline-block}
+}
+@media (max-width:880px){
+  .menu .lbl,.btn .lbl,.btn kbd{display:none}
+  .tb-title{display:none}
+  .logo small{display:none}
+  .menu{margin-left:auto}
+}
+@media (max-width:760px){
+  body{padding-block:8px}
+  .workspace,.workspace.sb-closed{grid-template-columns:44px minmax(0,1fr)}
+  .activity button{width:44px}
+  .main{grid-column:2}
+  .sidebar{position:absolute;left:44px;top:0;bottom:0;width:min(290px, calc(100% - 64px));z-index:20;box-shadow:var(--shadow)}
+  .workspace.sb-closed .sidebar{display:none}
+  .editor{grid-template-columns:42px minmax(0,1fr)}
+  .gl{padding-right:8px}
+  .gl.bp::before,.gl:not(.bp):hover::before{left:3px;width:8px;height:8px;margin-top:-4px}
+  #hl,#ta{padding-left:12px;padding-right:12px}
+  .statusbar .hide-sm{display:none}
+  .speed input{width:70px}
+}
+@media (prefers-reduced-motion:reduce){.chg{animation:none}.toast{transition:none}}
+</style>
+</head>
+<body>
+
+
+<div class="app" id="app" data-state="idle">
+  <header class="titlebar">
+    <div class="logo" title="AlgoLab © 2026 Wahiba BOUZYAN"><span class="mark" aria-hidden="true">←</span>AlgoLab<small>pseudo-code</small></div>
+    <nav class="menu" aria-label="Fichier">
+      <button id="mNew" title="Nouvel algorithme"><span data-ic="plus"></span><span class="lbl">Nouveau</span></button>
+      <button id="mOpen" title="Ouvrir un fichier .algo ou .txt"><span data-ic="upload"></span><span class="lbl">Ouvrir</span></button>
+      <button id="mSave" title="Enregistrer (Ctrl+S)"><span data-ic="save"></span><span class="lbl">Enregistrer</span></button>
+      <button id="mDownload" title="Télécharger le fichier" hidden><span data-ic="download"></span><span class="lbl">Télécharger</span></button>
+    </nav>
+    <div class="tb-title" id="tbTitle"></div>
+    <button class="icon-btn" id="themeBtn" title="Thème"><span data-ic="theme"></span></button>
+    <input type="file" id="fileInput" accept=".algo,.alg,.txt,.pseudo,text/plain" hidden>
+  </header>
+
+  <div class="workspace" id="workspace">
+    <nav class="activity" aria-label="Vues">
+      <button data-view="explorer" class="on" title="Explorateur"><span data-ic="files" data-sz="22"></span></button>
+      <button data-view="snippets" title="Modèles d'instructions"><span data-ic="blocks" data-sz="22"></span></button>
+      <button data-view="help" title="Aide-mémoire du pseudo-code"><span data-ic="book" data-sz="22"></span></button>
+    </nav>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-head"><span id="sbTitle">Explorateur</span>
+        <div class="sb-actions" id="sbActions">
+          <button class="icon-btn" id="sbNew" title="Nouvel algorithme"><span data-ic="plus"></span></button>
+          <button class="icon-btn" id="sbOpen" title="Ouvrir un fichier"><span data-ic="upload"></span></button>
+        </div>
+      </div>
+      <div class="sb-view" id="view-explorer">
+        <div class="tg" id="tgUser">
+          <button class="tg-head"><span data-ic="chev" data-sz="14"></span>Mes algorithmes</button>
+          <div class="tg-body" id="userFiles"></div>
+        </div>
+        <div class="tg" id="tgEx">
+          <button class="tg-head"><span data-ic="chev" data-sz="14"></span>Exemples</button>
+          <div class="tg-body" id="exFiles"></div>
+        </div>
+      </div>
+      <div class="sb-view" id="view-snippets" hidden>
+        <p class="snip-hint">Cliquez pour insérer à la position du curseur.</p>
+        <div class="snips" id="snips"></div>
+      </div>
+      <div class="sb-view" id="view-help" hidden><div class="help" id="help"></div></div>
+    </aside>
+
+    <section class="main" id="main">
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <div class="toolbar">
+        <button class="btn primary" id="btnRun"><span data-ic="play"></span><span class="lbl" id="runLbl">Exécuter</span><kbd>F5</kbd></button>
+        <button class="btn" id="btnStep" title="Exécuter instruction par instruction"><span data-ic="step"></span><span class="lbl">Pas à pas</span><kbd>F10</kbd></button>
+        <button class="btn" id="btnPause" title="Mettre en pause" hidden><span data-ic="pause"></span><span class="lbl">Pause</span></button>
+        <button class="btn warn" id="btnStop" title="Arrêter (Maj+F5)" disabled><span data-ic="stop"></span><span class="lbl">Arrêter</span></button>
+        <span class="tb-sep"></span>
+        <div class="seg" role="group" aria-label="Mode d'exécution">
+          <button data-mode="normal" title="Exécution instantanée">Normal</button>
+          <button data-mode="anim" title="Exécution ralentie : la ligne courante et les variables s'affichent">Animé</button>
+        </div>
+        <label class="speed" id="speedWrap"><span class="lbl">Vitesse</span><input type="range" id="speed" min="0" max="100" aria-label="Vitesse d'animation"></label>
+        <span class="tb-spacer"></span>
+        <button class="btn ghost arrow" id="btnArrow" title="Insérer « ← » (ou tapez <-)">←</button>
+        <button class="btn ghost" id="btnFormat" title="Réindenter le code (Ctrl+Maj+F)"><span data-ic="indent"></span><span class="lbl">Indenter</span></button>
+        <button class="btn ghost" id="btnCopy" title="Copier tout le code"><span data-ic="copy"></span><span class="lbl">Copier</span></button>
+      </div>
+      <div class="editor" id="editor">
+        <div class="gutter" id="gutter"><div class="gutter-inner" id="gutterInner"></div></div>
+        <div class="code" id="code">
+          <div class="bands" id="bands"></div>
+          <div class="layer" id="layer"><pre id="hl"></pre></div>
+          <textarea id="ta" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Éditeur de pseudo-code"></textarea>
+          <div class="ro-badge" id="roBadge" hidden>Lecture seule pendant l'exécution</div>
+        </div>
+        <div class="welcome" id="welcome" hidden>
+          <div>
+            <h2>AlgoLab</h2>
+            <p>Aucun fichier ouvert. Créez un algorithme ou ouvrez un exemple dans l'explorateur.</p>
+            <button class="btn primary" id="wNew"><span data-ic="plus"></span>Nouvel algorithme</button>
+            <button class="btn" id="wEx">Ouvrir un exemple</button>
+            <p class="credit">© 2026 Wahiba BOUZYAN</p>
+          </div>
+        </div>
+      </div>
+      <div class="resizer" id="resizer" role="separator" aria-orientation="horizontal" title="Glisser pour redimensionner"></div>
+      <div class="panel" id="panel">
+        <div class="ptabs">
+          <button class="pt on" data-tab="console">Console</button>
+          <button class="pt pt-vars" data-tab="vars">Variables</button>
+          <button class="pt" data-tab="trace">Trace</button>
+          <button class="pt" data-tab="problems">Problèmes<span class="badge" id="probCount"></span></button>
+          <span class="grow"></span>
+          <button class="icon-btn" id="clearBtn" title="Effacer la console"><span data-ic="clear"></span></button>
+          <button class="icon-btn" id="panelBtn" title="Réduire le panneau"><span data-ic="chev" data-sz="16"></span></button>
+        </div>
+        <div class="pbody">
+          <div class="pview" id="pv-console"><div class="console" id="console" aria-live="polite"></div></div>
+          <div class="pview" id="pv-vars" hidden><div class="vars" id="varsB"></div></div>
+          <div class="pview" id="pv-trace" hidden><div class="trace-wrap" id="traceWrap"></div></div>
+          <div class="pview" id="pv-problems" hidden><div id="problems"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="runpanel" id="runpanel">
+      <div class="rp-head">Exécution</div>
+      <div class="rp-sec rp-vars"><h3>Variables</h3><div class="vars" id="varsR"></div></div>
+      <div class="rp-sec rp-stack"><h3>Pile d'appels</h3><div class="stack" id="stack"></div></div>
+    </aside>
+  </div>
+
+  <footer class="statusbar" id="statusbar">
+    <span class="si" id="stState"><span data-ic="dot" data-sz="12"></span><span id="stText">Prêt</span></span>
+    <button class="si" id="stProb" title="Problèmes"><span data-ic="alert" data-sz="13"></span><span id="stProbN">0</span></button>
+    <span class="si copy hide-sm" title="AlgoLab — conçu par Wahiba BOUZYAN">© 2026 Wahiba BOUZYAN</span>
+    <span class="grow"></span>
+    <span class="si" id="stPos">Ln 1, Col 1</span>
+    <span class="si hide-sm">Espaces : 3</span>
+    <span class="si hide-sm">Pseudo-code FR</span>
+    <button class="si" id="fsDown" title="Réduire la taille du texte">A−</button>
+    <span class="si hide-sm" id="fsVal">14</span>
+    <button class="si" id="fsUp" title="Agrandir la taille du texte (utile au vidéoprojecteur)">A+</button>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+</div>
+
+<script>
+/* ============================================================
+   AlgoLab — interpréteur de pseudo-code français
+   ============================================================ */
+const AlgoCore = (() => {
+'use strict';
+
+const strip = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const kwOf = s => strip(s).replace(/[_'’]/g, '');
+
+class AlgoError extends Error {
+  constructor(msg, line, col, kind) { super(msg); this.line = line || 0; this.col = col || 0; this.kind = kind || 'runtime'; }
+}
+class StopSignal extends Error { constructor() { super('stop'); } }
+class ReturnSig { constructor(v) { this.v = v; } }
+
+const ALIAS = {
+  jusque: 'jusqua', fsi: 'finsi', fpour: 'finpour', ftq: 'fintantque', fintq: 'fintantque',
+  fselon: 'finselon', retourne: 'retourner', renvoyer: 'retourner', renvoie: 'retourner',
+  saisir: 'lire', afficher: 'ecrire', variable: 'variables', constante: 'constantes',
+  finalgo: 'finalgorithme', procedur: 'procedure'
+};
+const RESERVED = new Set(['algorithme', 'variables', 'constantes', 'debut', 'fin', 'si', 'alors', 'sinon', 'sinonsi',
+  'finsi', 'pour', 'faire', 'finpour', 'tantque', 'fintantque', 'repeter', 'jusqua', 'selon', 'finselon', 'lire',
+  'ecrire', 'et', 'ou', 'non', 'xor', 'div', 'mod', 'vrai', 'faux', 'fonction', 'procedure', 'finfonction',
+  'finprocedure', 'finalgorithme', 'retourner', 'appeler', 'tableau']);
+const ALL_TERMS = new Set(['fin', 'finsi', 'finpour', 'fintantque', 'finselon', 'sinon', 'sinonsi', 'jusqua',
+  'finfonction', 'finprocedure', 'finalgorithme']);
+const DISP = {
+  finsi: 'FinSi', finpour: 'FinPour', fintantque: 'FinTantQue', finselon: 'FinSelon', fin: 'Fin',
+  jusqua: "Jusqu'à", sinon: 'Sinon', sinonsi: 'SinonSi', finfonction: 'FinFonction', finprocedure: 'FinProcédure',
+  finalgorithme: 'Fin'
+};
+const disp = k => DISP[k] || k;
+const TYPE_LABEL = { entier: 'Entier', reel: 'Réel', chaine: 'Chaîne', caractere: 'Caractère', booleen: 'Booléen' };
+const SCALAR_TYPES = {
+  entier: 'entier', entiers: 'entier', integer: 'entier', int: 'entier',
+  reel: 'reel', reels: 'reel', numerique: 'reel', decimal: 'reel', real: 'reel',
+  chaine: 'chaine', chaines: 'chaine', texte: 'chaine', string: 'chaine',
+  caractere: 'caractere', caracteres: 'caractere', car: 'caractere', char: 'caractere',
+  booleen: 'booleen', booleens: 'booleen', logique: 'booleen', boolean: 'booleen'
+};
+
+/* ---------------- Tokenizer ---------------- */
+const LETTER = /[A-Za-zÀ-ɏ_]/;
+const WORDCH = /[A-Za-z0-9À-ɏ_]/;
+const QUOTES = { '"': '"', "'": "'", '“': '”', '”': '”', '«': '»', '‘': '’' };
+const OPS2 = { '<-': '←', ':=': '←', '<=': '<=', '>=': '>=', '<>': '<>', '!=': '<>', '==': '=', '..': '..' };
+const OPS1 = { '←': '←', '≤': '<=', '≥': '>=', '≠': '<>', '×': '*', '÷': '/', '+': '+', '-': '-', '−': '-', '–': '-',
+  '*': '*', '/': '/', '^': '^', '%': 'mod', '=': '=', '<': '<', '>': '>', '(': '(', ')': ')', '[': '[', ']': ']',
+  ',': ',', ':': ':', ';': ';', '&': '&' };
+
+function tokenize(src) {
+  const toks = []; let i = 0, line = 1, col = 1; const n = src.length;
+  const add = (type, value, text, l, c) => {
+    const t = { type, value, text, line: l, col: c };
+    if (type === 'ID') t.kw = kwOf(text);
+    toks.push(t); return t;
+  };
+  const adv = (k = 1) => { for (let j = 0; j < k; j++) { if (src[i] === '\n') { line++; col = 1; } else col++; i++; } };
+  while (i < n) {
+    const ch = src[i], l = line, c = col;
+    if (ch === '\n') { add('NL', '\n', '\n', l, c); adv(); continue; }
+    if (ch === ' ' || ch === '\t' || ch === '\r' || ch === ' ' || ch === ' ') { adv(); continue; }
+    if (ch === '/' && src[i + 1] === '/') { while (i < n && src[i] !== '\n') adv(); continue; }
+    if (ch === '/' && src[i + 1] === '*') {
+      adv(2);
+      while (i < n && !(src[i] === '*' && src[i + 1] === '/')) adv();
+      if (i >= n) throw new AlgoError('Commentaire « /* » jamais fermé par « */ »', l, c, 'syntax');
+      adv(2); continue;
+    }
+    if (LETTER.test(ch)) {
+      const s = i;
+      while (i < n && WORDCH.test(src[i])) adv();
+      if (kwOf(src.slice(s, i)) === 'jusqu' && (src[i] === "'" || src[i] === '’') && /[aàAÀ]/.test(src[i + 1] || '') && !WORDCH.test(src[i + 2] || '')) adv(2);
+      const text = src.slice(s, i);
+      add('ID', text, text, l, c); continue;
+    }
+    if (/[0-9]/.test(ch)) {
+      const s = i; let isInt = true;
+      while (i < n && /[0-9]/.test(src[i])) adv();
+      if (src[i] === '.' && /[0-9]/.test(src[i + 1] || '')) { isInt = false; adv(); while (i < n && /[0-9]/.test(src[i])) adv(); }
+      const text = src.slice(s, i);
+      if (i < n && LETTER.test(src[i])) throw new AlgoError(`« ${text}${src[i]}… » : un nom ne peut pas commencer par un chiffre`, l, c, 'syntax');
+      add('NUM', Number(text), text, l, c).isInt = isInt; continue;
+    }
+    if (QUOTES[ch]) {
+      const close = QUOTES[ch]; adv(); const s = i;
+      while (i < n && src[i] !== close && !(ch === '“' && src[i] === '“') && src[i] !== '\n') adv();
+      if (i >= n || src[i] === '\n') throw new AlgoError('Texte entre guillemets non fermé : il manque le guillemet de fin', l, c, 'syntax');
+      const v = src.slice(s, i); adv();
+      add('STR', v, src.slice(s - 1, i), l, c).single = (ch === "'" || ch === '‘'); continue;
+    }
+    const two = src.substr(i, 2);
+    if (OPS2[two]) { add('OP', OPS2[two], two, l, c); adv(2); continue; }
+    if (OPS1[ch]) { add('OP', OPS1[ch], ch, l, c); adv(); continue; }
+    throw new AlgoError(`Caractère inattendu « ${ch} »`, l, c, 'syntax');
+  }
+  add('EOF', null, '', line, col);
+
+  // fusion des mots-clés en deux mots : « Fin Si », « Tant Que », « Sinon Si »…
+  const out = [];
+  for (let k = 0; k < toks.length; k++) {
+    const t = toks[k], nx = toks[k + 1];
+    if (t.type === 'ID' && nx && nx.type === 'ID' && nx.line === t.line) {
+      if (t.kw === 'tant' && nx.kw === 'que') { out.push({ ...t, kw: 'tantque', text: t.text + ' ' + nx.text }); k++; continue; }
+      if (t.kw === 'sinon' && nx.kw === 'si') { out.push({ ...t, kw: 'sinonsi', text: t.text + ' ' + nx.text }); k++; continue; }
+      if (t.kw === 'fin') {
+        let nk = nx.kw, skip = 1, txt = t.text + ' ' + nx.text;
+        const n2 = toks[k + 2];
+        if (nk === 'tant' && n2 && n2.type === 'ID' && n2.kw === 'que' && n2.line === t.line) { nk = 'tantque'; skip = 2; txt += ' ' + n2.text; }
+        if (['si', 'pour', 'tantque', 'selon', 'fonction', 'procedure', 'algorithme'].includes(nk)) {
+          out.push({ ...t, kw: 'fin' + nk, text: txt }); k += skip; continue;
+        }
+      }
+    }
+    out.push(t);
+  }
+  for (const t of out) if (t.type === 'ID' && ALIAS[t.kw]) t.kw = ALIAS[t.kw];
+  return out;
+}
+
+/* ---------------- Parser ---------------- */
+class Parser {
+  constructor(toks) { this.t = toks; this.p = 0; }
+  peek(o = 0) { return this.t[Math.min(this.p + o, this.t.length - 1)]; }
+  next() { return this.t[this.p++]; }
+  isKw(k, o = 0) { const t = this.peek(o); return t.type === 'ID' && (Array.isArray(k) ? k.includes(t.kw) : t.kw === k); }
+  isOp(v, o = 0) { const t = this.peek(o); return t.type === 'OP' && (Array.isArray(v) ? v.includes(t.value) : t.value === v); }
+  isEnd() { const t = this.peek(); return t.type === 'NL' || t.type === 'EOF' || (t.type === 'OP' && t.value === ';'); }
+  skipNL() { while (this.peek().type === 'NL' || this.isOp(';')) this.p++; }
+  found(t = this.peek()) {
+    if (t.type === 'NL') return 'mais la ligne se termine';
+    if (t.type === 'EOF') return 'mais le fichier se termine';
+    return `mais « ${t.text} » trouvé`;
+  }
+  error(msg, t = this.peek()) { throw new AlgoError(msg, t.line, t.col, 'syntax'); }
+  expectOp(v, msg) { if (!this.isOp(v)) this.error(msg || `« ${v} » attendu, ${this.found()}`); return this.next(); }
+  endStmt() { if (!this.isEnd()) this.error(`Fin d'instruction attendue, ${this.found()}`); }
+  ident(what = 'un nom') {
+    const t = this.peek();
+    if (t.type !== 'ID') this.error(`${what[0].toUpperCase() + what.slice(1)} attendu, ${this.found()}`);
+    if (RESERVED.has(t.kw)) this.error(`« ${t.text} » est un mot-clé réservé : il ne peut pas servir de nom`);
+    return this.next();
+  }
+  atSectionStart() {
+    const t = this.peek();
+    return t.type === 'EOF' || this.isKw(['variables', 'constantes', 'fonction', 'procedure', 'debut']) ||
+      (t.type === 'ID' && (t.kw === 'var' || t.kw === 'const') && this.peek(1).type === 'NL');
+  }
+
+  parseProgram() {
+    this.skipNL();
+    const prog = { name: 'Algorithme', consts: [], vars: [], funcs: {}, body: null, line: 1 };
+    if (this.isKw('algorithme')) {
+      const a = this.next();
+      if (this.peek().type === 'ID') prog.name = this.next().text;
+      while (!this.isEnd()) this.next();
+      prog.line = a.line;
+    }
+    for (;;) {
+      this.skipNL();
+      const t = this.peek();
+      if (t.type === 'EOF') {
+        if (!prog.body) this.error('Bloc principal « Début … Fin » manquant');
+        break;
+      }
+      if (this.isKw('variables') || (t.type === 'ID' && t.kw === 'var' && this.peek(1).type === 'NL')) {
+        this.next(); this.parseVarSection(prog.vars);
+      } else if (this.isKw('constantes') || (t.type === 'ID' && t.kw === 'const' && this.peek(1).type === 'NL')) {
+        this.next(); this.parseConstSection(prog.consts);
+      } else if (this.isKw(['fonction', 'procedure'])) {
+        const f = this.parseFunc();
+        if (prog.funcs[f.key]) this.error(`« ${f.name} » est déjà défini(e) plus haut`, f.tok);
+        prog.funcs[f.key] = f;
+      } else if (this.isKw('debut')) {
+        const d = this.next();
+        if (prog.body) this.error('Un seul bloc principal « Début … Fin » est autorisé', d);
+        prog.body = this.parseBlock(['fin', 'finalgorithme'], d);
+        prog.endLine = this.next().line; this.endStmt();
+      } else if (prog.body && t.type === 'ID' && ALL_TERMS.has(t.kw)) {
+        this.error(`« ${t.text} » inattendu après la fin de l'algorithme`);
+      } else {
+        this.error(`« ${t.text} » inattendu : on attend « Variables », « Constantes », « Fonction », « Procédure » ou « Début »`);
+      }
+    }
+    return prog;
+  }
+
+  parseConstSection(list) {
+    for (;;) {
+      this.skipNL();
+      if (this.atSectionStart()) return;
+      const nameTok = this.ident('le nom de la constante');
+      let type = null;
+      if (this.isOp(':')) { this.next(); type = this.parseScalarType(); }
+      if (!this.isOp(['=', '←'])) this.error(`« = » attendu après le nom de la constante « ${nameTok.text} », ${this.found()}`);
+      this.next();
+      list.push({ name: nameTok.text, type, value: this.parseExpr(), line: nameTok.line });
+      this.endStmt();
+    }
+  }
+
+  parseVarSection(list) {
+    for (;;) {
+      this.skipNL();
+      if (this.atSectionStart()) return;
+      if (this.isKw('tableau')) {
+        this.next(); const items = [];
+        for (;;) {
+          const nameTok = this.ident('le nom du tableau');
+          if (!this.isOp('[')) this.error(`« [ » attendu après « ${nameTok.text} » pour indiquer la taille, ex. Tableau ${nameTok.text}[10] : Entier`);
+          items.push({ nameTok, dims: this.parseDims() });
+          if (this.isOp(',')) { this.next(); continue; }
+          break;
+        }
+        if (this.isOp(':') || this.isKw('de')) this.next();
+        else this.error(`« : » attendu avant le type des éléments, ${this.found()}`);
+        const elem = this.parseScalarType();
+        for (const it of items) list.push({ name: it.nameTok.text, type: { kind: 'array', dims: it.dims, elem }, line: it.nameTok.line });
+      } else {
+        const names = [this.ident('un nom de variable')];
+        while (this.isOp(',')) { this.next(); names.push(this.ident('un nom de variable')); }
+        if (this.isOp(['←', '='])) this.error('Dans la section Variables, on déclare seulement le type (ex. : x : Entier). Les valeurs se donnent après « Début ».');
+        this.expectOp(':', `« : » attendu après ${names.map(n => '« ' + n.text + ' »').join(', ')} pour indiquer le type, ${this.found()}`);
+        const type = this.parseType(true);
+        for (const nt of names) list.push({ name: nt.text, type, line: nt.line });
+      }
+      this.endStmt();
+    }
+  }
+
+  parseDims() {
+    this.expectOp('[');
+    const dims = [];
+    for (;;) {
+      const a = this.parseExpr();
+      if (this.isOp('..')) { this.next(); dims.push({ lo: a, hi: this.parseExpr() }); }
+      else dims.push({ lo: null, hi: a });
+      if (this.isOp(',')) { this.next(); continue; }
+      break;
+    }
+    this.expectOp(']', `« ] » attendu pour fermer la taille du tableau, ${this.found()}`);
+    return dims;
+  }
+
+  parseType(dimsRequired) {
+    if (this.isKw('tableau')) {
+      const tt = this.next(); let dims = null;
+      if (this.isOp('[')) dims = this.parseDims();
+      else if (dimsRequired) this.error('Taille du tableau manquante, ex. : T : Tableau[1..10] de Entier', tt);
+      if (this.isKw('de') || this.isOp(':')) this.next();
+      else this.error(`« de » attendu avant le type des éléments, ex. Tableau[1..10] de Entier — ${this.found()}`);
+      return { kind: 'array', dims, elem: this.parseScalarType() };
+    }
+    return this.parseScalarType();
+  }
+
+  parseScalarType() {
+    const t = this.peek();
+    if (t.type !== 'ID' || !SCALAR_TYPES[t.kw]) {
+      this.error(`Type inconnu${t.type === 'ID' ? ' « ' + t.text + ' »' : ''}. Types possibles : Entier, Réel, Chaîne, Caractère, Booléen`);
+    }
+    this.next();
+    const ty = SCALAR_TYPES[t.kw];
+    if (ty === 'chaine' && this.isKw('de') && this.isKw(['caracteres', 'caractere'], 1)) { this.next(); this.next(); }
+    return ty;
+  }
+
+  parseFunc() {
+    const kwTok = this.next(); const isFunc = kwTok.kw === 'fonction';
+    const nameTok = this.ident(isFunc ? 'le nom de la fonction' : 'le nom de la procédure');
+    const params = [];
+    this.expectOp('(', `« ( » attendu après le nom « ${nameTok.text} »`);
+    if (!this.isOp(')')) {
+      for (;;) {
+        let byRef = false;
+        const t = this.peek();
+        if (t.type === 'ID' && ['var', 'ref', 'es', 'inout'].includes(t.kw) && this.peek(1).type === 'ID') { this.next(); byRef = true; }
+        const names = [this.ident('un nom de paramètre')];
+        while (this.isOp(',') && this.peek(1).type === 'ID' && !['var', 'ref'].includes(this.peek(1).kw) && this.peek(2).type === 'OP' && [',', ':'].includes(this.peek(2).value)) {
+          this.next(); names.push(this.ident('un nom de paramètre'));
+        }
+        let type = null;
+        if (this.isOp(':')) { this.next(); type = this.parseType(false); }
+        for (const nt of names) params.push({ name: nt.text, key: nt.text.toLowerCase(), type, byRef, line: nt.line });
+        if (this.isOp([',', ';'])) { this.next(); continue; }
+        break;
+      }
+    }
+    this.expectOp(')', `« ) » attendu pour fermer la liste des paramètres, ${this.found()}`);
+    let ret = null;
+    if (this.isOp(':')) {
+      this.next();
+      if (!isFunc) this.error('Une procédure ne retourne pas de valeur : utilisez « Fonction » si vous voulez un type de retour');
+      ret = this.parseType(false);
+    }
+    this.endStmt();
+    const vars = [], consts = [];
+    for (;;) {
+      this.skipNL();
+      if (this.isKw('variables') || (this.isKw('var') && this.peek(1).type === 'NL')) { this.next(); this.parseVarSection(vars); }
+      else if (this.isKw('constantes')) { this.next(); this.parseConstSection(consts); }
+      else break;
+    }
+    if (!this.isKw('debut')) this.error(`« Début » attendu pour commencer le corps de « ${nameTok.text} », ${this.found()}`);
+    const d = this.next();
+    const body = this.parseBlock(['fin', 'finfonction', 'finprocedure'], d, kwTok);
+    const endLine = this.next().line; this.endStmt();
+    return { name: nameTok.text, key: nameTok.text.toLowerCase(), isFunc, params, ret, vars, consts, body, line: kwTok.line, endLine, tok: nameTok };
+  }
+
+  parseBlock(terms, open, openLabel) {
+    const stmts = [];
+    const label = (openLabel || open).text;
+    for (;;) {
+      this.skipNL();
+      const t = this.peek();
+      if (t.type === 'EOF') throw new AlgoError(`« ${disp(terms[0])} » manquant : le bloc « ${label} » ouvert ligne ${open.line} n'est jamais fermé`, open.line, open.col, 'syntax');
+      if (t.type === 'ID' && terms.includes(t.kw)) return stmts;
+      if (t.type === 'ID' && ALL_TERMS.has(t.kw)) {
+        if (t.kw === 'sinon' || t.kw === 'sinonsi') this.error(`« ${t.text} » sans « Si … Alors » correspondant${label !== 'Début' ? ` (le bloc « ${label} » ouvert ligne ${open.line} n'est pas encore fermé)` : ''}`);
+        this.error(`« ${t.text} » trouvé alors que le bloc « ${label} » ouvert ligne ${open.line} attend « ${disp(terms[0])} »`);
+      }
+      stmts.push(this.parseStatement());
+    }
+  }
+
+  parseStatement() {
+    const t = this.peek();
+    if (t.type !== 'ID') {
+      if (t.type === 'OP' && t.value === '←') this.error('« ← » sans variable à gauche');
+      this.error(`Instruction attendue, ${this.found()}`);
+    }
+    switch (t.kw) {
+      case 'si': return this.parseIf();
+      case 'pour': return this.parsePour();
+      case 'tantque': return this.parseWhile();
+      case 'repeter': return this.parseRepeat();
+      case 'selon': return this.parseSwitch();
+      case 'lire': return this.parseRead();
+      case 'ecrire': return this.parseWrite();
+      case 'retourner': {
+        this.next(); let value = null;
+        if (!this.isEnd()) value = this.parseExpr();
+        this.endStmt(); return { type: 'return', value, line: t.line };
+      }
+      case 'appeler': {
+        this.next(); const nt = this.ident('le nom de la procédure');
+        const args = this.isOp('(') ? this.parseArgs() : [];
+        this.endStmt(); return { type: 'call', name: nt.text, args, line: t.line };
+      }
+      case 'alors': this.error('« Alors » inattendu : il doit suivre la condition d\'un « Si » sur la même ligne');
+      case 'faire': this.error('« Faire » inattendu : il doit suivre un « Pour » ou un « TantQue » sur la même ligne');
+    }
+    if (RESERVED.has(t.kw)) this.error(`« ${t.text} » inattendu ici`);
+    const nameTok = this.next();
+    if (this.isOp('(')) {
+      const args = this.parseArgs(); this.endStmt();
+      return { type: 'call', name: nameTok.text, args, line: t.line };
+    }
+    const target = this.parseTargetRest(nameTok);
+    if (this.isOp('←')) {
+      this.next();
+      if (this.isEnd()) this.error(`Valeur manquante après « ← » pour « ${nameTok.text} »`);
+      const value = this.parseExpr(); this.endStmt();
+      return { type: 'assign', target, value, line: t.line };
+    }
+    if (this.isOp('=')) this.error('Pour affecter une valeur, utilisez « ← » (ou tapez <-), pas « = ». Le « = » sert à comparer.');
+    this.error(`« ← » attendu après « ${nameTok.text} », ${this.found()}`);
+  }
+
+  parseTargetRest(nameTok) {
+    const idx = [];
+    while (this.isOp('[')) {
+      this.next();
+      for (;;) { idx.push(this.parseExpr()); if (this.isOp(',')) { this.next(); continue; } break; }
+      this.expectOp(']', `« ] » attendu, ${this.found()}`);
+    }
+    return { type: 'var', name: nameTok.text, idx, line: nameTok.line, col: nameTok.col };
+  }
+
+  parseArgs() {
+    this.expectOp('('); const args = [];
+    if (!this.isOp(')')) {
+      for (;;) { args.push(this.parseExpr()); if (this.isOp(',')) { this.next(); continue; } break; }
+    }
+    this.expectOp(')', `« ) » attendu pour fermer la parenthèse, ${this.found()}`);
+    return args;
+  }
+
+  parseIf() {
+    const start = this.next();
+    if (this.isEnd()) this.error('Condition manquante après « Si »');
+    const branches = [];
+    let cond = this.parseExpr();
+    if (this.isOp('←')) this.error('« ← » sert à affecter une valeur. Pour comparer dans une condition, utilisez « = ».');
+    if (this.isKw('alors')) this.next();
+    else if (!this.isEnd()) this.error(`« Alors » attendu après la condition du Si, ${this.found()}`);
+    branches.push({ cond, body: this.parseBlock(['finsi', 'sinon', 'sinonsi'], start), line: start.line });
+    let elseBody = null;
+    while (this.isKw('sinonsi')) {
+      const st = this.next(); const c = this.parseExpr();
+      if (this.isKw('alors')) this.next();
+      else if (!this.isEnd()) this.error(`« Alors » attendu après la condition, ${this.found()}`);
+      branches.push({ cond: c, body: this.parseBlock(['finsi', 'sinon', 'sinonsi'], start), line: st.line });
+    }
+    if (this.isKw('sinon')) { this.next(); elseBody = this.parseBlock(['finsi'], start); }
+    this.next(); this.endStmt();
+    return { type: 'if', branches, elseBody, line: start.line };
+  }
+
+  parsePour() {
+    const start = this.next();
+    const vt = this.ident('la variable du compteur');
+    if (this.isOp('←') || this.isKw('de') || this.isOp('=')) this.next();
+    else this.error(`« ← » attendu après la variable de boucle « ${vt.text} », ex. Pour ${vt.text} ← 1 à 10 Faire`);
+    const from = this.parseExpr();
+    if (this.isKw('a') || this.isKw('jusqua')) this.next();
+    else this.error(`« à » attendu après la valeur de départ, ${this.found()}`);
+    const to = this.parseExpr();
+    let step = null;
+    if (this.isKw('pas')) { this.next(); if (this.isOp(['=', ':'])) this.next(); step = this.parseExpr(); }
+    if (this.isKw('faire')) this.next();
+    else if (!this.isEnd()) this.error(`« Faire » attendu, ${this.found()}`);
+    const body = this.parseBlock(['finpour'], start);
+    this.next(); this.endStmt();
+    return { type: 'for', var: { type: 'var', name: vt.text, idx: [], line: vt.line }, from, to, step, body, line: start.line };
+  }
+
+  parseWhile() {
+    const start = this.next();
+    if (this.isEnd()) this.error('Condition manquante après « TantQue »');
+    const cond = this.parseExpr();
+    if (this.isKw('faire')) this.next();
+    else if (!this.isEnd()) this.error(`« Faire » attendu après la condition, ${this.found()}`);
+    const body = this.parseBlock(['fintantque'], start);
+    this.next(); this.endStmt();
+    return { type: 'while', cond, body, line: start.line };
+  }
+
+  parseRepeat() {
+    const start = this.next();
+    const body = this.parseBlock(['jusqua'], start);
+    const u = this.next();
+    if (this.isEnd()) this.error("Condition manquante après « Jusqu'à »");
+    const cond = this.parseExpr(); this.endStmt();
+    return { type: 'repeat', body, cond, line: start.line, untilLine: u.line };
+  }
+
+  isCaseLabelStart() {
+    const t = this.peek();
+    if (t.type === 'NUM' || t.type === 'STR') return true;
+    if (t.type === 'OP' && t.value === '-' && this.peek(1).type === 'NUM') return true;
+    if (t.type === 'ID' && (t.kw === 'cas' || t.kw === 'vrai' || t.kw === 'faux')) return true;
+    if (t.type === 'ID' && this.isOp(':', 1)) return true;
+    return false;
+  }
+
+  parseSwitch() {
+    const start = this.next();
+    const subject = this.parseExpr();
+    if (this.isKw('faire') || this.isKw('de')) this.next();
+    const cases = []; let def = null;
+    for (;;) {
+      this.skipNL();
+      const t = this.peek();
+      if (this.isKw('finselon')) { this.next(); break; }
+      if (t.type === 'EOF') throw new AlgoError(`« FinSelon » manquant pour le « Selon » ouvert ligne ${start.line}`, start.line, start.col, 'syntax');
+      if (this.isKw('sinon') || this.isKw(['autre', 'autrement', 'defaut'])) {
+        this.next(); if (this.isOp(':')) this.next();
+        def = this.parseCaseBody(start); continue;
+      }
+      if (!this.isCaseLabelStart()) this.error(`Valeur de cas attendue (ex. « 1 : … »), ${this.found()}`);
+      if (this.isKw('cas')) this.next();
+      const labels = [];
+      for (;;) {
+        const a = this.parseExpr();
+        if (this.isOp('..')) { this.next(); labels.push({ lo: a, hi: this.parseExpr() }); }
+        else labels.push({ v: a });
+        if (this.isOp(',')) { this.next(); continue; }
+        break;
+      }
+      this.expectOp(':', `« : » attendu après la valeur du cas, ${this.found()}`);
+      cases.push({ labels, body: this.parseCaseBody(start), line: t.line });
+    }
+    this.endStmt();
+    return { type: 'switch', subject, cases, def, line: start.line };
+  }
+
+  parseCaseBody(start) {
+    const stmts = [];
+    for (;;) {
+      this.skipNL();
+      const t = this.peek();
+      if (t.type === 'EOF') throw new AlgoError(`« FinSelon » manquant pour le « Selon » ouvert ligne ${start.line}`, start.line, start.col, 'syntax');
+      if (this.isKw(['finselon', 'sinon', 'autre', 'autrement', 'defaut']) || this.isCaseLabelStart()) return stmts;
+      if (t.type === 'ID' && ALL_TERMS.has(t.kw)) this.error(`« ${t.text} » trouvé alors que le « Selon » ouvert ligne ${start.line} attend « FinSelon »`);
+      stmts.push(this.parseStatement());
+    }
+  }
+
+  parseRead() {
+    const start = this.next(); const targets = [];
+    const paren = this.isOp('(');
+    if (paren) this.next();
+    if ((paren && this.isOp(')')) || this.isEnd()) this.error('« Lire » attend au moins une variable, ex. Lire(n)');
+    for (;;) {
+      const nt = this.ident('une variable');
+      targets.push(this.parseTargetRest(nt));
+      if (this.isOp(',')) { this.next(); continue; }
+      break;
+    }
+    if (paren) this.expectOp(')', `« ) » attendu, ${this.found()}`);
+    this.endStmt();
+    return { type: 'read', targets, line: start.line };
+  }
+
+  parseWrite() {
+    const start = this.next(); let args = [];
+    if (this.isOp('(')) {
+      args = this.parseArgs();
+      if (!this.isEnd()) this.error(`Fin d'instruction attendue après « Ecrire(…) », ${this.found()}`);
+    } else if (!this.isEnd()) {
+      for (;;) { args.push(this.parseExpr()); if (this.isOp(',')) { this.next(); continue; } break; }
+    }
+    this.endStmt();
+    return { type: 'write', args, line: start.line };
+  }
+
+  /* expressions */
+  parseExpr() { return this.parseOr(); }
+  parseOr() {
+    let l = this.parseAnd();
+    while (this.isKw(['ou', 'xor'])) { const op = this.next(); l = { type: 'bin', op: op.kw, l, r: this.parseAnd(), line: op.line }; }
+    return l;
+  }
+  parseAnd() {
+    let l = this.parseNot();
+    while (this.isKw('et')) { const op = this.next(); l = { type: 'bin', op: 'et', l, r: this.parseNot(), line: op.line }; }
+    return l;
+  }
+  parseNot() {
+    if (this.isKw('non')) { const t = this.next(); return { type: 'un', op: 'non', e: this.parseNot(), line: t.line }; }
+    return this.parseCmp();
+  }
+  parseCmp() {
+    let l = this.parseAdd();
+    while (this.isOp(['=', '<>', '<', '>', '<=', '>='])) {
+      const op = this.next(); l = { type: 'bin', op: op.value, l, r: this.parseAdd(), line: op.line };
+    }
+    return l;
+  }
+  parseAdd() {
+    let l = this.parseMul();
+    while (this.isOp(['+', '-', '&'])) { const op = this.next(); l = { type: 'bin', op: op.value, l, r: this.parseMul(), line: op.line }; }
+    return l;
+  }
+  parseMul() {
+    let l = this.parseUnary();
+    while (this.isOp(['*', '/', 'mod']) || this.isKw(['div', 'mod'])) {
+      const op = this.next(); const o = op.type === 'OP' ? op.value : op.kw;
+      l = { type: 'bin', op: o, l, r: this.parseUnary(), line: op.line };
+    }
+    return l;
+  }
+  parseUnary() {
+    if (this.isOp('-')) { const t = this.next(); return { type: 'un', op: 'neg', e: this.parseUnary(), line: t.line }; }
+    if (this.isOp('+')) { this.next(); return this.parseUnary(); }
+    return this.parsePow();
+  }
+  parsePow() {
+    const b = this.parsePrimary();
+    if (this.isOp('^')) { const t = this.next(); return { type: 'bin', op: '^', l: b, r: this.parseUnary(), line: t.line }; }
+    return b;
+  }
+  parsePrimary() {
+    const t = this.peek();
+    if (t.type === 'NUM') { this.next(); return { type: 'num', v: t.value, line: t.line }; }
+    if (t.type === 'STR') { this.next(); return { type: 'str', v: t.value, line: t.line }; }
+    if (t.type === 'OP' && t.value === '(') {
+      this.next(); const e = this.parseExpr();
+      this.expectOp(')', `« ) » attendu pour fermer la parenthèse, ${this.found()}`);
+      return e;
+    }
+    if (t.type === 'ID') {
+      if (t.kw === 'vrai' || t.kw === 'faux') { this.next(); return { type: 'bool', v: t.kw === 'vrai', line: t.line }; }
+      if (RESERVED.has(t.kw)) this.error(`Valeur attendue, mais le mot-clé « ${t.text} » a été trouvé`);
+      this.next();
+      if (this.isOp('(')) return { type: 'call', name: t.text, args: this.parseArgs(), line: t.line };
+      return this.parseTargetRest(t);
+    }
+    if (t.type === 'NL' || t.type === 'EOF') this.error('Valeur manquante en fin de ligne');
+    this.error(`Valeur attendue, ${this.found()}`);
+  }
+}
+
+function parse(src) {
+  const p = new Parser(tokenize(src));
+  return p.parseProgram();
+}
+
+/* ---------------- Valeurs ---------------- */
+function fmtNum(x) {
+  if (Number.isInteger(x)) return String(x);
+  if (!isFinite(x)) return isNaN(x) ? 'NaN' : (x > 0 ? '+∞' : '-∞');
+  return String(Number(x.toPrecision(12)));
+}
+function fmt(v) {
+  if (v === undefined) return '?';
+  if (typeof v === 'boolean') return v ? 'Vrai' : 'Faux';
+  if (typeof v === 'number') return fmtNum(v);
+  if (v instanceof ArrayVal) return v.label();
+  return String(v);
+}
+function fmtQ(v) { return typeof v === 'string' ? `"${v}"` : fmt(v); }
+function typeName(v) {
+  if (typeof v === 'number') return Number.isInteger(v) ? 'Entier' : 'Réel';
+  if (typeof v === 'string') return 'Chaîne';
+  if (typeof v === 'boolean') return 'Booléen';
+  if (v instanceof ArrayVal) return 'Tableau';
+  return 'valeur';
+}
+function typeLabel(t) {
+  if (!t) return 'Quelconque';
+  if (typeof t === 'string') return TYPE_LABEL[t];
+  return 'Tableau de ' + TYPE_LABEL[t.elem];
+}
+
+class ArrayVal {
+  constructor(name, elem, lo, hi, lenient) {
+    this.name = name; this.elem = elem; this.lo = lo; this.hi = hi; this.lenient = lenient;
+    this.sizes = lo.map((l, k) => hi[k] - l + 1);
+    const size = this.sizes.reduce((a, b) => a * b, 1);
+    if (size > 1e6) throw new AlgoError(`Tableau « ${name} » trop grand (${size} éléments, maximum 1 000 000)`);
+    this.data = new Array(size).fill(undefined);
+  }
+  label() { return `Tableau[${this.lo.map((l, k) => (this.lenient[k] ? this.hi[k] : l + '..' + this.hi[k])).join(', ')}] de ${TYPE_LABEL[this.elem]}`; }
+  offset(idx, line, name) {
+    if (idx.length !== this.lo.length) {
+      throw new AlgoError(`« ${name} » a ${this.lo.length} dimension${this.lo.length > 1 ? 's' : ''} : il faut ${this.lo.length} indice${this.lo.length > 1 ? 's' : ''}, ${idx.length} donné${idx.length > 1 ? 's' : ''}`, line);
+    }
+    let off = 0;
+    for (let k = 0; k < idx.length; k++) {
+      const x = idx[k];
+      if (typeof x !== 'number' || !Number.isInteger(x)) throw new AlgoError(`L'indice d'un tableau doit être un Entier (reçu : ${fmtQ(x)})`, line);
+      if (x < this.lo[k] || x > this.hi[k]) {
+        const lo = this.lenient[k] ? 0 : this.lo[k];
+        throw new AlgoError(`Indice ${x} hors limites pour « ${name} » : les indices valides vont de ${lo} à ${this.hi[k]}`, line);
+      }
+      off = off * this.sizes[k] + (x - this.lo[k]);
+    }
+    return off;
+  }
+}
+
+class Cell {
+  constructor(name, type, v, isConst) { this.name = name; this.type = type; this.v = v; this.isConst = !!isConst; }
+  get() { return this.v; }
+  set(x) { this.v = x; }
+}
+class AliasRef {
+  constructor(name, target) { this.name = name; this.target = target; this.type = target.type; this.alias = true; this.isConst = false; }
+  get() { return this.target.get(); }
+  set(x) { this.target.set(x); }
+}
+class ElemRef {
+  constructor(arr, off, label) { this.arr = arr; this.off = off; this.name = label; this.type = arr.elem; this.elem = true; }
+  get() { return this.arr.data[this.off]; }
+  set(x) { this.arr.data[this.off] = x; }
+}
+class Frame {
+  constructor(name, parent, fn) { this.name = name; this.parent = parent; this.fn = fn || null; this.vars = new Map(); }
+  lookup(k) { return this.vars.get(k) || (this.parent ? this.parent.lookup(k) : undefined); }
+}
+
+/* ---------------- Fonctions intégrées ---------------- */
+const BUILTINS = {};
+const BUILTIN_DOC = [];
+function reg(names, doc, fn) { names.forEach(n => (BUILTINS[n] = fn)); if (doc) BUILTIN_DOC.push(doc); }
+function argc(a, n, name, line) {
+  const ok = Array.isArray(n) ? n.includes(a.length) : a.length === n;
+  if (!ok) throw new AlgoError(`« ${name} » attend ${Array.isArray(n) ? n.join(' ou ') : n} paramètre${(Array.isArray(n) ? Math.max(...n) : n) > 1 ? 's' : ''}, ${a.length} donné${a.length > 1 ? 's' : ''}`, line);
+}
+function needNum(v, name, line) { if (typeof v !== 'number') throw new AlgoError(`« ${name} » attend un nombre (reçu : ${fmtQ(v)})`, line); return v; }
+function needStr(v, name, line) { if (typeof v !== 'string') throw new AlgoError(`« ${name} » attend une Chaîne (reçu : ${fmtQ(v)})`, line); return v; }
+function needInt(v, name, line) { needNum(v, name, line); if (!Number.isInteger(v)) throw new AlgoError(`« ${name} » attend un Entier (reçu : ${fmt(v)})`, line); return v; }
+
+reg(['racine', 'rac', 'racinecarree', 'sqrt'], ['Racine(x)', 'racine carrée'], (a, l, n) => {
+  argc(a, 1, n, l); const x = needNum(a[0], n, l);
+  if (x < 0) throw new AlgoError('Racine carrée d\'un nombre négatif impossible', l);
+  return Math.sqrt(x);
+});
+reg(['abs', 'valeurabsolue'], ['Abs(x)', 'valeur absolue'], (a, l, n) => { argc(a, 1, n, l); return Math.abs(needNum(a[0], n, l)); });
+reg(['arrondi', 'arrondir', 'round'], ['Arrondi(x)', 'entier le plus proche'], (a, l, n) => {
+  argc(a, [1, 2], n, l); const x = needNum(a[0], n, l);
+  if (a.length === 2) { const p = 10 ** needInt(a[1], n, l); return Math.round(x * p) / p; }
+  return Math.round(x);
+});
+reg(['ent', 'partieentiere', 'plancher', 'floor'], ['Ent(x)', 'partie entière'], (a, l, n) => { argc(a, 1, n, l); return Math.floor(needNum(a[0], n, l)); });
+reg(['tronquer', 'trunc', 'troncature'], null, (a, l, n) => { argc(a, 1, n, l); return Math.trunc(needNum(a[0], n, l)); });
+reg(['plafond', 'ceil'], null, (a, l, n) => { argc(a, 1, n, l); return Math.ceil(needNum(a[0], n, l)); });
+reg(['puissance', 'puiss', 'pow'], ['Puissance(x, n)', 'x exposant n'], (a, l, n) => { argc(a, 2, n, l); return Math.pow(needNum(a[0], n, l), needNum(a[1], n, l)); });
+reg(['carre'], null, (a, l, n) => { argc(a, 1, n, l); const x = needNum(a[0], n, l); return x * x; });
+reg(['max', 'maximum'], ['Max(a, b, …)', 'plus grande valeur'], (a, l, n) => { if (!a.length) argc(a, 2, n, l); a.forEach(x => needNum(x, n, l)); return Math.max(...a); });
+reg(['min', 'minimum'], ['Min(a, b, …)', 'plus petite valeur'], (a, l, n) => { if (!a.length) argc(a, 2, n, l); a.forEach(x => needNum(x, n, l)); return Math.min(...a); });
+reg(['aleatoire', 'alea', 'hasard', 'random'], ['Aleatoire(a, b)', 'entier au hasard entre a et b'], (a, l, n) => {
+  argc(a, [0, 1, 2], n, l);
+  if (a.length === 0) return Math.random();
+  if (a.length === 1) return Math.floor(Math.random() * needInt(a[0], n, l));
+  const lo = needInt(a[0], n, l), hi = needInt(a[1], n, l);
+  return lo + Math.floor(Math.random() * (hi - lo + 1));
+});
+reg(['longueur', 'long', 'taille', 'len'], ['Longueur(s)', 'nombre de caractères'], (a, l, n) => {
+  argc(a, 1, n, l);
+  if (a[0] instanceof ArrayVal) return a[0].sizes[0] - (a[0].lenient[0] ? 1 : 0);
+  return [...needStr(a[0], n, l)].length;
+});
+reg(['majuscule', 'majuscules', 'maj', 'upper'], ['Majuscule(s)', 'texte en majuscules'], (a, l, n) => { argc(a, 1, n, l); return needStr(a[0], n, l).toUpperCase(); });
+reg(['minuscule', 'minuscules', 'lower'], ['Minuscule(s)', 'texte en minuscules'], (a, l, n) => { argc(a, 1, n, l); return needStr(a[0], n, l).toLowerCase(); });
+reg(['souschaine', 'extraire', 'copie', 'substr'], ['SousChaine(s, pos, nb)', 'nb caractères à partir de pos'], (a, l, n) => {
+  argc(a, [2, 3], n, l); const s = [...needStr(a[0], n, l)]; const p = needInt(a[1], n, l);
+  const len = a.length === 3 ? needInt(a[2], n, l) : s.length;
+  if (p < 1) throw new AlgoError(`« ${n} » : la position commence à 1 (reçu : ${p})`, l);
+  return s.slice(p - 1, p - 1 + Math.max(0, len)).join('');
+});
+reg(['position', 'pos', 'chercher'], ['Position(s, mot)', 'position de mot dans s (0 si absent)'], (a, l, n) => { argc(a, 2, n, l); return needStr(a[0], n, l).indexOf(needStr(a[1], n, l)) + 1; });
+reg(['concat', 'concatener'], ['Concat(a, b, …)', 'colle des textes'], (a) => a.map(fmt).join(''));
+reg(['ord', 'asc', 'code', 'ascii'], ['Ord(c)', 'code d\'un caractère'], (a, l, n) => {
+  argc(a, 1, n, l); const s = needStr(a[0], n, l);
+  if (!s.length) throw new AlgoError(`« ${n} » attend un caractère`, l);
+  return s.codePointAt(0);
+});
+reg(['chr', 'car', 'caract'], ['Chr(n)', 'caractère de code n'], (a, l, n) => { argc(a, 1, n, l); return String.fromCodePoint(needInt(a[0], n, l)); });
+reg(['entier', 'enentier', 'convent', 'int'], ['Entier(x)', 'convertit en Entier'], (a, l, n) => {
+  argc(a, 1, n, l); const x = a[0];
+  if (typeof x === 'number') return Math.trunc(x);
+  if (typeof x === 'string' && /^\s*[+-]?\d+\s*$/.test(x)) return parseInt(x, 10);
+  throw new AlgoError(`Impossible de convertir ${fmtQ(x)} en Entier`, l);
+});
+reg(['reel', 'enreel', 'float'], ['Reel(x)', 'convertit en Réel'], (a, l, n) => {
+  argc(a, 1, n, l); const x = a[0];
+  if (typeof x === 'number') return x;
+  if (typeof x === 'string' && /^\s*[+-]?\d+([.,]\d+)?\s*$/.test(x)) return parseFloat(x.replace(',', '.'));
+  throw new AlgoError(`Impossible de convertir ${fmtQ(x)} en Réel`, l);
+});
+reg(['chaine', 'enchaine', 'str', 'convch'], ['Chaine(x)', 'convertit en texte'], (a, l, n) => { argc(a, 1, n, l); return fmt(a[0]); });
+
+/* ---------------- Interpréteur ---------------- */
+const MAX_STEPS = 5_000_000;
+const MAX_DEPTH = 2000;
+const yieldNow = typeof MessageChannel !== 'undefined'
+  ? () => new Promise(r => { const ch = new MessageChannel(); ch.port1.onmessage = () => { ch.port1.close(); r(); }; ch.port2.postMessage(0); })
+  : () => new Promise(r => setTimeout(r, 0));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+class Interp {
+  constructor(prog, hooks, opts = {}) {
+    this.prog = prog; this.h = hooks || {};
+    this.steps = 0; this.stepping = !!opts.stepping; this.breakpoints = opts.breakpoints || new Set();
+    this.delay = opts.delay || 0; this.stopped = false; this.callStack = [];
+    this.global = new Frame(prog.name, null, null);
+    this.frame = this.global; this.line = prog.line;
+  }
+  stop() { this.stopped = true; }
+
+  async run() {
+    this.callStack.push({ name: this.prog.name, line: 0, frame: this.global });
+    await this.declare(this.prog.consts, this.prog.vars, this.global);
+    await this.execBlock(this.prog.body, this.global);
+  }
+
+  async declare(consts, vars, frame) {
+    for (const c of consts) {
+      const key = c.name.toLowerCase();
+      if (frame.vars.has(key)) throw new AlgoError(`« ${c.name} » est déclaré deux fois`, c.line);
+      const v = await this.eval(c.value, frame);
+      const cv = c.type ? this.coerce(v, c.type, c.name, c.line) : v;
+      const t = c.type || ({ Entier: 'entier', Réel: 'reel', Chaîne: 'chaine', Booléen: 'booleen' })[typeName(v)];
+      frame.vars.set(key, new Cell(c.name, t, cv, true));
+    }
+    for (const d of vars) {
+      const key = d.name.toLowerCase();
+      if (frame.vars.has(key)) throw new AlgoError(`« ${d.name} » est déclaré deux fois`, d.line);
+      if (d.type && d.type.kind === 'array') {
+        const lo = [], hi = [], len = [];
+        for (const dim of d.type.dims) {
+          let h, l;
+          try {
+            h = await this.eval(dim.hi, frame);
+            l = dim.lo ? await this.eval(dim.lo, frame) : 0;
+          } catch (e) {
+            if (e instanceof AlgoError) throw new AlgoError(`Taille du tableau « ${d.name} » inconnue au moment de la déclaration : utilisez un nombre ou une constante (ex. Constantes  N = 10)`, d.line);
+            throw e;
+          }
+          if (!Number.isInteger(h) || !Number.isInteger(l)) throw new AlgoError(`Les bornes du tableau « ${d.name} » doivent être des Entiers`, d.line);
+          if (h < l) throw new AlgoError(`Bornes incorrectes pour « ${d.name} » : ${l}..${h}`, d.line);
+          lo.push(l); hi.push(h); len.push(!dim.lo);
+        }
+        frame.vars.set(key, new Cell(d.name, d.type, new ArrayVal(d.name, d.type.elem, lo, hi, len)));
+      } else {
+        frame.vars.set(key, new Cell(d.name, d.type, undefined));
+      }
+    }
+  }
+
+  async tick(line, frame) {
+    if (this.stopped) throw new StopSignal();
+    this.steps++;
+    this.line = line; this.frame = frame;
+    if (this.steps > MAX_STEPS) throw new AlgoError(`Plus de ${MAX_STEPS.toLocaleString('fr-FR')} instructions exécutées : l'algorithme semble pris dans une boucle infinie. Vérifiez que la condition d'arrêt finit par être atteinte.`, line);
+    if (this.stepping || this.breakpoints.has(line)) {
+      if (this.h.onPause) await this.h.onPause(line, frame);
+      if (this.stopped) throw new StopSignal();
+      return;
+    }
+    if (this.delay > 0) {
+      if (this.h.onLine) this.h.onLine(line, frame);
+      await sleep(this.delay);
+      if (this.stopped) throw new StopSignal();
+      return;
+    }
+    if (this.steps % 1500 === 0) { await yieldNow(); if (this.stopped) throw new StopSignal(); }
+  }
+
+  async execBlock(stmts, f) { for (const s of stmts) await this.exec(s, f); }
+
+  async exec(s, f) {
+    await this.tick(s.line, f);
+    switch (s.type) {
+      case 'assign': {
+        const v = await this.eval(s.value, f);
+        const r = await this.ref(s.target, f);
+        this.assign(r, v, s.line, f);
+        break;
+      }
+      case 'read': {
+        for (const tg of s.targets) {
+          const r = await this.ref(tg, f);
+          if (r.isConst) throw new AlgoError(`« ${r.name} » est une constante : on ne peut pas la lire au clavier`, s.line);
+          if (r.type && r.type.kind === 'array') throw new AlgoError(`« ${r.name} » est un tableau : lisez ses éléments un par un, ex. Lire(${r.name}[i])`, s.line);
+          const v = await this.h.read(r.name, r.type, s.line);
+          if (this.stopped) throw new StopSignal();
+          this.assign(r, v, s.line, f, 'lire');
+        }
+        break;
+      }
+      case 'write': {
+        const parts = [];
+        for (const a of s.args) {
+          const v = await this.eval(a, f);
+          if (v instanceof ArrayVal) throw new AlgoError(`On ne peut pas écrire un tableau entier : affichez ses éléments avec une boucle Pour`, s.line);
+          parts.push(fmt(v));
+        }
+        if (this.h.write) this.h.write(parts.join(''), s.line);
+        break;
+      }
+      case 'if': {
+        for (const b of s.branches) {
+          if (await this.evalBool(b.cond, f, 'Si')) { await this.execBlock(b.body, f); return; }
+        }
+        if (s.elseBody) await this.execBlock(s.elseBody, f);
+        break;
+      }
+      case 'for': {
+        const r = await this.ref(s.var, f);
+        if (r.type && r.type !== 'entier' && r.type !== 'reel') throw new AlgoError(`La variable de boucle « ${r.name} » doit être un Entier (elle est de type ${typeLabel(r.type)})`, s.line);
+        const a = await this.evalNum(s.from, f, 'La valeur de départ du Pour');
+        const b = await this.evalNum(s.to, f, 'La valeur de fin du Pour');
+        const st = s.step ? await this.evalNum(s.step, f, 'Le pas du Pour') : 1;
+        if (st === 0) throw new AlgoError('Le pas d\'une boucle Pour ne peut pas être 0', s.line);
+        this.assign(r, a, s.line, f);
+        for (;;) {
+          const i = r.get();
+          if (st > 0 ? i > b : i < b) break;
+          await this.execBlock(s.body, f);
+          await this.tick(s.line, f);
+          const cur = r.get();
+          if (typeof cur !== 'number') throw new AlgoError(`La variable de boucle « ${r.name} » a perdu sa valeur`, s.line);
+          this.assign(r, cur + st, s.line, f);
+        }
+        break;
+      }
+      case 'while': {
+        let first = true;
+        for (;;) {
+          if (!first) await this.tick(s.line, f);
+          first = false;
+          if (!(await this.evalBool(s.cond, f, 'TantQue'))) break;
+          await this.execBlock(s.body, f);
+        }
+        break;
+      }
+      case 'repeat': {
+        for (;;) {
+          await this.execBlock(s.body, f);
+          await this.tick(s.untilLine, f);
+          if (await this.evalBool(s.cond, f, "Jusqu'à")) break;
+        }
+        break;
+      }
+      case 'switch': {
+        const v = await this.eval(s.subject, f);
+        for (const c of s.cases) {
+          for (const lb of c.labels) {
+            let ok;
+            if (lb.v) ok = this.compare(v, await this.eval(lb.v, f), '=', c.line);
+            else ok = this.compare(v, await this.eval(lb.lo, f), '>=', c.line) && this.compare(v, await this.eval(lb.hi, f), '<=', c.line);
+            if (ok) { await this.execBlock(c.body, f); return; }
+          }
+        }
+        if (s.def) await this.execBlock(s.def, f);
+        break;
+      }
+      case 'return': {
+        if (!f.fn) throw new AlgoError('« Retourner » ne peut être utilisé que dans une fonction', s.line);
+        const v = s.value ? await this.eval(s.value, f) : undefined;
+        if (f.fn.isFunc && v === undefined) throw new AlgoError(`« Retourner » doit être suivi d'une valeur dans la fonction « ${f.fn.name} »`, s.line);
+        throw new ReturnSig(v);
+      }
+      case 'call': await this.call(s, f, false); break;
+    }
+  }
+
+  assign(r, v, line, f, how) {
+    if (r.isConst) throw new AlgoError(`« ${r.name} » est une constante : sa valeur ne peut pas changer`, line);
+    if (v instanceof ArrayVal) throw new AlgoError('On ne peut pas affecter un tableau entier : copiez-le élément par élément avec une boucle Pour', line);
+    if (r.type && r.type.kind === 'array') throw new AlgoError(`« ${r.name} » est un tableau : précisez l'indice, ex. ${r.name}[1] ← …`, line);
+    const cv = this.coerce(v, r.type, r.name, line);
+    r.set(cv);
+    if (this.h.onAssign) this.h.onAssign(r.name, cv, line, f, how || 'affect');
+  }
+
+  coerce(v, t, name, line) {
+    if (!t || typeof t !== 'string') return v;
+    const bad = () => { throw new AlgoError(`Type incompatible : impossible de mettre ${fmtQ(v)} (${typeName(v)}) dans « ${name} » qui est de type ${TYPE_LABEL[t]}`, line); };
+    switch (t) {
+      case 'entier':
+        if (typeof v !== 'number') bad();
+        if (!Number.isInteger(v)) throw new AlgoError(`Type incompatible : « ${name} » est un Entier mais ${fmt(v)} est un Réel. Utilisez « div » pour une division entière, ou déclarez « ${name} » en Réel.`, line);
+        return v;
+      case 'reel': if (typeof v !== 'number') bad(); return v;
+      case 'chaine': if (typeof v !== 'string') bad(); return v;
+      case 'caractere':
+        if (typeof v !== 'string') bad();
+        if ([...v].length !== 1) throw new AlgoError(`« ${name} » est un Caractère : il doit contenir exactement un caractère (reçu ${fmtQ(v)})`, line);
+        return v;
+      case 'booleen': if (typeof v !== 'boolean') bad(); return v;
+    }
+    return v;
+  }
+
+  async ref(e, f) {
+    const key = e.name.toLowerCase();
+    const cell = f.lookup(key);
+    if (!cell) {
+      if (this.prog.funcs[key]) throw new AlgoError(`« ${e.name} » est une fonction : ajoutez des parenthèses pour l'appeler, ex. ${e.name}(…)`, e.line);
+      throw new AlgoError(`Variable « ${e.name} » non déclarée. Ajoutez-la dans la section Variables, ex. ${e.name} : Entier`, e.line);
+    }
+    if (!e.idx.length) return cell;
+    const arr = cell.get();
+    if (!(arr instanceof ArrayVal)) throw new AlgoError(`« ${cell.name} » n'est pas un tableau : on ne peut pas écrire ${cell.name}[…]`, e.line);
+    const idx = [];
+    for (const x of e.idx) idx.push(await this.eval(x, f));
+    const off = arr.offset(idx, e.line, cell.name);
+    return new ElemRef(arr, off, `${cell.name}[${idx.map(fmt).join(', ')}]`);
+  }
+
+  async evalBool(e, f, ctx) {
+    const v = await this.eval(e, f);
+    if (typeof v !== 'boolean') throw new AlgoError(`La condition du « ${ctx} » doit valoir Vrai ou Faux, mais elle vaut ${fmtQ(v)}. Utilisez une comparaison (=, <, >…).`, e.line);
+    return v;
+  }
+  async evalNum(e, f, what) {
+    const v = await this.eval(e, f);
+    if (typeof v !== 'number') throw new AlgoError(`${what} doit être un nombre (reçu : ${fmtQ(v)})`, e.line);
+    return v;
+  }
+
+  needNum(v, op, line) {
+    if (typeof v !== 'number') throw new AlgoError(`L'opérateur « ${op} » s'applique à des nombres, pas à ${fmtQ(v)} (${typeName(v)})`, line);
+    return v;
+  }
+  needBool(v, op, line) {
+    if (typeof v !== 'boolean') throw new AlgoError(`« ${op.toUpperCase()} » relie des conditions (Vrai/Faux), pas ${fmtQ(v)}. Écrivez par exemple : x = 1 OU x = 2`, line);
+    return v;
+  }
+  compare(a, b, op, line) {
+    if (a instanceof ArrayVal || b instanceof ArrayVal) throw new AlgoError('On ne peut pas comparer des tableaux entiers', line);
+    if (typeof a !== typeof b) throw new AlgoError(`Comparaison impossible entre ${fmtQ(a)} (${typeName(a)}) et ${fmtQ(b)} (${typeName(b)})`, line);
+    if (typeof a === 'boolean' && op !== '=' && op !== '<>') throw new AlgoError(`On ne peut pas utiliser « ${op} » avec des booléens`, line);
+    switch (op) {
+      case '=': return a === b; case '<>': return a !== b;
+      case '<': return a < b; case '>': return a > b;
+      case '<=': return a <= b; case '>=': return a >= b;
+    }
+  }
+
+  async eval(e, f) {
+    switch (e.type) {
+      case 'num': case 'str': case 'bool': return e.v;
+      case 'var': {
+        const r = await this.ref(e, f);
+        const v = r.get();
+        if (v === undefined) {
+          if (r.elem) throw new AlgoError(`L'élément ${r.name} n'a pas encore de valeur`, e.line);
+          throw new AlgoError(`Variable « ${r.name} » utilisée sans valeur. Donnez-lui une valeur (ex. ${r.name} ← 0) ou lisez-la avec Lire avant de l'utiliser.`, e.line);
+        }
+        return v;
+      }
+      case 'call': return await this.call(e, f, true);
+      case 'un': {
+        const v = await this.eval(e.e, f);
+        if (e.op === 'neg') return -this.needNum(v, '-', e.line);
+        return !this.needBool(v, 'non', e.line);
+      }
+      case 'bin': {
+        const op = e.op;
+        if (op === 'et' || op === 'ou') {
+          const a = this.needBool(await this.eval(e.l, f), op, e.line);
+          if (op === 'et' && !a) return false;
+          if (op === 'ou' && a) return true;
+          return this.needBool(await this.eval(e.r, f), op, e.line);
+        }
+        const a = await this.eval(e.l, f), b = await this.eval(e.r, f);
+        switch (op) {
+          case 'xor': return this.needBool(a, op, e.line) !== this.needBool(b, op, e.line);
+          case '+':
+            if (typeof a === 'string' || typeof b === 'string') {
+              if (a instanceof ArrayVal || b instanceof ArrayVal) throw new AlgoError('On ne peut pas additionner un tableau', e.line);
+              return fmt(a) + fmt(b);
+            }
+            return this.needNum(a, '+', e.line) + this.needNum(b, '+', e.line);
+          case '&':
+            if (a instanceof ArrayVal || b instanceof ArrayVal) throw new AlgoError('On ne peut pas concaténer un tableau', e.line);
+            return fmt(a) + fmt(b);
+          case '-': return this.needNum(a, '-', e.line) - this.needNum(b, '-', e.line);
+          case '*': return this.needNum(a, '*', e.line) * this.needNum(b, '*', e.line);
+          case '/':
+            this.needNum(a, '/', e.line); this.needNum(b, '/', e.line);
+            if (b === 0) throw new AlgoError('Division par zéro', e.line);
+            return a / b;
+          case 'div': case 'mod': {
+            this.needNum(a, op, e.line); this.needNum(b, op, e.line);
+            if (!Number.isInteger(a) || !Number.isInteger(b)) throw new AlgoError(`« ${op} » s'applique à des Entiers (reçu : ${fmt(a)} et ${fmt(b)})`, e.line);
+            if (b === 0) throw new AlgoError(`Division par zéro (« ${op} » 0)`, e.line);
+            return op === 'div' ? Math.trunc(a / b) : a % b;
+          }
+          case '^': return Math.pow(this.needNum(a, '^', e.line), this.needNum(b, '^', e.line));
+          default: return this.compare(a, b, op, e.line);
+        }
+      }
+    }
+    throw new AlgoError('Expression inconnue', e.line);
+  }
+
+  async call(e, f, wantValue) {
+    const key = e.name.toLowerCase();
+    const fn = this.prog.funcs[key];
+    if (!fn) {
+      const b = BUILTINS[kwOf(e.name)];
+      if (!b) {
+        if (f.lookup(key)) throw new AlgoError(`« ${e.name} » est une variable, pas une fonction`, e.line);
+        throw new AlgoError(`Fonction ou procédure inconnue « ${e.name} »`, e.line);
+      }
+      const args = [];
+      for (const a of e.args) args.push(await this.eval(a, f));
+      return b(args, e.line, e.name);
+    }
+    if (wantValue && !fn.isFunc) throw new AlgoError(`« ${fn.name} » est une procédure : elle ne retourne pas de valeur et ne peut pas être utilisée dans un calcul`, e.line);
+    if (e.args.length !== fn.params.length) throw new AlgoError(`« ${fn.name} » attend ${fn.params.length} paramètre${fn.params.length > 1 ? 's' : ''}, ${e.args.length} donné${e.args.length > 1 ? 's' : ''}`, e.line);
+    if (this.callStack.length > MAX_DEPTH) throw new AlgoError(`Trop d'appels imbriqués (plus de ${MAX_DEPTH}) : la récursivité ne s'arrête jamais ? Vérifiez le cas de base de « ${fn.name} ».`, e.line);
+    const fr = new Frame(fn.name, this.global, fn);
+    for (let k = 0; k < fn.params.length; k++) {
+      const p = fn.params[k], a = e.args[k];
+      if (fr.vars.has(p.key)) throw new AlgoError(`Paramètre « ${p.name} » en double dans « ${fn.name} »`, fn.line);
+      if (p.byRef) {
+        if (a.type !== 'var') throw new AlgoError(`Le paramètre « ${p.name} » de « ${fn.name} » est passé par référence (Var) : donnez-lui une variable, pas une valeur`, e.line);
+        const r = await this.ref(a, f);
+        if (r.isConst) throw new AlgoError(`On ne peut pas passer la constante « ${r.name} » à un paramètre Var`, e.line);
+        fr.vars.set(p.key, new AliasRef(p.name, r));
+      } else {
+        const v = await this.eval(a, f);
+        let cv = v, ty = p.type;
+        if (p.type && p.type.kind === 'array') {
+          if (!(v instanceof ArrayVal)) throw new AlgoError(`Le paramètre « ${p.name} » de « ${fn.name} » attend un tableau (reçu : ${fmtQ(v)})`, e.line);
+        } else if (v instanceof ArrayVal) {
+          if (p.type) throw new AlgoError(`Le paramètre « ${p.name} » de « ${fn.name} » attend un ${TYPE_LABEL[p.type]}, pas un tableau`, e.line);
+          ty = { kind: 'array' };
+        } else cv = this.coerce(v, p.type, p.name, e.line);
+        fr.vars.set(p.key, new Cell(p.name, ty, cv));
+      }
+    }
+    await this.declare(fn.consts, fn.vars, fr);
+    this.callStack.push({ name: fn.name, line: e.line, frame: fr });
+    let ret, returned = false;
+    try {
+      await this.execBlock(fn.body, fr);
+    } catch (x) {
+      if (x instanceof ReturnSig) { ret = x.v; returned = true; } else throw x;
+    }
+    this.callStack.pop();
+    if (fn.isFunc) {
+      if (!returned) throw new AlgoError(`La fonction « ${fn.name} » s'est terminée sans « Retourner » de valeur`, fn.endLine);
+      return fn.ret && typeof fn.ret === 'string' ? this.coerce(ret, fn.ret, `le résultat de ${fn.name}`, fn.endLine) : ret;
+    }
+    return undefined;
+  }
+}
+
+/* lecture clavier : convertit le texte tapé selon le type attendu */
+function parseInput(text, type) {
+  const s = text.trim();
+  switch (type) {
+    case 'entier':
+      if (/^[+-]?\d+$/.test(s)) return { ok: true, v: parseInt(s, 10) };
+      if (/^[+-]?\d+([.,]\d+)?$/.test(s)) return { ok: false, msg: `« ${s} » n'est pas un Entier (pas de virgule). Recommencez.` };
+      return { ok: false, msg: `« ${s} » n'est pas un Entier valide. Recommencez.` };
+    case 'reel':
+      if (/^[+-]?(\d+([.,]\d*)?|[.,]\d+)$/.test(s)) return { ok: true, v: parseFloat(s.replace(',', '.')) };
+      return { ok: false, msg: `« ${s} » n'est pas un nombre valide. Recommencez.` };
+    case 'caractere':
+      if ([...text].length === 1) return { ok: true, v: text };
+      return { ok: false, msg: 'Tapez exactement un caractère.' };
+    case 'booleen': {
+      const k = kwOf(s);
+      if (['vrai', 'v', 'true', '1', 'oui'].includes(k)) return { ok: true, v: true };
+      if (['faux', 'f', 'false', '0', 'non'].includes(k)) return { ok: true, v: false };
+      return { ok: false, msg: 'Tapez Vrai ou Faux.' };
+    }
+    case 'chaine': return { ok: true, v: text };
+    default:
+      if (/^[+-]?\d+$/.test(s)) return { ok: true, v: parseInt(s, 10) };
+      if (/^[+-]?\d+[.,]\d+$/.test(s)) return { ok: true, v: parseFloat(s.replace(',', '.')) };
+      return { ok: true, v: text };
+  }
+}
+
+return { tokenize, parse, Interp, AlgoError, StopSignal, ArrayVal, Cell, AliasRef, fmt, fmtQ, typeLabel, TYPE_LABEL, parseInput, kwOf, BUILTINS, BUILTIN_DOC };
+})();
+if (typeof module !== 'undefined') module.exports = AlgoCore;
+
+</script>
+<script>
+const ALGO_EXAMPLES = [
+{ name: 'SommeDeuxNombres.algo', group: 'Bases', content:
+`Algorithme SommeDeuxNombres
+// Lit deux entiers et affiche leur somme
+Variables
+   a, b, s : Entier
+Début
+   Ecrire("Entrez le premier nombre :")
+   Lire(a)
+   Ecrire("Entrez le deuxième nombre :")
+   Lire(b)
+   s ← a + b
+   Ecrire("La somme de ", a, " et ", b, " est ", s)
+Fin
+` },
+{ name: 'MaximumDeTrois.algo', group: 'Conditions', content:
+`Algorithme MaximumDeTrois
+Variables
+   x, y, z, plusGrand : Entier
+Début
+   Ecrire("Entrez trois nombres :")
+   Lire(x, y, z)
+   Si x >= y ET x >= z Alors
+      plusGrand ← x
+   SinonSi y >= z Alors
+      plusGrand ← y
+   Sinon
+      plusGrand ← z
+   FinSi
+   Ecrire("Le plus grand est : ", plusGrand)
+Fin
+` },
+{ name: 'MentionStagiaire.algo', group: 'Conditions', content:
+`Algorithme MentionStagiaire
+Variables
+   note : Réel
+   mention : Chaîne
+Début
+   Ecrire("Note sur 20 :")
+   Lire(note)
+   Si note < 0 OU note > 20 Alors
+      Ecrire("Note invalide")
+   Sinon
+      Si note >= 16 Alors
+         mention ← "Très bien"
+      SinonSi note >= 14 Alors
+         mention ← "Bien"
+      SinonSi note >= 12 Alors
+         mention ← "Assez bien"
+      SinonSi note >= 10 Alors
+         mention ← "Passable"
+      Sinon
+         mention ← "Non admis"
+      FinSi
+      Ecrire("Mention : ", mention)
+   FinSi
+Fin
+` },
+{ name: 'JourDeLaSemaine.algo', group: 'Conditions', content:
+`Algorithme JourDeLaSemaine
+Variables
+   j : Entier
+Début
+   Ecrire("Numéro du jour (1 à 7) :")
+   Lire(j)
+   Selon j Faire
+      1 : Ecrire("Lundi")
+      2 : Ecrire("Mardi")
+      3 : Ecrire("Mercredi")
+      4 : Ecrire("Jeudi")
+      5 : Ecrire("Vendredi")
+      6, 7 : Ecrire("Week-end !")
+      Sinon : Ecrire("Numéro invalide")
+   FinSelon
+Fin
+` },
+{ name: 'Factorielle.algo', group: 'Boucles', content:
+`Algorithme Factorielle
+Variables
+   n, i, f : Entier
+Début
+   Répéter
+      Ecrire("Entrez un entier positif :")
+      Lire(n)
+   Jusqu'à n >= 0
+   f ← 1
+   Pour i ← 1 à n Faire
+      f ← f * i
+   FinPour
+   Ecrire(n, "! = ", f)
+Fin
+` },
+{ name: 'TableMultiplication.algo', group: 'Boucles', content:
+`Algorithme TableMultiplication
+Variables
+   n, i : Entier
+Début
+   Ecrire("Quelle table voulez-vous afficher ?")
+   Lire(n)
+   Pour i ← 1 à 10 Faire
+      Ecrire(n, " x ", i, " = ", n * i)
+   FinPour
+Fin
+` },
+{ name: 'NombrePremier.algo', group: 'Boucles', content:
+`Algorithme NombrePremier
+Variables
+   n, d : Entier
+   premier : Booléen
+Début
+   Ecrire("Entrez un entier supérieur à 1 :")
+   Lire(n)
+   premier ← Vrai
+   d ← 2
+   TantQue d * d <= n ET premier Faire
+      Si n mod d = 0 Alors
+         premier ← Faux
+      Sinon
+         d ← d + 1
+      FinSi
+   FinTantQue
+   Si premier Alors
+      Ecrire(n, " est premier")
+   Sinon
+      Ecrire(n, " n'est pas premier : il est divisible par ", d)
+   FinSi
+Fin
+` },
+{ name: 'PGCD.algo', group: 'Boucles', content:
+`Algorithme PGCD
+// Algorithme d'Euclide
+Variables
+   a, b, r : Entier
+Début
+   Ecrire("Entrez deux entiers positifs :")
+   Lire(a, b)
+   TantQue b <> 0 Faire
+      r ← a mod b
+      a ← b
+      b ← r
+   FinTantQue
+   Ecrire("PGCD = ", a)
+Fin
+` },
+{ name: 'StatistiquesTableau.algo', group: 'Tableaux', content:
+`Algorithme StatistiquesTableau
+Constantes
+   N = 5
+Variables
+   T : Tableau[1..N] de Réel
+   i : Entier
+   somme, plusGrand : Réel
+Début
+   Pour i ← 1 à N Faire
+      Ecrire("Valeur n°", i, " :")
+      Lire(T[i])
+   FinPour
+   somme ← 0
+   plusGrand ← T[1]
+   Pour i ← 1 à N Faire
+      somme ← somme + T[i]
+      Si T[i] > plusGrand Alors
+         plusGrand ← T[i]
+      FinSi
+   FinPour
+   Ecrire("Somme : ", somme)
+   Ecrire("Moyenne : ", somme / N)
+   Ecrire("Maximum : ", plusGrand)
+Fin
+` },
+{ name: 'TriABulles.algo', group: 'Tableaux', content:
+`Algorithme TriABulles
+// Trie un tableau par ordre croissant
+Constantes
+   N = 8
+Variables
+   T : Tableau[1..N] de Entier
+   i, tmp : Entier
+   echange : Booléen
+   ligne : Chaîne
+Début
+   T[1] ← 42
+   T[2] ← 17
+   T[3] ← 8
+   T[4] ← 23
+   T[5] ← 4
+   T[6] ← 15
+   T[7] ← 16
+   T[8] ← 31
+
+   ligne ← ""
+   Pour i ← 1 à N Faire
+      ligne ← ligne & T[i] & " "
+   FinPour
+   Ecrire("Avant le tri : ", ligne)
+
+   Répéter
+      echange ← Faux
+      Pour i ← 1 à N - 1 Faire
+         Si T[i] > T[i + 1] Alors
+            tmp ← T[i]
+            T[i] ← T[i + 1]
+            T[i + 1] ← tmp
+            echange ← Vrai
+         FinSi
+      FinPour
+   Jusqu'à NON echange
+
+   ligne ← ""
+   Pour i ← 1 à N Faire
+      ligne ← ligne & T[i] & " "
+   FinPour
+   Ecrire("Après le tri : ", ligne)
+Fin
+` },
+{ name: 'RechercheSequentielle.algo', group: 'Tableaux', content:
+`Algorithme RechercheSequentielle
+Constantes
+   N = 6
+Variables
+   T : Tableau[1..N] de Entier
+   x, i : Entier
+   trouve : Booléen
+Début
+   T[1] ← 12
+   T[2] ← 7
+   T[3] ← 25
+   T[4] ← 3
+   T[5] ← 18
+   T[6] ← 9
+   Ecrire("Quel nombre cherchez-vous ?")
+   Lire(x)
+   i ← 1
+   trouve ← Faux
+   TantQue i <= N ET NON trouve Faire
+      Si T[i] = x Alors
+         trouve ← Vrai
+      Sinon
+         i ← i + 1
+      FinSi
+   FinTantQue
+   Si trouve Alors
+      Ecrire(x, " se trouve à la position ", i)
+   Sinon
+      Ecrire(x, " n'est pas dans le tableau")
+   FinSi
+Fin
+` },
+{ name: 'Matrice.algo', group: 'Tableaux', content:
+`Algorithme Matrice
+// Tableau à deux dimensions : table de Pythagore
+Variables
+   M : Tableau[1..5, 1..5] de Entier
+   i, j : Entier
+   ligne : Chaîne
+Début
+   Pour i ← 1 à 5 Faire
+      Pour j ← 1 à 5 Faire
+         M[i, j] ← i * j
+      FinPour
+   FinPour
+   Pour i ← 1 à 5 Faire
+      ligne ← ""
+      Pour j ← 1 à 5 Faire
+         Si M[i, j] < 10 Alors
+            ligne ← ligne & " "
+         FinSi
+         ligne ← ligne & M[i, j] & "  "
+      FinPour
+      Ecrire(ligne)
+   FinPour
+Fin
+` },
+{ name: 'FonctionsProcedures.algo', group: 'Sous-programmes', content:
+`Algorithme FonctionsProcedures
+
+Fonction Maximum(a : Entier, b : Entier) : Entier
+Début
+   Si a > b Alors
+      Retourner a
+   Sinon
+      Retourner b
+   FinSi
+FinFonction
+
+// Var : les paramètres sont modifiés chez l'appelant
+Procédure Echanger(Var x : Entier, Var y : Entier)
+Variables
+   tmp : Entier
+Début
+   tmp ← x
+   x ← y
+   y ← tmp
+FinProcédure
+
+Variables
+   p, q : Entier
+Début
+   p ← 7
+   q ← 3
+   Ecrire("Le maximum de ", p, " et ", q, " est ", Maximum(p, q))
+   Echanger(p, q)
+   Ecrire("Après l'échange : p = ", p, " et q = ", q)
+Fin
+` },
+{ name: 'FactorielleRecursive.algo', group: 'Sous-programmes', content:
+`Algorithme FactorielleRecursive
+
+Fonction Fact(n : Entier) : Entier
+Début
+   Si n <= 1 Alors
+      Retourner 1
+   FinSi
+   Retourner n * Fact(n - 1)
+FinFonction
+
+Variables
+   k : Entier
+Début
+   Pour k ← 0 à 10 Faire
+      Ecrire(k, "! = ", Fact(k))
+   FinPour
+Fin
+` },
+{ name: 'Palindrome.algo', group: 'Chaînes', content:
+`Algorithme Palindrome
+Variables
+   mot, inverse : Chaîne
+   i : Entier
+Début
+   Ecrire("Entrez un mot :")
+   Lire(mot)
+   inverse ← ""
+   Pour i ← Longueur(mot) à 1 Pas -1 Faire
+      inverse ← inverse & SousChaine(mot, i, 1)
+   FinPour
+   Si Minuscule(inverse) = Minuscule(mot) Alors
+      Ecrire(mot, " est un palindrome")
+   Sinon
+      Ecrire(mot, " n'est pas un palindrome (à l'envers : ", inverse, ")")
+   FinSi
+Fin
+` },
+{ name: 'TrouvezLErreur.algo', group: 'Exercices', content:
+`Algorithme TrouvezLErreur
+// Exercice : exécutez cet algorithme.
+// AlgoLab signale l'erreur et la ligne concernée.
+// Corrigez-la, puis relancez : il reste une deuxième erreur !
+Variables
+   i, somme : Entier
+   moyenne : Entier
+Début
+   Pour i ← 1 à 4 Faire
+      somme ← somme + i
+   FinPour
+   moyenne ← somme / 4
+   Ecrire("Moyenne = ", moyenne)
+Fin
+` }
+];
+const ALGO_STARTER =
+`Algorithme MonAlgorithme
+Variables
+   n : Entier
+Début
+   Ecrire("Bonjour ! Entrez un nombre :")
+   Lire(n)
+   Ecrire("Le double de ", n, " est ", n * 2)
+Fin
+`;
+if (typeof module !== 'undefined') module.exports = { ALGO_EXAMPLES, ALGO_STARTER };
+
+</script>
+<script>
+(() => {
+'use strict';
+const C = AlgoCore;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const IND = '   ';
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('algolab.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('algolab.' + k, JSON.stringify(v)); } catch (e) { } }
+};
+const framed = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+
+/* ---------- icônes ---------- */
+const P = {
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  upload: '<path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4M12 4v11M7 9l5-5 5 5"/>',
+  download: '<path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4M12 4v11M7 10l5 5 5-5"/>',
+  save: '<path d="M5 4h11l4 4v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
+  files: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+  blocks: '<path d="M4 5h7v5H4zM13 14h7v5h-7zM7.5 10v4.5a2 2 0 0 0 2 2H13"/>',
+  book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
+  play: '<path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke="none"/>',
+  step: '<path d="M5 7a6 6 0 0 1 11.5-1M17 2v4h-4"/><circle cx="12" cy="18" r="2.4" fill="currentColor" stroke="none"/>',
+  pause: '<path d="M8 5v14M16 5v14" stroke-width="3"/>',
+  stop: '<rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor" stroke="none"/>',
+  cont: '<path d="M6 4.5v15l10-7.5z" fill="currentColor" stroke="none"/><path d="M19 5v14" stroke-width="2.4"/>',
+  indent: '<path d="M4 6h16M10 12h10M10 18h10M4 10l3 2-3 2"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/>',
+  chev: '<path d="M6 9l6 6 6-6"/>',
+  clear: '<circle cx="12" cy="12" r="8"/><path d="M6.5 17.5l11-11"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  close: '<path d="M7 7l10 10M17 7L7 17"/>',
+  theme: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor" stroke="none"/>',
+  dot: '<circle cx="12" cy="12" r="5" fill="currentColor" stroke="none"/>',
+  alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.5"/>',
+  copyfile: '<path d="M8 4h8l4 4v12H8z"/><path d="M16 4v4h4M4 8v12h4"/>'
+};
+const icon = (n, sz = 16) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n] || ''}</svg>`;
+function paintIcons(root = document) { root.querySelectorAll('[data-ic]').forEach(el => { el.outerHTML = icon(el.dataset.ic, +(el.dataset.sz || 16)); }); }
+paintIcons();
+
+/* ---------- état ---------- */
+const EX = ALGO_EXAMPLES.map(e => ({ id: 'ex:' + e.name, name: e.name, group: e.group, content: e.content, orig: e.content, ex: true, bps: [] }));
+let files = LS.get('files', null);
+if (!Array.isArray(files) || !files.length) files = [{ id: 'u' + Date.now(), name: 'MonAlgorithme.algo', content: ALGO_STARTER, bps: [] }];
+files.forEach(f => { if (!Array.isArray(f.bps)) f.bps = []; });
+const S = {
+  tabs: LS.get('tabs', null), active: LS.get('active', null),
+  mode: LS.get('mode', 'normal'), speed: LS.get('speed', 55), fs: LS.get('fs', 14), panelH: LS.get('panelH', 240),
+  view: 'explorer', running: null, paused: false, resume: null, pendingRead: null,
+  syntaxErr: null, runErr: null, execLine: 0, rename: null, confirmDel: null,
+  state: 'idle', prevSnap: new Map(), trace: null, lastVars: null
+};
+const firstVisit = !LS.get('visited', false);
+const all = () => files.concat(EX);
+const byId = id => all().find(f => f.id === id);
+if (!Array.isArray(S.tabs)) S.tabs = ['ex:TriABulles.algo', files[0].id];
+S.tabs = S.tabs.filter(byId);
+if (!byId(S.active)) S.active = S.tabs[0] || null;
+const cur = () => byId(S.active);
+
+const app = $('#app'), ta = $('#ta'), hl = $('#hl'), layer = $('#layer'), bands = $('#bands'), gin = $('#gutterInner');
+const con = $('#console');
+let LH = 22;
+
+/* ---------- coloration ---------- */
+const SET = a => new Set(a);
+const CTRL = SET(['si', 'alors', 'sinon', 'sinonsi', 'finsi', 'pour', 'faire', 'finpour', 'tantque', 'tant', 'que', 'fintantque', 'repeter', 'jusqua', 'jusque', 'selon', 'finselon', 'cas', 'retourner', 'renvoyer', 'retourne', 'appeler', 'pas', 'fsi', 'fpour', 'ftq']);
+const STRUCT = SET(['algorithme', 'variables', 'variable', 'var', 'constantes', 'constante', 'const', 'debut', 'fin', 'fonction', 'procedure', 'finfonction', 'finprocedure', 'finalgorithme', 'tableau']);
+const IOW = SET(['lire', 'ecrire', 'afficher', 'saisir']);
+const OPW = SET(['et', 'ou', 'non', 'xor', 'div', 'mod']);
+const BOOLW = SET(['vrai', 'faux']);
+const TYPEW = SET(['entier', 'entiers', 'reel', 'reels', 'chaine', 'chaines', 'caractere', 'caracteres', 'booleen', 'logique', 'numerique']);
+const HL_RE = /(\/\/[^\n]*)|(\/\*[\s\S]*?(?:\*\/|$))|(jusqu['’][aà](?![\wÀ-ɏ]))|("[^"\n]*"?|'[^'\n]*'?|“[^”\n]*”?|«[^»\n]*»?)|(\d+(?:\.\d+)?)|([A-Za-zÀ-ɏ_][A-Za-z0-9À-ɏ_]*)|(←|<-|:=|<=|>=|<>|!=|≠|≤|≥|\.\.|[-+*/^%=<>&×÷])/gi;
+function highlight(src) {
+  const userFns = new Set();
+  src.replace(/(?:fonction|proc[eé]dure)\s+([A-Za-zÀ-ɏ_][\wÀ-ɏ]*)/gi, (_, n) => userFns.add(n.toLowerCase()));
+  let out = '', last = 0, m;
+  HL_RE.lastIndex = 0;
+  while ((m = HL_RE.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    const s = m[0]; let cls = null;
+    if (m[1] || m[2]) cls = 'c';
+    else if (m[3]) cls = 'k';
+    else if (m[4]) cls = 's';
+    else if (m[5]) cls = 'n';
+    else if (m[6]) {
+      const k = C.kwOf(s);
+      if (s === 'à' || s === 'À') cls = 'k';
+      else if (CTRL.has(k)) cls = 'k';
+      else if (STRUCT.has(k)) cls = 'kd';
+      else if (IOW.has(k)) cls = 'io';
+      else if (OPW.has(k)) cls = 'o';
+      else if (BOOLW.has(k)) cls = 'b';
+      else if (TYPEW.has(k)) cls = 't';
+      else if (/^\s*\(/.test(src.slice(HL_RE.lastIndex, HL_RE.lastIndex + 8)) && (userFns.has(s.toLowerCase()) || C.BUILTINS[k])) cls = 'f';
+    } else if (m[7]) cls = (s === '←' || s === '<-' || s === ':=') ? 'as' : 'o';
+    out += cls ? `<span class="${cls}">${esc(s)}</span>` : esc(s);
+    last = HL_RE.lastIndex;
+  }
+  return out + esc(src.slice(last)) + '\n ';
+}
+
+/* ---------- éditeur ---------- */
+const lineCount = () => ta.value.split('\n').length;
+const caretLine = () => ta.value.slice(0, ta.selectionStart).split('\n').length;
+const errLine = () => (S.runErr && S.runErr.line) || (S.syntaxErr && S.syntaxErr.line) || 0;
+
+function renderGutter() {
+  const f = cur(); const n = lineCount(); const bps = new Set(f ? f.bps : []);
+  const cl = caretLine(), el = errLine();
+  let h = '';
+  for (let i = 1; i <= n; i++) {
+    let c = 'gl';
+    if (bps.has(i)) c += ' bp';
+    if (i === cl) c += ' cur';
+    if (i === el) c += ' err';
+    if (i === S.execLine) c += ' exec';
+    h += `<div class="${c}" data-l="${i}">${i}</div>`;
+  }
+  gin.innerHTML = h;
+}
+function renderBands() {
+  const top = l => `top:${10 + (l - 1) * LH}px`;
+  let h = '';
+  if (document.activeElement === ta && !ta.readOnly) h += `<div class="band cur" style="${top(caretLine())}"></div>`;
+  const el = errLine();
+  if (el) h += `<div class="band err" style="${top(el)}"></div>`;
+  if (S.execLine) h += `<div class="band exec" style="${top(S.execLine)}"></div>`;
+  bands.innerHTML = h;
+}
+function syncScroll() {
+  const x = ta.scrollLeft, y = ta.scrollTop;
+  layer.style.transform = `translate(${-x}px,${-y}px)`;
+  bands.style.transform = `translateY(${-y}px)`;
+  gin.style.transform = `translateY(${-y}px)`;
+}
+function refreshEditor() { hl.innerHTML = highlight(ta.value); renderGutter(); renderBands(); syncScroll(); }
+function refreshMarks() { renderGutter(); renderBands(); }
+function updatePos() {
+  const p = ta.selectionStart; const ls = ta.value.lastIndexOf('\n', p - 1) + 1;
+  $('#stPos').textContent = `Ln ${caretLine()}, Col ${p - ls + 1}`;
+}
+function scrollToLine(l) {
+  const y = 10 + (l - 1) * LH; const h = ta.clientHeight;
+  if (y < ta.scrollTop + LH || y > ta.scrollTop + h - LH * 3) ta.scrollTop = Math.max(0, y - h / 3);
+  syncScroll();
+}
+function gotoLine(l) {
+  if (!l) return;
+  const lines = ta.value.split('\n'); let p = 0;
+  for (let i = 0; i < l - 1 && i < lines.length; i++) p += lines[i].length + 1;
+  ta.focus({ preventScroll: true }); ta.setSelectionRange(p, p + (lines[l - 1] || '').length);
+  scrollToLine(l); updatePos(); refreshMarks();
+}
+function insertText(t) {
+  ta.focus({ preventScroll: true });
+  let ok = false;
+  try { ok = document.execCommand('insertText', false, t); } catch (e) { ok = false; }
+  if (!ok) { ta.setRangeText(t, ta.selectionStart, ta.selectionEnd, 'end'); onEdit(); }
+}
+function setFont(fs) {
+  S.fs = Math.max(11, Math.min(28, fs)); LH = Math.round(S.fs * 1.58);
+  document.documentElement.style.setProperty('--fs', S.fs + 'px');
+  document.documentElement.style.setProperty('--lh', LH + 'px');
+  $('#fsVal').textContent = S.fs; LS.set('fs', S.fs); refreshEditor();
+}
+
+let checkT = 0, saveT = 0;
+function onEdit() {
+  const f = cur(); if (!f) return;
+  const wasDirty = f.ex && f.content !== f.orig;
+  f.content = ta.value;
+  if (S.runErr) { S.runErr = null; renderProblems(); }
+  refreshEditor(); updatePos();
+  if (f.ex && wasDirty !== (f.content !== f.orig)) renderTabs();
+  clearTimeout(checkT); checkT = setTimeout(liveCheck, 350);
+  if (!f.ex) { clearTimeout(saveT); saveT = setTimeout(saveFiles, 400); }
+}
+function liveCheck() {
+  const f = cur(); if (!f) { S.syntaxErr = null; renderProblems(); return; }
+  try { C.parse(ta.value); S.syntaxErr = null; }
+  catch (e) { S.syntaxErr = e instanceof C.AlgoError ? { line: e.line, col: e.col, msg: e.message, kind: 'syntax' } : null; }
+  renderProblems(); refreshMarks();
+}
+
+ta.addEventListener('input', e => {
+  if (e.inputType === 'insertText' && e.data === '-') {
+    const p = ta.selectionStart;
+    if (ta.value.slice(p - 2, p) === '<-' && !/["']/.test(ta.value.slice(ta.value.lastIndexOf('\n', p - 1) + 1, p - 2).replace(/"[^"]*"/g, ''))) {
+      ta.setSelectionRange(p - 2, p); insertText('←'); return;
+    }
+  }
+  onEdit();
+});
+ta.addEventListener('scroll', syncScroll, { passive: true });
+['keyup', 'click', 'focus', 'blur', 'select'].forEach(ev => ta.addEventListener(ev, () => { updatePos(); refreshMarks(); }));
+document.addEventListener('selectionchange', () => { if (document.activeElement === ta) { updatePos(); refreshMarks(); } });
+
+const CLOSERS = new Set(['fin', 'finsi', 'finpour', 'fintantque', 'finselon', 'finfonction', 'finprocedure', 'finalgorithme', 'sinon', 'sinonsi', 'jusqua', 'jusque', 'debut', 'variables', 'variable', 'constantes', 'constante', 'algorithme', 'fonction', 'procedure', 'fsi', 'fpour', 'ftq']);
+function lineBounds() {
+  const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+  const ls = v.lastIndexOf('\n', s - 1) + 1;
+  let endPos = e > s && v[e - 1] === '\n' ? e - 1 : e;
+  let le = v.indexOf('\n', endPos); if (le < 0) le = v.length;
+  return { ls, le };
+}
+function mapLines(fn) {
+  const { ls, le } = lineBounds();
+  const block = ta.value.slice(ls, le);
+  const out = fn(block.split('\n')).join('\n');
+  ta.setSelectionRange(ls, le); insertText(out);
+  ta.setSelectionRange(ls, ls + out.length);
+}
+ta.addEventListener('keydown', e => {
+  if (ta.readOnly) return;
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    if (e.shiftKey) mapLines(ls => ls.map(l => l.replace(/^( {1,3}|\t)/, '')));
+    else if (ta.selectionStart !== ta.selectionEnd && ta.value.slice(ta.selectionStart, ta.selectionEnd).includes('\n')) mapLines(ls => ls.map(l => IND + l));
+    else insertText(IND);
+    return;
+  }
+  if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    e.preventDefault();
+    const v = ta.value, p = ta.selectionStart;
+    const ls = v.lastIndexOf('\n', p - 1) + 1;
+    const line = v.slice(ls, p);
+    const w = C.kwOf((line.trim().split(/[\s(:\[]/)[0]) || '');
+    let before = v.slice(0, ls) + line;
+    if (CLOSERS.has(w)) {
+      const fixed = formatCode(before).split('\n').pop();
+      if (fixed !== line) { ta.setSelectionRange(ls, p); insertText(fixed); before = v.slice(0, ls) + fixed; }
+    }
+    const nextInd = formatCode(before + '\nx').split('\n').pop().match(/^ */)[0];
+    insertText('\n' + nextInd);
+    return;
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+    e.preventDefault();
+    mapLines(ls => {
+      const allC = ls.filter(l => l.trim()).every(l => /^\s*\/\//.test(l));
+      return ls.map(l => allC ? l.replace(/^(\s*)\/\/ ?/, '$1') : (l.trim() ? l.replace(/^(\s*)/, '$1// ') : l));
+    });
+  }
+});
+$('#gutter').addEventListener('click', e => {
+  const g = e.target.closest('.gl'); if (!g) return;
+  toggleBp(+g.dataset.l);
+});
+function toggleBp(l) {
+  const f = cur(); if (!f) return;
+  const i = f.bps.indexOf(l);
+  if (i >= 0) f.bps.splice(i, 1); else f.bps.push(l);
+  if (S.running) { if (i >= 0) S.running.breakpoints.delete(l); else S.running.breakpoints.add(l); }
+  if (!f.ex) saveFiles();
+  renderGutter();
+}
+
+function formatCode(src) {
+  const out = []; let lvl = 0;
+  for (const raw of src.split('\n')) {
+    const t = raw.trim();
+    if (!t) { out.push(''); continue; }
+    const w = C.kwOf(t.split(/[\s(:\[]/)[0]);
+    const j = C.kwOf(t).replace(/\s+/g, '');
+    const put = n => out.push(IND.repeat(Math.max(0, n)) + t);
+    if (t.startsWith('//') || t.startsWith('/*')) { put(lvl); continue; }
+    if (['algorithme', 'fonction', 'procedure'].includes(w)) { put(0); lvl = 0; continue; }
+    if (['variables', 'variable', 'constantes', 'constante'].includes(w) || ((w === 'var' || w === 'const') && t.split(/\s+/).length === 1)) { put(0); lvl = 1; continue; }
+    if (w === 'debut') { put(0); lvl = 1; continue; }
+    if (/^(finsi|finpour|fintantque|finselon|fsi|fpour|ftq|fintq)/.test(j)) { lvl--; put(lvl); continue; }
+    if (['fin', 'finfonction', 'finprocedure', 'finalgorithme'].includes(w)) { put(0); lvl = 0; continue; }
+    if (w === 'sinon' || w === 'sinonsi') { put(lvl - 1); continue; }
+    if (w === 'jusqua' || w === 'jusque' || /^jusqu/.test(j)) { lvl--; put(lvl); continue; }
+    put(lvl);
+    if (w === 'si' || w === 'pour' || w === 'repeter' || w === 'selon' || /^tantque/.test(j)) lvl++;
+  }
+  return out.join('\n');
+}
+
+/* ---------- fichiers ---------- */
+function saveFiles() { LS.set('files', files.map(f => ({ id: f.id, name: f.name, content: f.content, bps: f.bps }))); }
+function saveTabs() { LS.set('tabs', S.tabs); LS.set('active', S.active); }
+function uniqueName(base) {
+  const names = new Set(files.map(f => f.name.toLowerCase()));
+  let stem = base.replace(/\.[^.]+$/, ''), ext = (base.match(/\.[^.]+$/) || ['.algo'])[0], n = base, k = 2;
+  while (names.has(n.toLowerCase())) n = `${stem}_${k++}${ext}`;
+  return n;
+}
+function newFile(name, content, rename) {
+  const f = { id: 'u' + Date.now() + Math.random().toString(36).slice(2, 6), name: uniqueName(name || 'NouvelAlgorithme.algo'), content: content ?? ALGO_STARTER.replace('MonAlgorithme', 'NouvelAlgorithme'), bps: [] };
+  files.unshift(f); saveFiles();
+  openFile(f.id);
+  if (rename) { S.rename = f.id; renderExplorer(); }
+  return f;
+}
+function saveCopy() {
+  const f = cur(); if (!f) return;
+  if (!f.ex) { saveFiles(); toast('Enregistré dans Mes algorithmes'); return; }
+  const content = f.content;
+  f.content = f.orig;
+  const nf = { id: 'u' + Date.now(), name: uniqueName(f.name), content, bps: [...f.bps] };
+  files.unshift(nf); saveFiles();
+  const ti = S.tabs.indexOf(f.id); if (ti >= 0) S.tabs[ti] = nf.id;
+  S.active = nf.id; saveTabs(); loadActive(); renderAll();
+  toast(`Copie enregistrée : ${nf.name}`);
+}
+function openFile(id) {
+  storeView();
+  if (!S.tabs.includes(id)) S.tabs.push(id);
+  S.active = id; saveTabs(); loadActive(); renderAll();
+  if (window.matchMedia('(max-width:760px)').matches) setSidebar(false);
+}
+function closeTab(id) {
+  if (S.running && id === S.active) return toast('Arrêtez l\'exécution avant de fermer ce fichier');
+  storeView();
+  const i = S.tabs.indexOf(id); if (i < 0) return;
+  S.tabs.splice(i, 1);
+  if (S.active === id) S.active = S.tabs[Math.min(i, S.tabs.length - 1)] || null;
+  saveTabs(); loadActive(); renderAll();
+}
+function deleteFile(id) {
+  files = files.filter(f => f.id !== id); saveFiles();
+  S.confirmDel = null;
+  if (S.tabs.includes(id)) closeTab(id); else renderExplorer();
+}
+function storeView() {
+  const f = cur(); if (!f) return;
+  f.view = { st: ta.scrollTop, sl: ta.scrollLeft, s: ta.selectionStart, e: ta.selectionEnd };
+}
+function loadActive() {
+  const f = cur();
+  $('#welcome').hidden = !!f;
+  S.syntaxErr = null; S.runErr = null;
+  if (!f) { ta.value = ''; refreshEditor(); renderProblems(); return; }
+  ta.value = f.content;
+  refreshEditor();
+  if (f.view) { ta.setSelectionRange(f.view.s, f.view.e); ta.scrollTop = f.view.st; ta.scrollLeft = f.view.sl; }
+  else { ta.setSelectionRange(0, 0); ta.scrollTop = 0; ta.scrollLeft = 0; }
+  syncScroll(); updatePos(); liveCheck();
+}
+
+/* ---------- rendu explorateur, onglets ---------- */
+function fileRow(f) {
+  const act = f.id === S.active ? ' active' : '';
+  if (S.rename === f.id) return `<div class="row${act}" data-id="${f.id}"><span class="fi">A</span><input id="renameIn" value="${esc(f.name)}" aria-label="Nouveau nom"></div>`;
+  if (S.confirmDel === f.id) return `<div class="row confirm" data-id="${f.id}"><span class="q">Supprimer « ${esc(f.name)} » ?</span><button class="yes" data-act="del-yes">Oui</button><button data-act="del-no">Non</button></div>`;
+  const acts = f.ex ? '' : `<span class="ra"><button data-act="rename" title="Renommer">${icon('edit', 14)}</button><button data-act="delete" title="Supprimer">${icon('trash', 14)}</button></span>`;
+  return `<div class="row${act}" data-id="${f.id}" title="${esc(f.name)}"><span class="fi">A</span><span class="rn">${esc(f.name.replace(/\.algo$/, ''))}</span>${acts}</div>`;
+}
+function renderExplorer() {
+  $('#userFiles').innerHTML = files.length ? files.map(fileRow).join('') : '<div class="empty-note">Aucun algorithme pour l\'instant.</div>';
+  let h = '', g = null;
+  for (const f of EX) { if (f.group !== g) { g = f.group; h += `<div class="tg-sub">${esc(g)}</div>`; } h += fileRow(f); }
+  $('#exFiles').innerHTML = h;
+  const ri = $('#renameIn');
+  if (ri) {
+    ri.focus(); ri.setSelectionRange(0, ri.value.replace(/\.algo$/, '').length);
+    const commit = ok => {
+      if (S.rename == null) return;
+      const f = byId(S.rename); S.rename = null;
+      let v = ri.value.trim();
+      if (ok && v && f) { if (!/\.[a-z]+$/i.test(v)) v += '.algo'; if (v.toLowerCase() !== f.name.toLowerCase()) v = uniqueName(v); f.name = v; saveFiles(); }
+      renderAll();
+    };
+    ri.addEventListener('keydown', e => { if (e.key === 'Enter') commit(true); if (e.key === 'Escape') commit(false); });
+    ri.addEventListener('blur', () => commit(true));
+  }
+}
+$('#view-explorer').addEventListener('click', e => {
+  const head = e.target.closest('.tg-head');
+  if (head) { head.parentElement.classList.toggle('closed'); return; }
+  const row = e.target.closest('.row'); if (!row || e.target.tagName === 'INPUT') return;
+  const id = row.dataset.id; const act = e.target.closest('[data-act]')?.dataset.act;
+  if (act === 'rename') { S.rename = id; S.confirmDel = null; renderExplorer(); return; }
+  if (act === 'delete') { S.confirmDel = id; renderExplorer(); return; }
+  if (act === 'del-yes') { deleteFile(id); return; }
+  if (act === 'del-no') { S.confirmDel = null; renderExplorer(); return; }
+  if (S.confirmDel) { S.confirmDel = null; }
+  openFile(id);
+});
+$('#view-explorer').addEventListener('dblclick', e => {
+  const row = e.target.closest('.row'); if (!row) return;
+  const f = byId(row.dataset.id); if (f && !f.ex) { S.rename = f.id; renderExplorer(); }
+});
+function renderTabs() {
+  $('#tabs').innerHTML = S.tabs.map(id => {
+    const f = byId(id); if (!f) return '';
+    const dirty = f.ex && f.content !== f.orig;
+    return `<div class="tab${id === S.active ? ' on' : ''}" data-id="${id}" role="tab" aria-selected="${id === S.active}" title="${esc(f.name)}${f.ex ? ' (exemple)' : ''}">
+      <span class="fi">A</span>${esc(f.name)}${f.ex ? '<span class="ro">exemple</span>' : ''}
+      ${dirty ? '<span class="dot" title="Modifié — Ctrl+S pour enregistrer une copie"></span>' : ''}
+      <button class="tx" data-close="${id}" title="Fermer">${icon('close', 14)}</button></div>`;
+  }).join('');
+  const f = cur();
+  $('#tbTitle').innerHTML = f ? `<b>${esc(f.name)}</b> — ${f.ex ? 'Exemples' : 'Mes algorithmes'}` : 'AlgoLab';
+  const on = $('#tabs .tab.on'), bar = $('#tabs');
+  if (on) { if (on.offsetLeft < bar.scrollLeft) bar.scrollLeft = on.offsetLeft; else if (on.offsetLeft + on.offsetWidth > bar.scrollLeft + bar.clientWidth) bar.scrollLeft = on.offsetLeft + on.offsetWidth - bar.clientWidth; }
+}
+$('#tabs').addEventListener('click', e => {
+  const c = e.target.closest('[data-close]'); if (c) { e.stopPropagation(); closeTab(c.dataset.close); return; }
+  const t = e.target.closest('.tab'); if (t && t.dataset.id !== S.active) { if (S.running) return toast('Arrêtez l\'exécution pour changer de fichier'); openFile(t.dataset.id); }
+});
+$('#tabs').addEventListener('auxclick', e => { const t = e.target.closest('.tab'); if (t && e.button === 1) closeTab(t.dataset.id); });
+function renderAll() { renderExplorer(); renderTabs(); renderProblems(); }
+
+/* ---------- vues latérales ---------- */
+function setSidebar(open) { $('#workspace').classList.toggle('sb-closed', !open); }
+function setView(v) {
+  const ws = $('#workspace');
+  if (S.view === v && !ws.classList.contains('sb-closed')) { setSidebar(false); $$('.activity button').forEach(b => b.classList.remove('on')); return; }
+  S.view = v; setSidebar(true);
+  $$('.activity button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+  ['explorer', 'snippets', 'help'].forEach(n => { $('#view-' + n).hidden = n !== v; });
+  $('#sbTitle').textContent = { explorer: 'Explorateur', snippets: 'Modèles', help: 'Aide-mémoire' }[v];
+  $('#sbActions').style.visibility = v === 'explorer' ? 'visible' : 'hidden';
+}
+$$('.activity button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+
+const SNIPPETS = [
+  ['Algorithme complet', 'Algorithme ¦Nom\nVariables\n   n : Entier\nDébut\n   \nFin'],
+  ['Si … Alors', 'Si ¦ Alors\n   \nFinSi'],
+  ['Si … Sinon', 'Si ¦ Alors\n   \nSinon\n   \nFinSi'],
+  ['Si … SinonSi … Sinon', 'Si ¦ Alors\n   \nSinonSi  Alors\n   \nSinon\n   \nFinSi'],
+  ['Selon (choix multiple)', 'Selon ¦ Faire\n   1 : \n   2 : \n   Sinon : \nFinSelon'],
+  ['Pour', 'Pour i ← 1 à ¦ Faire\n   \nFinPour'],
+  ['Pour avec pas', 'Pour i ← ¦10 à 1 Pas -1 Faire\n   \nFinPour'],
+  ['TantQue', 'TantQue ¦ Faire\n   \nFinTantQue'],
+  ['Répéter … Jusqu\'à', 'Répéter\n   ¦\nJusqu\'à '],
+  ['Saisie (Ecrire + Lire)', 'Ecrire("¦")\nLire()'],
+  ['Déclaration de tableau', 'T : Tableau[1..¦10] de Entier'],
+  ['Parcours de tableau', 'Pour i ← 1 à ¦N Faire\n   Ecrire(T[i])\nFinPour'],
+  ['Fonction', 'Fonction ¦Nom(a : Entier) : Entier\nVariables\n   r : Entier\nDébut\n   r ← a\n   Retourner r\nFinFonction'],
+  ['Procédure', 'Procédure ¦Nom(Var x : Entier)\nDébut\n   \nFinProcédure']
+];
+$('#snips').innerHTML = SNIPPETS.map(([t, c], i) => `<button class="snip" data-i="${i}"><b>${esc(t)}</b><pre>${highlight(c.replace('¦', '')).replace(/\n $/, '')}</pre></button>`).join('');
+$('#snips').addEventListener('click', e => {
+  const b = e.target.closest('.snip'); if (!b || !cur() || ta.readOnly) return;
+  insertSnippet(SNIPPETS[+b.dataset.i][1]);
+  if (window.matchMedia('(max-width:760px)').matches) setSidebar(false);
+});
+function insertSnippet(tpl) {
+  ta.focus({ preventScroll: true });
+  const v = ta.value, p = ta.selectionStart;
+  const ls = v.lastIndexOf('\n', p - 1) + 1; let le = v.indexOf('\n', p); if (le < 0) le = v.length;
+  const line = v.slice(ls, le); const ind = line.match(/^[ \t]*/)[0];
+  let text = tpl.replace(/\n/g, '\n' + ind);
+  const mark = text.indexOf('¦'); text = text.replace('¦', '');
+  let prefix, base;
+  if (line.trim()) { ta.setSelectionRange(le, le); prefix = '\n' + ind; base = le + prefix.length; }
+  else { ta.setSelectionRange(ls, le); prefix = ind; base = ls + ind.length; }
+  insertText(prefix + text);
+  const caret = base + Math.max(0, mark);
+  ta.setSelectionRange(caret, caret); updatePos(); refreshMarks();
+}
+$('#help').innerHTML = `
+<h4>Structure</h4>
+<pre>${highlight('Algorithme Nom\nConstantes\n   N = 10\nVariables\n   a, b : Entier\n   x : Réel\n   nom : Chaîne\n   ok : Booléen\n   T : Tableau[1..N] de Entier\nDébut\n   …\nFin').trim()}</pre>
+<p>Majuscules et accents sont facultatifs : <code>Debut</code>, <code>début</code> et <code>Début</code> sont acceptés.</p>
+<h4>Instructions</h4>
+<pre>${highlight('x ← 5          // ou x <- 5\nLire(a, b)\nEcrire("Somme : ", a + b)').trim()}</pre>
+<pre>${highlight('Si a > b Alors\n   …\nSinonSi a = b Alors\n   …\nSinon\n   …\nFinSi').trim()}</pre>
+<pre>${highlight('Selon j Faire\n   1 : Ecrire("Lundi")\n   6, 7 : Ecrire("Week-end")\n   Sinon : Ecrire("?")\nFinSelon').trim()}</pre>
+<h4>Boucles</h4>
+<pre>${highlight('Pour i ← 1 à 10 Pas 2 Faire\n   …\nFinPour\n\nTantQue i < 10 Faire\n   …\nFinTantQue\n\nRépéter\n   …\nJusqu\'à i >= 10').trim()}</pre>
+<h4>Sous-programmes</h4>
+<pre>${highlight('Fonction Carre(x : Entier) : Entier\nDébut\n   Retourner x * x\nFinFonction\n\nProcédure Echanger(Var a : Entier,\n                   Var b : Entier)\n…\nFinProcédure').trim()}</pre>
+<p><b>Var</b> devant un paramètre : la variable de l'appelant est modifiée.</p>
+<h4>Opérateurs</h4>
+<table>
+<tr><td>+ − * /</td><td>calcul (/ donne un Réel)</td></tr>
+<tr><td>div  mod</td><td>quotient et reste entiers</td></tr>
+<tr><td>^</td><td>puissance</td></tr>
+<tr><td>= &lt;&gt; &lt; &gt; &lt;= &gt;=</td><td>comparaison</td></tr>
+<tr><td>ET  OU  NON</td><td>logique</td></tr>
+<tr><td>&amp;</td><td>concaténation de textes</td></tr>
+</table>
+<h4>Fonctions intégrées</h4>
+<table>${C.BUILTIN_DOC.map(([a, b]) => `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join('')}</table>
+<h4>Raccourcis</h4>
+<table>
+<tr><td><kbd>F5</kbd></td><td>exécuter / continuer</td></tr>
+<tr><td><kbd>F10</kbd></td><td>pas à pas</td></tr>
+<tr><td><kbd>Maj</kbd>+<kbd>F5</kbd></td><td>arrêter</td></tr>
+<tr><td><kbd>F9</kbd></td><td>point d'arrêt sur la ligne</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>enregistrer</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>/</kbd></td><td>commenter les lignes</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Maj</kbd>+<kbd>F</kbd></td><td>réindenter</td></tr>
+<tr><td><kbd>Tab</kbd></td><td>indenter la sélection</td></tr>
+</table>
+<p style="margin-top:10px">Cliquez sur un numéro de ligne pour poser un point d'arrêt : l'exécution s'y mettra en pause.</p>
+<p class="credit">AlgoLab © 2026 Wahiba BOUZYAN. Tous droits réservés.</p>`;
+
+/* ---------- panneau bas ---------- */
+function showTab(t) {
+  if (t === 'vars' && !window.matchMedia('(max-width:1100px)').matches) t = 'console';
+  S.panelTab = t;
+  $$('.ptabs .pt').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  ['console', 'vars', 'trace', 'problems'].forEach(n => { $('#pv-' + n).hidden = n !== t; });
+  $('#clearBtn').style.visibility = t === 'console' ? 'visible' : 'hidden';
+  if ($('#main').classList.contains('panel-min')) togglePanel(false);
+}
+$$('.ptabs .pt').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+function togglePanel(min) {
+  const m = $('#main'); const v = min ?? !m.classList.contains('panel-min');
+  m.classList.toggle('panel-min', v);
+  $('#panelBtn').title = v ? 'Agrandir le panneau' : 'Réduire le panneau';
+  $('#panelBtn').querySelector('svg').style.transform = v ? 'rotate(180deg)' : '';
+}
+$('#panelBtn').addEventListener('click', () => togglePanel());
+$('#clearBtn').addEventListener('click', () => { con.innerHTML = ''; });
+(function resizer() {
+  const r = $('#resizer'), main = $('#main');
+  const setH = h => { S.panelH = Math.round(h); main.style.setProperty('--panel-h', S.panelH + 'px'); };
+  setH(S.panelH);
+  r.addEventListener('pointerdown', e => {
+    e.preventDefault(); r.setPointerCapture(e.pointerId); r.classList.add('drag'); togglePanel(false);
+    const rect = main.getBoundingClientRect();
+    const move = ev => setH(Math.max(90, Math.min(rect.height - 150, rect.bottom - ev.clientY)));
+    const up = () => { r.classList.remove('drag'); r.removeEventListener('pointermove', move); r.removeEventListener('pointerup', up); LS.set('panelH', S.panelH); };
+    r.addEventListener('pointermove', move); r.addEventListener('pointerup', up);
+  });
+})();
+
+function cLine(text, cls) {
+  const d = document.createElement('div'); d.className = 'cl' + (cls ? ' ' + cls : ''); d.textContent = text;
+  const pend = S.pendingRead && S.pendingRead.row;
+  if (pend && pend.parentNode === con) con.insertBefore(d, pend); else con.appendChild(d);
+  while (con.childElementCount > 4000) con.firstElementChild.remove();
+  const pv = $('#pv-console'); pv.scrollTop = pv.scrollHeight;
+  return d;
+}
+function cError(err) {
+  const kind = err.kind === 'syntax' ? 'Erreur de syntaxe' : 'Erreur d\'exécution';
+  const d = cLine('', 'err');
+  d.innerHTML = `<b>${kind}${err.line ? ' · ligne ' + err.line : ''}</b> — ${esc(err.msg)}`;
+  d.title = 'Aller à la ligne';
+  d.addEventListener('click', () => gotoLine(err.line));
+}
+
+function renderProblems() {
+  const ps = [S.syntaxErr, S.runErr].filter(Boolean);
+  $('#probCount').textContent = ps.length || '';
+  $('#stProbN').textContent = ps.length;
+  $('#problems').innerHTML = ps.length ? ps.map(p => `<div class="prob" data-l="${p.line}"><span class="pi">${icon('alert', 15)}</span><span>${esc(p.msg)}</span><span class="pl">${p.kind === 'syntax' ? 'syntaxe' : 'exécution'} · ligne ${p.line}</span></div>`).join('') : '<div class="no-prob">Aucun problème détecté dans le fichier ouvert.</div>';
+}
+$('#problems').addEventListener('click', e => { const p = e.target.closest('.prob'); if (p) gotoLine(+p.dataset.l); });
+$('#stProb').addEventListener('click', () => showTab('problems'));
+
+/* ---------- variables ---------- */
+function valCls(v) { return typeof v === 'number' ? 'num' : typeof v === 'string' ? 'str' : typeof v === 'boolean' ? 'bool' : ''; }
+function shownRange(arr, k) {
+  if (!arr.lenient[k]) return [arr.lo[k], arr.hi[k]];
+  const used = idx => {
+    for (let o = 0; o < arr.data.length; o++) {
+      if (arr.data[o] === undefined) continue;
+      let rem = o, ix = [];
+      for (let d = arr.sizes.length - 1; d >= 0; d--) { ix[d] = rem % arr.sizes[d] + arr.lo[d]; rem = Math.floor(rem / arr.sizes[d]); }
+      if (ix[k] === idx) return true;
+    }
+    return false;
+  };
+  const u0 = used(0);
+  if (!u0) return [1, arr.hi[k]];
+  return [0, used(arr.hi[k]) ? arr.hi[k] : arr.hi[k] - 1];
+}
+function varHTML(cell, key, snap) {
+  const v = cell.get();
+  const mark = (k, s) => { snap.set(k, s); const p = S.prevSnap.get(k); return p !== undefined && p !== s ? ' chg' : ''; };
+  if (v instanceof C.ArrayVal) {
+    let body = '';
+    if (v.lo.length === 1) {
+      const [a, b] = shownRange(v, 0); let cells = '';
+      for (let i = a; i <= b; i++) {
+        const x = v.data[i - v.lo[0]]; const s = x === undefined ? '?' : C.fmt(x);
+        cells += `<div class="ac${mark(key + '[' + i + ']', s)}"><span class="ai">${i}</span><span class="av${x === undefined ? ' undef' : ''}">${esc(s)}</span></div>`;
+      }
+      body = `<div class="arr">${cells}</div>`;
+    } else if (v.lo.length === 2) {
+      const [r0, r1] = shownRange(v, 0), [c0, c1] = shownRange(v, 1);
+      let t = '<tr><th></th>'; for (let j = c0; j <= c1; j++) t += `<th>${j}</th>`; t += '</tr>';
+      for (let i = r0; i <= r1; i++) {
+        t += `<tr><th>${i}</th>`;
+        for (let j = c0; j <= c1; j++) {
+          const x = v.data[(i - v.lo[0]) * v.sizes[1] + (j - v.lo[1])]; const s = x === undefined ? '?' : C.fmt(x);
+          t += `<td class="${mark(key + '[' + i + ',' + j + ']', s)}${x === undefined ? ' undef' : ''}">${esc(s)}</td>`;
+        }
+        t += '</tr>';
+      }
+      body = `<div class="mat-wrap"><table class="mat">${t}</table></div>`;
+    } else body = `<div class="vt">${v.data.length} éléments</div>`;
+    return `<div class="var"><div class="var-h"><span class="vn">${esc(cell.name)}</span><span class="vt">${esc(v.label())}${cell.alias ? ' · Var' : ''}</span></div>${body}</div>`;
+  }
+  const s = v === undefined ? '?' : C.fmtQ(v);
+  const tl = cell.type && typeof cell.type === 'string' ? C.TYPE_LABEL[cell.type] : (v === undefined ? '' : '');
+  return `<div class="var${mark(key, s)}"><div class="var-h"><span class="vn">${esc(cell.name)}</span><span class="vt">${esc(tl)}${cell.alias ? ' · Var' : ''}</span>${cell.isConst ? '<span class="const-tag">const</span>' : ''}<span class="vv ${valCls(v)}">${v === undefined ? '<span class="undef">non initialisée</span>' : esc(s)}</span></div></div>`;
+}
+function renderVars(interp, frame) {
+  S.lastVars = { interp, frame };
+  let h = '';
+  const snap = new Map();
+  if (!interp) h = '<div class="vars-empty">Lancez l\'algorithme (Exécuter ou Pas à pas) pour voir ici la valeur de chaque variable.</div>';
+  else {
+    const groups = [];
+    if (frame && frame !== interp.global) groups.push([`Locales · ${frame.name}`, frame]);
+    groups.push(['Programme principal', interp.global]);
+    for (const [title, fr] of groups) {
+      const cells = [...fr.vars.entries()];
+      h += `<div class="vg"><div class="vg-title">${esc(title)}</div>`;
+      h += cells.length ? cells.map(([k, c]) => varHTML(c, fr.name + '/' + k, snap)).join('') : '<div class="vars-empty">Aucune variable</div>';
+      h += '</div>';
+    }
+  }
+  S.prevSnap = snap.size ? snap : S.prevSnap;
+  $('#varsR').innerHTML = h; $('#varsB').innerHTML = h;
+  renderStack(interp);
+}
+function renderStack(interp) {
+  const st = $('#stack');
+  if (!interp || !S.running) { st.innerHTML = '<div class="vars-empty">Visible pendant une pause.</div>'; return; }
+  const cs = interp.callStack.slice().reverse();
+  st.innerHTML = cs.map((c, i) => `<div class="sf${i === 0 ? ' top' : ''}">${esc(c.name)}<span>${i === 0 ? 'ligne ' + interp.line : 'appel ligne ' + cs[i - 1].line}</span></div>`).join('');
+}
+
+/* ---------- trace ---------- */
+function traceStart(prog) {
+  const cols = prog.vars.filter(d => !d.type || typeof d.type === 'string').map(d => d.name);
+  S.trace = { cols, rows: 0, capped: false };
+  $('#traceWrap').innerHTML = `<table class="trace"><thead><tr><th>N°</th><th>Ligne</th><th>Instruction</th>${cols.map(c => `<th class="var-col">${esc(c)}</th>`).join('')}</tr></thead><tbody id="traceBody"></tbody></table>`;
+}
+function traceRow(interp, line, instr, kind, name, frame) {
+  const T = S.trace; if (!T) return;
+  if (T.rows >= 1000) {
+    if (!T.capped) { T.capped = true; $('#traceWrap').insertAdjacentHTML('beforeend', '<div class="trace-note">Trace limitée aux 1 000 premières étapes.</div>'); }
+    return;
+  }
+  T.rows++;
+  const hitKey = frame === interp.global && name ? name.toLowerCase() : null;
+  const vals = T.cols.map(c => {
+    const cell = interp.global.vars.get(c.toLowerCase()); const v = cell ? cell.get() : undefined;
+    return `<td class="vc${hitKey === c.toLowerCase() ? ' hit' : ''}">${v === undefined ? '' : esc(C.fmtQ(v))}</td>`;
+  }).join('');
+  const tr = document.createElement('tr'); tr.className = kind;
+  tr.innerHTML = `<td class="ln">${T.rows}</td><td class="ln">${line}</td><td class="ins">${esc(instr)}</td>${vals}`;
+  $('#traceBody').appendChild(tr);
+  if (S.panelTab === 'trace') { const pv = $('#pv-trace'); pv.scrollTop = pv.scrollHeight; }
+}
+
+/* ---------- exécution ---------- */
+const speedToDelay = v => Math.round(25 + Math.pow(1 - v / 100, 2) * 1175);
+function setState(st, line) {
+  S.state = st; app.dataset.state = st;
+  const running = !!S.running;
+  const paused = st === 'paused';
+  $('#runLbl').textContent = paused ? 'Continuer' : 'Exécuter';
+  $('#btnRun').title = paused ? 'Continuer jusqu\'au prochain point d\'arrêt (F5)' : 'Exécuter l\'algorithme (F5)';
+  $('#btnRun').disabled = running && !paused;
+  $('#btnStep').disabled = st === 'reading';
+  $('#btnPause').hidden = !(running && (st === 'running'));
+  $('#btnStop').disabled = !running;
+  ta.readOnly = running; $('#roBadge').hidden = !running;
+  const txt = {
+    idle: 'Prêt', running: 'Exécution…', reading: `Saisie attendue · ligne ${line}`, paused: `Pause · ligne ${line}`,
+    stopped: 'Arrêté', error: `Erreur ligne ${line}`
+  }[st] || st;
+  if (st !== 'done') $('#stText').textContent = txt;
+}
+function hooks(interp) {
+  let lastAnim = 0;
+  return {
+    write(text, line) { cLine(text); traceRow(interp, line, 'Écrire : ' + text, 'out', null, interp.frame); },
+    read(name, type, line) {
+      return new Promise((resolve, reject) => {
+        showTab('console'); setState('reading', line);
+        S.execLine = line; refreshMarks(); scrollToLine(line);
+        const row = document.createElement('div'); row.className = 'cl in-row';
+        row.innerHTML = `<span class="pr">›</span><input class="read-in" id="readIn" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" placeholder="${esc(name)} (${type && typeof type === 'string' ? C.TYPE_LABEL[type] : 'valeur'}) puis Entrée">`;
+        con.appendChild(row);
+        const inp = row.querySelector('input');
+        S.pendingRead = { reject, row };
+        setTimeout(() => inp.focus({ preventScroll: true }), 0);
+        const pv = $('#pv-console'); pv.scrollTop = pv.scrollHeight;
+        inp.addEventListener('keydown', ev => {
+          if (ev.key !== 'Enter') return;
+          ev.preventDefault();
+          const r = C.parseInput(inp.value, typeof type === 'string' ? type : null);
+          if (!r.ok || (inp.value.trim() === '' && type !== 'chaine')) {
+            inp.classList.add('bad'); cLine('⚠ ' + (r.msg || 'Tapez une valeur.'), 'warn'); inp.select(); return;
+          }
+          S.pendingRead = null; row.remove();
+          const d = cLine('', 'echo'); d.innerHTML = `› ${esc(inp.value)}<span class="en">→ ${esc(name)}</span>`;
+          if (!interp.stepping && !interp.delay) S.execLine = 0;
+          setState('running'); refreshMarks();
+          resolve(r.v);
+        });
+      });
+    },
+    onAssign(name, v, line, frame, how) {
+      traceRow(interp, line, how === 'lire' ? `Lire ${name} → ${C.fmtQ(v)}` : `${name} ← ${C.fmtQ(v)}`, how === 'lire' ? 'in' : '', name, frame);
+    },
+    onPause(line, frame) {
+      S.paused = true; S.execLine = line;
+      setState('paused', line); refreshMarks(); scrollToLine(line);
+      renderVars(interp, frame);
+      return new Promise(res => { S.resume = res; });
+    },
+    onLine(line, frame) {
+      S.execLine = line; refreshMarks(); scrollToLine(line);
+      const now = performance.now();
+      if (now - lastAnim > 40) { lastAnim = now; renderVars(interp, frame); }
+    }
+  };
+}
+async function run(stepping) {
+  if (S.running) {
+    if (S.paused) { stepping ? stepNext() : contRun(); }
+    else if (stepping) S.running.stepping = true;
+    return;
+  }
+  const f = cur(); if (!f) return;
+  storeView();
+  con.innerHTML = '';
+  S.runErr = null; S.execLine = 0;
+  let prog;
+  try { prog = C.parse(ta.value); S.syntaxErr = null; }
+  catch (e) {
+    if (!(e instanceof C.AlgoError)) throw e;
+    S.syntaxErr = { line: e.line, col: e.col, msg: e.message, kind: 'syntax' };
+    cError(S.syntaxErr); renderProblems(); refreshMarks(); gotoLine(e.line); setState('error', e.line); showTab('console');
+    renderVars(null); return;
+  }
+  renderProblems();
+  const interp = new C.Interp(prog, null, { stepping, breakpoints: new Set(f.bps), delay: S.mode === 'anim' ? speedToDelay(S.speed) : 0 });
+  interp.h = hooks(interp);
+  S.running = interp; S.paused = false; S.prevSnap = new Map();
+  traceStart(prog);
+  renderVars(interp, interp.global);
+  setState('running');
+  if (S.panelTab === 'problems') showTab('console');
+  cLine(`▶ ${prog.name}`, 'info');
+  const t0 = performance.now();
+  let endState = 'done', endLine = 0;
+  try {
+    await interp.run();
+    const ms = performance.now() - t0;
+    cLine(`✓ Terminé — ${interp.steps.toLocaleString('fr-FR')} instruction${interp.steps > 1 ? 's' : ''} exécutée${interp.steps > 1 ? 's' : ''}${S.mode === 'normal' && !stepping ? ' en ' + (ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(1) + ' s') : ''}`, 'ok');
+    $('#stText').textContent = `Terminé · ${interp.steps.toLocaleString('fr-FR')} instructions`;
+  } catch (e) {
+    if (e instanceof C.StopSignal) { cLine('■ Exécution arrêtée', 'warn'); endState = 'stopped'; }
+    else if (e instanceof C.AlgoError) {
+      S.runErr = { line: e.line || interp.line, msg: e.message, kind: e.kind };
+      cError(S.runErr); endState = 'error'; endLine = S.runErr.line;
+    } else {
+      console.error(e);
+      S.runErr = { line: interp.line, msg: 'Erreur interne : ' + e.message, kind: 'runtime' };
+      cError(S.runErr); endState = 'error'; endLine = interp.line;
+    }
+  } finally {
+    if (S.pendingRead) { S.pendingRead.row.remove(); S.pendingRead = null; }
+    S.running = null; S.paused = false; S.resume = null; S.execLine = 0;
+    renderVars(interp, endState === 'error' ? interp.frame : interp.global);
+    setState(endState, endLine);
+    renderProblems(); refreshMarks();
+    if (endState === 'error') scrollToLine(endLine);
+  }
+}
+function contRun() { if (!S.running || !S.paused) return; S.running.stepping = false; S.paused = false; S.execLine = 0; setState('running'); refreshMarks(); const r = S.resume; S.resume = null; r && r(); }
+function stepNext() { if (!S.running || !S.paused) return; S.running.stepping = true; S.paused = false; setState('running'); const r = S.resume; S.resume = null; r && r(); }
+function stopRun() {
+  const it = S.running; if (!it) return;
+  it.stop();
+  if (S.pendingRead) { const p = S.pendingRead; S.pendingRead = null; p.row.remove(); p.reject(new C.StopSignal()); }
+  if (S.resume) { const r = S.resume; S.resume = null; r(); }
+}
+$('#btnRun').addEventListener('click', () => run(false));
+$('#btnStep').addEventListener('click', () => run(true));
+$('#btnPause').addEventListener('click', () => { if (S.running) S.running.stepping = true; });
+$('#btnStop').addEventListener('click', stopRun);
+function setMode(m) {
+  S.mode = m; LS.set('mode', m);
+  $$('.seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  $('#speedWrap').hidden = m !== 'anim';
+  if (S.running) S.running.delay = m === 'anim' ? speedToDelay(S.speed) : 0;
+}
+$$('.seg button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+$('#speed').value = S.speed;
+$('#speed').addEventListener('input', e => { S.speed = +e.target.value; LS.set('speed', S.speed); if (S.running && S.mode === 'anim') S.running.delay = speedToDelay(S.speed); });
+
+/* ---------- commandes ---------- */
+let toastT = 0;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
+$('#btnArrow').addEventListener('click', () => { if (!ta.readOnly && cur()) insertText('← '); });
+function doFormat() {
+  if (ta.readOnly || !cur()) return;
+  const sel = ta.selectionStart; const v = formatCode(ta.value);
+  if (v === ta.value) { toast('Le code est déjà bien indenté'); return; }
+  ta.setSelectionRange(0, ta.value.length); insertText(v); ta.setSelectionRange(Math.min(sel, v.length), Math.min(sel, v.length));
+  toast('Code réindenté');
+}
+$('#btnFormat').addEventListener('click', doFormat);
+$('#btnCopy').addEventListener('click', () => {
+  const text = ta.value;
+  const fallback = () => { ta.focus(); ta.select(); toast('Code sélectionné : faites Ctrl+C'); };
+  try { navigator.clipboard.writeText(text).then(() => toast('Code copié dans le presse-papiers'), fallback); } catch (e) { fallback(); }
+});
+const openPicker = () => $('#fileInput').click();
+$('#fileInput').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const rd = new FileReader();
+  rd.onload = () => { newFile(file.name.replace(/\.(txt|alg|pseudo)$/i, '.algo'), String(rd.result).replace(/\r\n?/g, '\n')); toast(`« ${file.name} » ouvert`); };
+  rd.readAsText(file, 'utf-8'); e.target.value = '';
+});
+$('#mNew').addEventListener('click', () => newFile(null, null, true));
+$('#sbNew').addEventListener('click', () => newFile(null, null, true));
+$('#wNew').addEventListener('click', () => newFile(null, null, true));
+$('#wEx').addEventListener('click', () => { setView('explorer'); openFile('ex:SommeDeuxNombres.algo'); });
+$('#mOpen').addEventListener('click', openPicker);
+$('#sbOpen').addEventListener('click', openPicker);
+$('#mSave').addEventListener('click', saveCopy);
+if (!framed) {
+  $('#mDownload').hidden = false;
+  $('#mDownload').addEventListener('click', () => {
+    const f = cur(); if (!f) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([f.content], { type: 'text/plain;charset=utf-8' }));
+    a.download = f.name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+}
+const THEMES = ['auto', 'dark', 'light'];
+function applyTheme(t) {
+  if (t === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+  $('#themeBtn').title = 'Thème : ' + { auto: 'automatique', dark: 'sombre', light: 'clair' }[t];
+  LS.set('theme', t);
+}
+let theme = LS.get('theme', 'auto'); if (theme !== 'auto') applyTheme(theme); else $('#themeBtn').title = 'Thème : automatique';
+$('#themeBtn').addEventListener('click', () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; applyTheme(theme); toast($('#themeBtn').title); });
+$('#fsUp').addEventListener('click', () => setFont(S.fs + 1));
+$('#fsDown').addEventListener('click', () => setFont(S.fs - 1));
+
+document.addEventListener('keydown', e => {
+  const k = e.key;
+  if (k === 'F5' && e.shiftKey) { e.preventDefault(); stopRun(); return; }
+  if (k === 'F5') { e.preventDefault(); run(false); return; }
+  if (k === 'F10') { e.preventDefault(); run(true); return; }
+  if (k === 'F9') { e.preventDefault(); toggleBp(caretLine()); return; }
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (k === 's' || k === 'S')) { e.preventDefault(); saveCopy(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (k === 'f' || k === 'F')) { e.preventDefault(); doFormat(); return; }
+  if ((e.ctrlKey || e.metaKey) && (k === '=' || k === '+')) { e.preventDefault(); setFont(S.fs + 1); return; }
+  if ((e.ctrlKey || e.metaKey) && k === '-') { e.preventDefault(); setFont(S.fs - 1); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 'Enter') { e.preventDefault(); run(false); }
+});
+window.addEventListener('resize', () => { syncScroll(); if (S.panelTab === 'vars') showTab('vars'); });
+
+/* ---------- démarrage ---------- */
+setMode(S.mode);
+setFont(S.fs);
+if (window.matchMedia('(max-width:760px)').matches) { setSidebar(false); $$('.activity button').forEach(b => b.classList.remove('on')); }
+loadActive(); renderAll(); renderVars(null); setState('idle'); showTab('console');
+if (firstVisit && S.active === 'ex:TriABulles.algo') {
+  LS.set('visited', true);
+  const m = S.mode; S.mode = 'normal';
+  run(false).then(() => { S.mode = m; });
+} else {
+  LS.set('visited', true);
+  const f = cur();
+  if (f) cLine(`Prêt. Appuyez sur Exécuter (F5) pour lancer « ${f.name.replace(/\.algo$/, '')} », ou Pas à pas (F10) pour suivre chaque instruction.`, 'hint-line');
+}
+})();
+</script>
+
+</body>
+</html>
