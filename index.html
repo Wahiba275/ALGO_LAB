@@ -17,12 +17,12 @@
   --bg:#0e1116; --win:#13171e; --ed:#161b22; --pane:#1a1f28; --bar:#1d232d; --hover:#262d39; --line:#29303c;
   --fg:#d7dce5; --muted:#8a93a4; --faint:#5c6577;
   --accent:#3dbba8; --on-accent:#04211c; --amber:#e9a84e; --on-amber:#2b1a02; --err:#f07067; --on-err:#2c0806; --ok:#72c78e;
-  --sel:rgba(61,187,168,.26); --cur:rgba(255,255,255,.04); --exec:rgba(233,168,78,.18); --errbg:rgba(240,112,103,.14);
+  --sel:rgba(61,187,168,.26); --cur:rgba(255,255,255,.04); --exec:rgba(233,168,78,.18); --errbg:rgba(240,112,103,.14); --done:rgba(61,187,168,.12); --okbg:rgba(114,199,142,.16);
   --shadow:0 18px 50px rgba(0,0,0,.35);
   --k:#cf9cf2; --kd:#f2907a; --io:#5cc3ea; --t:#6fd3bd; --s:#b9d880; --n:#f2b56c; --c:#6a7389; --o:#ec8aa3; --as:#e9a84e; --f:#8eb5ff;
   --ui:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono:"JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, "Liberation Mono", monospace;
-  --fs:14px; --lh:22px; --panel-h:240px; --sb-w:252px;
+  --fs:14px; --lh:22px; --panel-h:240px; --sb-w:236px; --padl:18px; --rp-w:340px;
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme="dark"]){
@@ -30,7 +30,7 @@
     --bg:#dde1e7; --win:#f3f4f6; --ed:#ffffff; --pane:#f1f3f6; --bar:#e8ebf0; --hover:#dce1e9; --line:#d2d7df;
     --fg:#1c2230; --muted:#5b6474; --faint:#99a1ae;
     --accent:#0e8a79; --on-accent:#ffffff; --amber:#b06c16; --on-amber:#ffffff; --err:#c9362e; --on-err:#ffffff; --ok:#2b8a4f;
-    --sel:rgba(14,138,121,.2); --cur:rgba(20,40,70,.045); --exec:rgba(214,146,40,.22); --errbg:rgba(201,54,46,.1);
+    --sel:rgba(14,138,121,.2); --cur:rgba(20,40,70,.045); --exec:rgba(214,146,40,.22); --errbg:rgba(201,54,46,.1); --done:rgba(14,138,121,.1); --okbg:rgba(43,138,79,.12);
     --shadow:0 18px 50px rgba(30,40,60,.16);
     --k:#8434bf; --kd:#c0401d; --io:#0a72a1; --t:#0b7f68; --s:#4a7810; --n:#ad540e; --c:#8a92a1; --o:#b03360; --as:#b06c16; --f:#2b5dc3;
   }
@@ -40,7 +40,7 @@
   --bg:#dde1e7; --win:#f3f4f6; --ed:#ffffff; --pane:#f1f3f6; --bar:#e8ebf0; --hover:#dce1e9; --line:#d2d7df;
   --fg:#1c2230; --muted:#5b6474; --faint:#99a1ae;
   --accent:#0e8a79; --on-accent:#ffffff; --amber:#b06c16; --on-amber:#ffffff; --err:#c9362e; --on-err:#ffffff; --ok:#2b8a4f;
-  --sel:rgba(14,138,121,.2); --cur:rgba(20,40,70,.045); --exec:rgba(214,146,40,.22); --errbg:rgba(201,54,46,.1);
+  --sel:rgba(14,138,121,.2); --cur:rgba(20,40,70,.045); --exec:rgba(214,146,40,.22); --errbg:rgba(201,54,46,.1); --done:rgba(14,138,121,.1); --okbg:rgba(43,138,79,.12);
   --shadow:0 18px 50px rgba(30,40,60,.16);
   --k:#8434bf; --kd:#c0401d; --io:#0a72a1; --t:#0b7f68; --s:#4a7810; --n:#ad540e; --c:#8a92a1; --o:#b03360; --as:#b06c16; --f:#2b5dc3;
 }
@@ -70,8 +70,8 @@ svg{display:block;flex:none}
 .tb-title b{color:var(--fg);font-weight:500}
 
 /* ---------- espace de travail ---------- */
-.workspace{display:grid;grid-template-columns:46px var(--sb-w) minmax(0,1fr) 300px;min-height:0;position:relative}
-.workspace.sb-closed{grid-template-columns:46px 0 minmax(0,1fr) 300px}
+.workspace{display:grid;grid-template-columns:46px var(--sb-w) minmax(0,1fr) var(--rp-w);min-height:0;position:relative}
+.workspace.sb-closed{grid-template-columns:46px 0 minmax(0,1fr) var(--rp-w)}
 .activity{grid-column:1;display:flex;flex-direction:column;align-items:center;background:var(--bar);border-right:1px solid var(--line);padding-top:4px}
 .activity button{width:46px;height:46px;display:grid;place-items:center;border:0;background:transparent;color:var(--faint);cursor:pointer;position:relative}
 .activity button:hover{color:var(--fg)}
@@ -170,6 +170,7 @@ svg{display:block;flex:none}
 .gl.err{color:var(--err)}
 .gl.bp::before{content:"";position:absolute;left:7px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--err)}
 .gl:not(.bp):hover::before{content:"";position:absolute;left:7px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:var(--err);opacity:.3}
+.gl.done{color:var(--accent);font-weight:700}
 .gl.exec{color:var(--amber);font-weight:700}
 .gl.exec::after{content:"";position:absolute;right:2px;top:50%;margin-top:-5px;border-left:8px solid var(--amber);border-top:5px solid transparent;border-bottom:5px solid transparent}
 .code{position:relative;overflow:hidden;min-width:0}
@@ -178,22 +179,31 @@ svg{display:block;flex:none}
 .band.cur{background:var(--cur)}
 .band.exec{background:var(--exec);box-shadow:inset 2px 0 0 var(--amber)}
 .band.err{background:var(--errbg);border-bottom:2px dotted var(--err)}
+.band.done{background:var(--done);box-shadow:inset 3px 0 0 var(--accent)}
 .layer{position:absolute;top:0;left:0;pointer-events:none;will-change:transform}
-#hl,#ta{font:var(--fs)/var(--lh) var(--mono);font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;letter-spacing:0;tab-size:3;white-space:pre;padding:10px 18px 60px}
+#hl,#ta{font:var(--fs)/var(--lh) var(--mono);font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;letter-spacing:0;tab-size:3;white-space:pre;padding:10px 18px 60px var(--padl)}
 #hl{margin:0;color:var(--fg)}
 #ta{position:absolute;inset:0;width:100%;height:100%;margin:0;border:0;outline:0;resize:none;overflow:auto;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--fg)}
 #ta::selection{background:var(--sel);color:transparent}
 #ta[readonly]{caret-color:transparent}
-#hl .k{color:var(--k);font-weight:600}
-#hl .kd{color:var(--kd);font-weight:600}
-#hl .io{color:var(--io);font-weight:600}
-#hl .t{color:var(--t)}
-#hl .s{color:var(--s)}
-#hl .n,#hl .b{color:var(--n)}
-#hl .c{color:var(--c);font-style:italic}
-#hl .o{color:var(--o);font-weight:600}
-#hl .as{color:var(--as);font-weight:700}
-#hl .f{color:var(--f)}
+/* coloration syntaxique (éditeur, aide, explications) */
+.syn .k{color:var(--k);font-weight:600}
+.syn .kd{color:var(--kd);font-weight:600}
+.syn .io{color:var(--io);font-weight:600}
+.syn .t{color:var(--t)}
+.syn .s{color:var(--s)}
+.syn .n,.syn .b{color:var(--n)}
+.syn .c{color:var(--c);font-style:italic}
+.syn .o{color:var(--o);font-weight:600}
+.syn .as{color:var(--as);font-weight:700}
+.syn .f{color:var(--f)}
+#inl{position:absolute;top:0;left:0}
+.inl{position:absolute;font:var(--fs)/var(--lh) var(--mono);white-space:pre;display:flex;gap:6px;align-items:center;height:var(--lh)}
+.inl span{font:600 calc(var(--fs) - 2px)/1.5 var(--ui);padding:0 7px;border-radius:4px;background:var(--done);color:var(--accent);white-space:pre}
+.inl span.io{color:var(--io);background:var(--cur);border:1px solid var(--line)}
+.inl span.it{color:var(--ok);background:var(--okbg)}
+.inl span.if{color:var(--err);background:var(--errbg)}
+.inl span.ic{color:var(--f);background:var(--cur);border:1px solid var(--line)}
 .ro-badge{position:absolute;right:14px;top:8px;font-size:11px;color:var(--amber);background:var(--pane);border:1px solid var(--line);border-radius:4px;padding:1px 7px;pointer-events:none;z-index:3}
 .welcome{position:absolute;inset:0;display:grid;place-items:center;background:var(--ed);z-index:4;padding:20px}
 .welcome div{max-width:380px;text-align:center}
@@ -245,7 +255,17 @@ svg{display:block;flex:none}
 .const-tag{font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:3px;padding:0 4px}
 @keyframes flash{from{background:var(--exec)}to{background:transparent}}
 .chg{animation:flash 1.1s ease-out}
+.var.chg{background:var(--exec);animation:none}
 .var.chg .vv{font-weight:700}
+.vvw{margin-left:auto;display:flex;align-items:baseline;gap:5px;min-width:0;justify-content:flex-end;flex-wrap:wrap}
+.vvw .vv{margin-left:0}
+.vold{font:12px var(--mono);color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint)}
+.varr{color:var(--amber);font-weight:700}
+.vhist{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;margin-top:3px;font:11px var(--mono);color:var(--faint)}
+.vhist i{font-style:normal;color:var(--faint);opacity:.8}
+.vhist span.last{color:var(--fg);font-weight:600}
+.ac.chg{background:var(--exec)}
+.mat td.chg{background:var(--exec)}
 .arr{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
 .ac{min-width:34px;border:1px solid var(--line);border-radius:4px;text-align:center;font:12px var(--mono);overflow:hidden;background:var(--ed)}
 .ac .ai{display:block;font-size:10px;color:var(--faint);border-bottom:1px solid var(--line);padding:0 3px}
@@ -261,10 +281,53 @@ svg{display:block;flex:none}
 .sf{display:flex;justify-content:space-between;gap:8px;padding:4px 6px;margin:0 -6px;border-radius:4px;font-family:var(--mono)}
 .sf.top{background:var(--exec)}
 .sf span{color:var(--faint);font-family:var(--ui);font-size:11.5px}
+.rp-explain{flex:0 1 auto;max-height:62%;overflow:auto;border-bottom:1px solid var(--line)}
+.xc{padding:10px 12px 12px;display:flex;flex-direction:column;gap:9px}
+.xc-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.xc-step{font:700 13px var(--mono);color:var(--fg)}
+.xc-sub{font-size:11.5px;color:var(--muted)}
+.xc-legend{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.xc-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-left:4px}
+.lg-done{background:var(--done);box-shadow:inset 2px 0 0 var(--accent)}
+.lg-next{background:var(--exec);box-shadow:inset 2px 0 0 var(--amber)}
+.xc-intro b{font-size:13px}
+.xc-intro p{margin:6px 0 0;color:var(--muted);font-size:12.5px;line-height:1.55}
+.xc-review{font-size:12px;line-height:1.5;padding:7px 10px;border-radius:6px;background:var(--exec);color:var(--fg)}
+.xe{border:1px solid var(--line);border-radius:8px;background:var(--ed);overflow:hidden}
+.xe-h{display:flex;align-items:center;gap:8px;padding:6px 10px}
+.xe-kind{font:600 10.5px var(--ui);letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--done);color:var(--accent)}
+.xe-kind.k-io{color:var(--io);background:var(--cur)}
+.xe-kind.k-true{color:var(--ok);background:var(--okbg)}
+.xe-kind.k-false{color:var(--err);background:var(--errbg)}
+.xe-kind.k-loop{color:var(--k);background:var(--cur)}
+.xe-kind.k-call{color:var(--f);background:var(--cur)}
+.xe-kind.k-start{color:var(--fg);background:var(--cur)}
+.xe-ln{margin-left:auto;font:11.5px var(--mono);color:var(--faint)}
+.xe-code{margin:0;padding:6px 10px;font:13px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word;background:var(--pane);border-block:1px solid var(--line)}
+.xr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 10px;margin:0;padding:8px 10px 2px;align-items:baseline}
+.xr dt{font:600 12px var(--mono);color:var(--muted);white-space:nowrap}
+.xr dd{margin:0;font:12.5px/1.5 var(--mono);overflow-wrap:anywhere}
+.xv{color:var(--fg)}
+.xa{font-style:normal;color:var(--amber);font-weight:700}
+.xn{font-family:var(--ui);font-size:11.5px;color:var(--muted)}
+.xout{color:var(--io)}
+.vt-true{color:var(--ok)} .vt-false{color:var(--err)}
+.xe-say{margin:0;padding:6px 10px 9px;font-size:12.5px;line-height:1.55;color:var(--fg)}
+.xe-tip{margin:0 10px 9px;padding:6px 9px;border-radius:6px;font-size:12px;line-height:1.5;background:var(--exec);color:var(--fg)}
+.xe-tip b{font-weight:600;color:var(--amber);margin-right:4px}
+.xc-next{display:flex;flex-direction:column;gap:3px;padding:7px 10px;border-radius:8px;border:1px dashed var(--amber)}
+.xc-next > span{font:600 10.5px var(--ui);letter-spacing:.07em;text-transform:uppercase;color:var(--amber)}
+.xc-next code{font:12.5px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word}
+.xc-end{padding:8px 10px;border-radius:8px;font-size:12.5px;line-height:1.5;background:var(--cur);border:1px solid var(--line)}
+.xc-end.ok{background:var(--okbg);border-color:transparent} .xc-end.ok b{color:var(--ok)}
+.xc-end.err{background:var(--errbg);border-color:transparent} .xc-end.err b{color:var(--err)}
+.xc-replay{align-self:flex-start}
+.xe-errcode{margin-top:6px;border:1px solid var(--line);border-radius:5px;background:var(--ed)}
+#explainB{border-bottom:1px solid var(--line)}
 .rp-head{height:35px;flex:none;display:flex;align-items:center;padding:0 16px;font:600 11px var(--ui);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .rp-sec{border-top:1px solid var(--line)}
 .rp-sec h3{margin:0;padding:8px 12px 2px;font:600 11px var(--ui);letter-spacing:.07em;text-transform:uppercase;color:var(--fg)}
-.rp-vars{flex:1;min-height:0;overflow:auto}
+.rp-vars{flex:1 1 140px;min-height:110px;overflow:auto}
 .rp-stack{flex:none;max-height:35%;overflow:auto}
 
 .trace-wrap{min-width:0}
@@ -273,11 +336,19 @@ svg{display:block;flex:none}
 .trace th.var-col{font-family:var(--mono);font-size:12px;color:var(--fg);text-align:center}
 .trace td{padding:3px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
 .trace td.vc{text-align:center;color:var(--muted)}
-.trace td.vc.hit{color:var(--fg);font-weight:700;background:var(--exec)}
+.trace td.vc.hit{color:var(--fg);font-weight:700;background:var(--done);box-shadow:inset 0 -2px 0 var(--accent)}
 .trace td.ln{color:var(--faint)}
 .trace td.ins{color:var(--fg)}
-.trace tr.out td.ins{color:var(--io)}
-.trace tr.in td.ins{color:var(--accent)}
+.trace td.res{color:var(--muted);font-family:var(--ui);font-size:12px}
+.trace td.ins,.trace td.res{max-width:300px;overflow:hidden;text-overflow:ellipsis}
+.trace tr.ct td.res{color:var(--ok)} .trace tr.cf td.res{color:var(--err)}
+.trace tr.call td.res{color:var(--f)}
+.trace tbody tr{cursor:pointer}
+.trace tbody tr:hover td{background:var(--hover)}
+.trace tr.now td{background:var(--exec)}
+.trace tr.now td.ln:first-child{box-shadow:inset 3px 0 0 var(--amber);color:var(--fg);font-weight:700}
+.trace tr.fut,.cl.fut{display:none}
+.cl.link{color:var(--accent);font-family:var(--ui);cursor:pointer;text-decoration:underline;text-underline-offset:3px;margin-top:4px}
 .trace-note{padding:10px 16px;color:var(--faint);font-size:12.5px}
 .prob{display:flex;gap:10px;padding:6px 16px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--line)}
 .prob:hover{background:var(--hover)}
@@ -308,6 +379,7 @@ svg{display:block;flex:none}
 ::-webkit-scrollbar-corner{background:transparent}
 
 /* ---------- responsive ---------- */
+@media (max-width:1599px){ .btn.ghost .lbl{display:none} }
 @media (max-width:1100px){
   .workspace{grid-template-columns:46px var(--sb-w) minmax(0,1fr)}
   .workspace.sb-closed{grid-template-columns:46px 0 minmax(0,1fr)}
@@ -330,7 +402,8 @@ svg{display:block;flex:none}
   .editor{grid-template-columns:42px minmax(0,1fr)}
   .gl{padding-right:8px}
   .gl.bp::before,.gl:not(.bp):hover::before{left:3px;width:8px;height:8px;margin-top:-4px}
-  #hl,#ta{padding-left:12px;padding-right:12px}
+  .editor{--padl:12px}
+  #hl,#ta{padding-right:12px}
   .statusbar .hide-sm{display:none}
   .speed input{width:70px}
 }
@@ -389,7 +462,8 @@ svg{display:block;flex:none}
       <div class="tabs" id="tabs" role="tablist"></div>
       <div class="toolbar">
         <button class="btn primary" id="btnRun"><span data-ic="play"></span><span class="lbl" id="runLbl">Exécuter</span><kbd>F5</kbd></button>
-        <button class="btn" id="btnStep" title="Exécuter instruction par instruction"><span data-ic="step"></span><span class="lbl">Pas à pas</span><kbd>F10</kbd></button>
+        <button class="btn" id="btnBack" title="Revenir à l'étape précédente (Maj+F10)" disabled><span data-ic="back"></span><span class="lbl">Précédent</span></button>
+        <button class="btn" id="btnStep" title="Exécuter une instruction et l'expliquer (F10)"><span data-ic="step"></span><span class="lbl" id="stepLbl">Pas à pas</span><kbd>F10</kbd></button>
         <button class="btn" id="btnPause" title="Mettre en pause" hidden><span data-ic="pause"></span><span class="lbl">Pause</span></button>
         <button class="btn warn" id="btnStop" title="Arrêter (Maj+F5)" disabled><span data-ic="stop"></span><span class="lbl">Arrêter</span></button>
         <span class="tb-sep"></span>
@@ -407,7 +481,7 @@ svg{display:block;flex:none}
         <div class="gutter" id="gutter"><div class="gutter-inner" id="gutterInner"></div></div>
         <div class="code" id="code">
           <div class="bands" id="bands"></div>
-          <div class="layer" id="layer"><pre id="hl"></pre></div>
+          <div class="layer" id="layer"><pre id="hl" class="syn"></pre><div id="inl"></div></div>
           <textarea id="ta" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="Éditeur de pseudo-code"></textarea>
           <div class="ro-badge" id="roBadge" hidden>Lecture seule pendant l'exécution</div>
         </div>
@@ -425,8 +499,8 @@ svg{display:block;flex:none}
       <div class="panel" id="panel">
         <div class="ptabs">
           <button class="pt on" data-tab="console">Console</button>
-          <button class="pt pt-vars" data-tab="vars">Variables</button>
-          <button class="pt" data-tab="trace">Trace</button>
+          <button class="pt pt-vars" data-tab="vars">Explication</button>
+          <button class="pt" data-tab="trace" title="Tableau de déroulement : une ligne par instruction exécutée">Déroulement</button>
           <button class="pt" data-tab="problems">Problèmes<span class="badge" id="probCount"></span></button>
           <span class="grow"></span>
           <button class="icon-btn" id="clearBtn" title="Effacer la console"><span data-ic="clear"></span></button>
@@ -434,7 +508,7 @@ svg{display:block;flex:none}
         </div>
         <div class="pbody">
           <div class="pview" id="pv-console"><div class="console" id="console" aria-live="polite"></div></div>
-          <div class="pview" id="pv-vars" hidden><div class="vars" id="varsB"></div></div>
+          <div class="pview" id="pv-vars" hidden><div id="explainB"></div><div class="vars" id="varsB"></div></div>
           <div class="pview" id="pv-trace" hidden><div class="trace-wrap" id="traceWrap"></div></div>
           <div class="pview" id="pv-problems" hidden><div id="problems"></div></div>
         </div>
@@ -442,7 +516,7 @@ svg{display:block;flex:none}
     </section>
 
     <aside class="runpanel" id="runpanel">
-      <div class="rp-head">Exécution</div>
+      <div class="rp-explain" id="explainR"></div>
       <div class="rp-sec rp-vars"><h3>Variables</h3><div class="vars" id="varsR"></div></div>
       <div class="rp-sec rp-stack"><h3>Pile d'appels</h3><div class="stack" id="stack"></div></div>
     </aside>
@@ -477,7 +551,7 @@ class AlgoError extends Error {
   constructor(msg, line, col, kind) { super(msg); this.line = line || 0; this.col = col || 0; this.kind = kind || 'runtime'; }
 }
 class StopSignal extends Error { constructor() { super('stop'); } }
-class ReturnSig { constructor(v) { this.v = v; } }
+class ReturnSig { constructor(v, line) { this.v = v; this.line = line; } }
 
 const ALIAS = {
   jusque: 'jusqua', fsi: 'finsi', fpour: 'finpour', ftq: 'fintantque', fintq: 'fintantque',
@@ -1134,8 +1208,9 @@ class ElemRef {
   get() { return this.arr.data[this.off]; }
   set(x) { this.arr.data[this.off] = x; }
 }
+let FRAME_ID = 0;
 class Frame {
-  constructor(name, parent, fn) { this.name = name; this.parent = parent; this.fn = fn || null; this.vars = new Map(); }
+  constructor(name, parent, fn) { this.id = ++FRAME_ID; this.name = name; this.parent = parent; this.fn = fn || null; this.vars = new Map(); }
   lookup(k) { return this.vars.get(k) || (this.parent ? this.parent.lookup(k) : undefined); }
 }
 
@@ -1219,6 +1294,11 @@ const yieldNow = typeof MessageChannel !== 'undefined'
   : () => new Promise(r => setTimeout(r, 0));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+const PREC = { ou: 1, xor: 1, et: 2, '=': 4, '<>': 4, '<': 4, '>': 4, '<=': 4, '>=': 4, '+': 5, '-': 5, '&': 5, '*': 6, '/': 6, div: 6, mod: 6, '^': 8 };
+const OPTXT = { ou: 'OU', xor: 'XOR', et: 'ET' };
+const NOPE = Symbol('nope');
+const EXPLAIN_LIMIT = 2000;
+
 class Interp {
   constructor(prog, hooks, opts = {}) {
     this.prog = prog; this.h = hooks || {};
@@ -1228,6 +1308,77 @@ class Interp {
     this.frame = this.global; this.line = prog.line;
   }
   stop() { this.stopped = true; }
+
+  /* ---- explications pédagogiques ---- */
+  get explain() { return this.stepping || this.delay > 0 || this.breakpoints.size > 0 || this.steps <= EXPLAIN_LIMIT; }
+  condInfo(c, f) {
+    const logic = x => (x.type === 'un' && x.op === 'non') || (x.type === 'bin' && (['et', 'ou', 'xor'].includes(x.op) || logic(x.l) || logic(x.r)));
+    return { code: this.render(c, f, false), sub: this.render(c, f, true), mid: logic(c) ? this.render(c, f, 2) : null };
+  }
+  emit(ev) {
+    ev.depth = this.callStack.length; ev.fn = this.frame && this.frame.fn ? this.frame.fn.name : null;
+    if (this.h.onEvent) this.h.onEvent(ev);
+  }
+  peekExpr(e, f) {
+    switch (e.type) {
+      case 'num': case 'str': case 'bool': return e.v;
+      case 'var': return this.peek(e, f);
+      case 'un': { const v = this.peekExpr(e.e, f); return typeof v === 'number' && e.op === 'neg' ? -v : NOPE; }
+      case 'bin': {
+        const a = this.peekExpr(e.l, f), b = this.peekExpr(e.r, f);
+        if (typeof a !== 'number' || typeof b !== 'number') return NOPE;
+        switch (e.op) {
+          case '+': return a + b; case '-': return a - b; case '*': return a * b;
+          case 'div': return b && Number.isInteger(a) && Number.isInteger(b) ? Math.trunc(a / b) : NOPE;
+          case 'mod': return b && Number.isInteger(a) && Number.isInteger(b) ? a % b : NOPE;
+        }
+        return NOPE;
+      }
+    }
+    return NOPE;
+  }
+  peek(e, f) {
+    const cell = f.lookup(e.name.toLowerCase());
+    if (!cell) return NOPE;
+    const v = cell.get();
+    if (!e.idx.length) return v;
+    if (!(v instanceof ArrayVal)) return NOPE;
+    const idx = [];
+    for (const x of e.idx) { const iv = this.peekExpr(x, f); if (iv === NOPE) return NOPE; idx.push(iv); }
+    try { return v.data[v.offset(idx, 0, cell.name)]; } catch (err) { return NOPE; }
+  }
+  /* affiche une expression ; sub = true remplace les variables par leur valeur actuelle */
+  render(e, f, sub, pp = 0, right = false) {
+    switch (e.type) {
+      case 'num': return fmtNum(e.v);
+      case 'str': return '"' + e.v + '"';
+      case 'bool': return e.v ? 'Vrai' : 'Faux';
+      case 'var': {
+        if (sub) {
+          const v = this.peek(e, f);
+          if (v !== NOPE && !(v instanceof ArrayVal)) return v === undefined ? '?' : fmtQ(v);
+        }
+        return e.name + (e.idx.length ? '[' + e.idx.map(x => this.render(x, f, sub)).join(', ') + ']' : '');
+      }
+      case 'call': return e.name + '(' + e.args.map(x => this.render(x, f, sub)).join(', ') + ')';
+      case 'un': {
+        const t = e.op === 'neg' ? '-' + this.render(e.e, f, sub, 7) : 'NON ' + this.render(e.e, f, sub, 3);
+        return (e.op === 'neg' ? 7 : 3) < pp ? '(' + t + ')' : t;
+      }
+      case 'bin': {
+        const p = PREC[e.op] || 4;
+        if (sub === 2 && p === 4) {
+          const a = this.peekExpr(e.l, f), b = this.peekExpr(e.r, f);
+          if (a !== NOPE && b !== NOPE && a !== undefined && b !== undefined && typeof a === typeof b && typeof a !== 'object') {
+            try { return this.compare(a, b, e.op, 0) ? 'Vrai' : 'Faux'; } catch (err) { /* affichage normal */ }
+          }
+        }
+        const t = this.render(e.l, f, sub, p, false) + ' ' + (OPTXT[e.op] || e.op) + ' ' + this.render(e.r, f, sub, e.op === '^' ? p : p + 0.5, true);
+        return p < pp ? '(' + t + ')' : t;
+      }
+    }
+    return '…';
+  }
 
   async run() {
     this.callStack.push({ name: this.prog.name, line: 0, frame: this.global });
@@ -1274,6 +1425,7 @@ class Interp {
     this.steps++;
     this.line = line; this.frame = frame;
     if (this.steps > MAX_STEPS) throw new AlgoError(`Plus de ${MAX_STEPS.toLocaleString('fr-FR')} instructions exécutées : l'algorithme semble pris dans une boucle infinie. Vérifiez que la condition d'arrêt finit par être atteinte.`, line);
+    if (this.h.onTick) this.h.onTick(line, frame);
     if (this.stepping || this.breakpoints.has(line)) {
       if (this.h.onPause) await this.h.onPause(line, frame);
       if (this.stopped) throw new StopSignal();
@@ -1294,9 +1446,16 @@ class Interp {
     await this.tick(s.line, f);
     switch (s.type) {
       case 'assign': {
+        const ex = this.explain;
+        const pre = ex ? this.render(s.value, f, true) : null;
         const v = await this.eval(s.value, f);
         const r = await this.ref(s.target, f);
+        const old = r.get();
         this.assign(r, v, s.line, f);
+        if (ex) {
+          const expr = this.render(s.value, f, false);
+          this.emit({ type: 'assign', line: s.line, target: r.name, code: this.render(s.target, f, false) + ' ← ' + expr, expr, sub: pre, old: old === undefined ? undefined : fmtQ(old), val: fmtQ(r.get()) });
+        }
         break;
       }
       case 'read': {
@@ -1306,7 +1465,9 @@ class Interp {
           if (r.type && r.type.kind === 'array') throw new AlgoError(`« ${r.name} » est un tableau : lisez ses éléments un par un, ex. Lire(${r.name}[i])`, s.line);
           const v = await this.h.read(r.name, r.type, s.line);
           if (this.stopped) throw new StopSignal();
+          const old = r.get();
           this.assign(r, v, s.line, f, 'lire');
+          if (this.explain) this.emit({ type: 'read', line: s.line, target: r.name, code: 'Lire(' + s.targets.map(t => this.render(t, f, false)).join(', ') + ')', old: old === undefined ? undefined : fmtQ(old), val: fmtQ(r.get()) });
         }
         break;
       }
@@ -1318,11 +1479,19 @@ class Interp {
           parts.push(fmt(v));
         }
         if (this.h.write) this.h.write(parts.join(''), s.line);
+        if (this.explain) this.emit({ type: 'write', line: s.line, code: 'Ecrire(' + s.args.map(a => this.render(a, f, false)).join(', ') + ')', text: parts.join('') });
         break;
       }
       case 'if': {
-        for (const b of s.branches) {
-          if (await this.evalBool(b.cond, f, 'Si')) { await this.execBlock(b.body, f); return; }
+        for (let k = 0; k < s.branches.length; k++) {
+          const b = s.branches[k];
+          if (k > 0) await this.tick(b.line, f);
+          const ex = this.explain;
+          const pre = ex ? this.condInfo(b.cond, f) : null;
+          const ok = await this.evalBool(b.cond, f, k ? 'SinonSi' : 'Si');
+          if (ex) this.emit({ type: 'cond', kind: k ? 'sinonsi' : 'si', line: b.line, ...pre, val: ok,
+            next: ok ? null : (k + 1 < s.branches.length ? 'sinonsi' : s.elseBody ? 'sinon' : 'finsi') });
+          if (ok) { await this.execBlock(b.body, f); return; }
         }
         if (s.elseBody) await this.execBlock(s.elseBody, f);
         break;
@@ -1334,46 +1503,64 @@ class Interp {
         const b = await this.evalNum(s.to, f, 'La valeur de fin du Pour');
         const st = s.step ? await this.evalNum(s.step, f, 'Le pas du Pour') : 1;
         if (st === 0) throw new AlgoError('Le pas d\'une boucle Pour ne peut pas être 0', s.line);
+        const goOn = x => (st > 0 ? x <= b : x >= b);
+        const old0 = r.get();
         this.assign(r, a, s.line, f);
-        for (;;) {
-          const i = r.get();
-          if (st > 0 ? i > b : i < b) break;
+        if (this.explain) this.emit({ type: 'for-init', line: s.line, target: r.name, old: old0 === undefined ? undefined : fmtQ(old0), from: fmt(a), to: fmt(b), step: fmt(st),
+          count: Math.max(0, Math.floor((b - a) / st) + 1), code: `Pour ${r.name} ← ${this.render(s.from, f, false)} à ${this.render(s.to, f, false)}${s.step ? ' Pas ' + this.render(s.step, f, false) : ''}` });
+        let k = 0;
+        while (goOn(r.get())) {
+          k++;
           await this.execBlock(s.body, f);
           await this.tick(s.line, f);
           const cur = r.get();
           if (typeof cur !== 'number') throw new AlgoError(`La variable de boucle « ${r.name} » a perdu sa valeur`, s.line);
           this.assign(r, cur + st, s.line, f);
+          if (this.explain) this.emit({ type: 'for-step', line: s.line, target: r.name, old: fmt(cur), val: fmt(r.get()), to: fmt(b), step: st, cont: goOn(r.get()), iter: k });
         }
         break;
       }
       case 'while': {
-        let first = true;
-        for (;;) {
-          if (!first) await this.tick(s.line, f);
-          first = false;
-          if (!(await this.evalBool(s.cond, f, 'TantQue'))) break;
+        for (let k = 1; ; k++) {
+          if (k > 1) await this.tick(s.line, f);
+          const ex = this.explain;
+          const pre = ex ? this.condInfo(s.cond, f) : null;
+          const ok = await this.evalBool(s.cond, f, 'TantQue');
+          if (ex) this.emit({ type: 'cond', kind: 'tantque', line: s.line, ...pre, val: ok, iter: k });
+          if (!ok) break;
           await this.execBlock(s.body, f);
         }
         break;
       }
       case 'repeat': {
-        for (;;) {
+        if (this.explain) this.emit({ type: 'repeat-start', line: s.line, code: 'Répéter' });
+        for (let k = 1; ; k++) {
           await this.execBlock(s.body, f);
           await this.tick(s.untilLine, f);
-          if (await this.evalBool(s.cond, f, "Jusqu'à")) break;
+          const ex = this.explain;
+          const pre = ex ? this.condInfo(s.cond, f) : null;
+          const ok = await this.evalBool(s.cond, f, "Jusqu'à");
+          if (ex) this.emit({ type: 'cond', kind: 'jusqua', line: s.untilLine, ...pre, val: ok, iter: k });
+          if (ok) break;
         }
         break;
       }
       case 'switch': {
         const v = await this.eval(s.subject, f);
+        const ex = this.explain;
+        const sw = ex ? { type: 'switch', line: s.line, code: 'Selon ' + this.render(s.subject, f, false), val: fmtQ(v), hasDefault: !!s.def } : null;
         for (const c of s.cases) {
           for (const lb of c.labels) {
             let ok;
             if (lb.v) ok = this.compare(v, await this.eval(lb.v, f), '=', c.line);
             else ok = this.compare(v, await this.eval(lb.lo, f), '>=', c.line) && this.compare(v, await this.eval(lb.hi, f), '<=', c.line);
-            if (ok) { await this.execBlock(c.body, f); return; }
+            if (ok) {
+              if (ex) { sw.matched = c.labels.map(l => l.v ? this.render(l.v, f, false) : this.render(l.lo, f, false) + '..' + this.render(l.hi, f, false)).join(', '); sw.caseLine = c.line; this.emit(sw); }
+              await this.execBlock(c.body, f); return;
+            }
           }
         }
+        if (ex) { sw.matched = s.def ? 'Sinon' : null; this.emit(sw); }
         if (s.def) await this.execBlock(s.def, f);
         break;
       }
@@ -1381,7 +1568,7 @@ class Interp {
         if (!f.fn) throw new AlgoError('« Retourner » ne peut être utilisé que dans une fonction', s.line);
         const v = s.value ? await this.eval(s.value, f) : undefined;
         if (f.fn.isFunc && v === undefined) throw new AlgoError(`« Retourner » doit être suivi d'une valeur dans la fonction « ${f.fn.name} »`, s.line);
-        throw new ReturnSig(v);
+        throw new ReturnSig(v, s.line);
       }
       case 'call': await this.call(s, f, false); break;
     }
@@ -1392,8 +1579,9 @@ class Interp {
     if (v instanceof ArrayVal) throw new AlgoError('On ne peut pas affecter un tableau entier : copiez-le élément par élément avec une boucle Pour', line);
     if (r.type && r.type.kind === 'array') throw new AlgoError(`« ${r.name} » est un tableau : précisez l'indice, ex. ${r.name}[1] ← …`, line);
     const cv = this.coerce(v, r.type, r.name, line);
+    const old = r.get();
     r.set(cv);
-    if (this.h.onAssign) this.h.onAssign(r.name, cv, line, f, how || 'affect');
+    if (this.h.onAssign) this.h.onAssign(r, cv, old, line, f, how || 'affect');
   }
 
   coerce(v, t, name, line) {
@@ -1557,14 +1745,23 @@ class Interp {
       }
     }
     await this.declare(fn.consts, fn.vars, fr);
+    if (this.explain) {
+      this.emit({ type: 'call', line: e.line, name: fn.name, isFunc: fn.isFunc, fnLine: fn.line, code: e.name + '(' + e.args.map(a => this.render(a, f, false)).join(', ') + ')',
+        params: fn.params.map((p, k) => {
+          const c = fr.vars.get(p.key); const v = c.get();
+          return { name: p.name, byRef: p.byRef, arg: this.render(e.args[k], f, false), val: v instanceof ArrayVal ? null : (v === undefined ? '?' : fmtQ(v)) };
+        }) });
+    }
     this.callStack.push({ name: fn.name, line: e.line, frame: fr });
-    let ret, returned = false;
+    let ret, returned = false, retLine = fn.endLine;
     try {
       await this.execBlock(fn.body, fr);
+      if (!fn.isFunc) await this.tick(fn.endLine, fr);
     } catch (x) {
-      if (x instanceof ReturnSig) { ret = x.v; returned = true; } else throw x;
+      if (x instanceof ReturnSig) { ret = x.v; returned = true; retLine = x.line; } else throw x;
     }
     this.callStack.pop();
+    if (this.explain && (returned || !fn.isFunc)) this.emit({ type: 'return', line: retLine, name: fn.name, isFunc: fn.isFunc, val: ret === undefined ? undefined : fmtQ(ret), back: e.line });
     if (fn.isFunc) {
       if (!returned) throw new AlgoError(`La fonction « ${fn.name} » s'est terminée sans « Retourner » de valeur`, fn.endLine);
       return fn.ret && typeof fn.ret === 'string' ? this.coerce(ret, fn.ret, `le résultat de ${fn.name}`, fn.endLine) : ret;
@@ -2011,6 +2208,7 @@ const P = {
   indent: '<path d="M4 6h16M10 12h10M10 18h10M4 10l3 2-3 2"/>',
   copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/>',
   chev: '<path d="M6 9l6 6 6-6"/>',
+  back: '<path d="M19 7a6 6 0 0 0-11.5-1M7 2v4h4"/><circle cx="12" cy="18" r="2.4" fill="currentColor" stroke="none"/>',
   clear: '<circle cx="12" cy="12" r="8"/><path d="M6.5 17.5l11-11"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/>',
   trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
@@ -2034,7 +2232,7 @@ const S = {
   mode: LS.get('mode', 'normal'), speed: LS.get('speed', 55), fs: LS.get('fs', 14), panelH: LS.get('panelH', 240),
   view: 'explorer', running: null, paused: false, resume: null, pendingRead: null,
   syntaxErr: null, runErr: null, execLine: 0, rename: null, confirmDel: null,
-  state: 'idle', prevSnap: new Map(), trace: null, lastVars: null
+  state: 'idle', trace: null, hist: [], hi: null, pendingEv: [], lastFlat: null, liveSnap: null, shown: null, doneMarks: null, truncated: false
 };
 const firstVisit = !LS.get('visited', false);
 const all = () => files.concat(EX);
@@ -2100,6 +2298,7 @@ function renderGutter() {
     if (bps.has(i)) c += ' bp';
     if (i === cl) c += ' cur';
     if (i === el) c += ' err';
+    if (S.doneMarks && S.doneMarks.has(i)) c += ' done';
     if (i === S.execLine) c += ' exec';
     h += `<div class="${c}" data-l="${i}">${i}</div>`;
   }
@@ -2111,8 +2310,20 @@ function renderBands() {
   if (document.activeElement === ta && !ta.readOnly) h += `<div class="band cur" style="${top(caretLine())}"></div>`;
   const el = errLine();
   if (el) h += `<div class="band err" style="${top(el)}"></div>`;
+  if (S.doneMarks) for (const l of S.doneMarks.keys()) if (l !== S.execLine) h += `<div class="band done" style="${top(l)}"></div>`;
   if (S.execLine) h += `<div class="band exec" style="${top(S.execLine)}"></div>`;
   bands.innerHTML = h;
+  renderInline();
+}
+function renderInline() {
+  const box = $('#inl'); const m = S.doneMarks;
+  if (!m || !m.size) { box.innerHTML = ''; return; }
+  const lines = ta.value.split('\n'); let h = '';
+  for (const [l, items] of m) {
+    const len = [...(lines[l - 1] || '')].length;
+    h += `<div class="inl" style="top:${10 + (l - 1) * LH}px;left:calc(var(--padl) + ${len + 2}ch)">${items.slice(0, 4).map(it => `<span class="${it.c}">${esc(it.t)}</span>`).join('')}</div>`;
+  }
+  box.innerHTML = h;
 }
 function syncScroll() {
   const x = ta.scrollLeft, y = ta.scrollTop;
@@ -2157,6 +2368,7 @@ function onEdit() {
   const wasDirty = f.ex && f.content !== f.orig;
   f.content = ta.value;
   if (S.runErr) { S.runErr = null; renderProblems(); }
+  if (S.hist.length || S.doneMarks) clearSteps();
   refreshEditor(); updatePos();
   if (f.ex && wasDirty !== (f.content !== f.orig)) renderTabs();
   clearTimeout(checkT); checkT = setTimeout(liveCheck, 350);
@@ -2318,6 +2530,7 @@ function loadActive() {
   const f = cur();
   $('#welcome').hidden = !!f;
   S.syntaxErr = null; S.runErr = null;
+  if (!S.running && S.booted) clearSteps();
   if (!f) { ta.value = ''; refreshEditor(); renderProblems(); return; }
   ta.value = f.content;
   refreshEditor();
@@ -2419,7 +2632,7 @@ const SNIPPETS = [
   ['Fonction', 'Fonction ¦Nom(a : Entier) : Entier\nVariables\n   r : Entier\nDébut\n   r ← a\n   Retourner r\nFinFonction'],
   ['Procédure', 'Procédure ¦Nom(Var x : Entier)\nDébut\n   \nFinProcédure']
 ];
-$('#snips').innerHTML = SNIPPETS.map(([t, c], i) => `<button class="snip" data-i="${i}"><b>${esc(t)}</b><pre>${highlight(c.replace('¦', '')).replace(/\n $/, '')}</pre></button>`).join('');
+$('#snips').innerHTML = SNIPPETS.map(([t, c], i) => `<button class="snip" data-i="${i}"><b>${esc(t)}</b><pre class="syn">${highlight(c.replace('¦', '')).replace(/\n $/, '')}</pre></button>`).join('');
 $('#snips').addEventListener('click', e => {
   const b = e.target.closest('.snip'); if (!b || !cur() || ta.readOnly) return;
   insertSnippet(SNIPPETS[+b.dataset.i][1]);
@@ -2441,17 +2654,20 @@ function insertSnippet(tpl) {
 }
 $('#help').innerHTML = `
 <h4>Structure</h4>
-<pre>${highlight('Algorithme Nom\nConstantes\n   N = 10\nVariables\n   a, b : Entier\n   x : Réel\n   nom : Chaîne\n   ok : Booléen\n   T : Tableau[1..N] de Entier\nDébut\n   …\nFin').trim()}</pre>
+<pre class="syn">${highlight('Algorithme Nom\nConstantes\n   N = 10\nVariables\n   a, b : Entier\n   x : Réel\n   nom : Chaîne\n   ok : Booléen\n   T : Tableau[1..N] de Entier\nDébut\n   …\nFin').trim()}</pre>
 <p>Majuscules et accents sont facultatifs : <code>Debut</code>, <code>début</code> et <code>Début</code> sont acceptés.</p>
 <h4>Instructions</h4>
-<pre>${highlight('x ← 5          // ou x <- 5\nLire(a, b)\nEcrire("Somme : ", a + b)').trim()}</pre>
-<pre>${highlight('Si a > b Alors\n   …\nSinonSi a = b Alors\n   …\nSinon\n   …\nFinSi').trim()}</pre>
-<pre>${highlight('Selon j Faire\n   1 : Ecrire("Lundi")\n   6, 7 : Ecrire("Week-end")\n   Sinon : Ecrire("?")\nFinSelon').trim()}</pre>
+<pre class="syn">${highlight('x ← 5          // ou x <- 5\nLire(a, b)\nEcrire("Somme : ", a + b)').trim()}</pre>
+<pre class="syn">${highlight('Si a > b Alors\n   …\nSinonSi a = b Alors\n   …\nSinon\n   …\nFinSi').trim()}</pre>
+<pre class="syn">${highlight('Selon j Faire\n   1 : Ecrire("Lundi")\n   6, 7 : Ecrire("Week-end")\n   Sinon : Ecrire("?")\nFinSelon').trim()}</pre>
 <h4>Boucles</h4>
-<pre>${highlight('Pour i ← 1 à 10 Pas 2 Faire\n   …\nFinPour\n\nTantQue i < 10 Faire\n   …\nFinTantQue\n\nRépéter\n   …\nJusqu\'à i >= 10').trim()}</pre>
+<pre class="syn">${highlight('Pour i ← 1 à 10 Pas 2 Faire\n   …\nFinPour\n\nTantQue i < 10 Faire\n   …\nFinTantQue\n\nRépéter\n   …\nJusqu\'à i >= 10').trim()}</pre>
 <h4>Sous-programmes</h4>
-<pre>${highlight('Fonction Carre(x : Entier) : Entier\nDébut\n   Retourner x * x\nFinFonction\n\nProcédure Echanger(Var a : Entier,\n                   Var b : Entier)\n…\nFinProcédure').trim()}</pre>
+<pre class="syn">${highlight('Fonction Carre(x : Entier) : Entier\nDébut\n   Retourner x * x\nFinFonction\n\nProcédure Echanger(Var a : Entier,\n                   Var b : Entier)\n…\nFinProcédure').trim()}</pre>
 <p><b>Var</b> devant un paramètre : la variable de l'appelant est modifiée.</p>
+<h4>Pas à pas</h4>
+<p>Chaque clic sur <b>Pas à pas</b> (F10) exécute une seule instruction et l'explique. Dans l'éditeur, la ligne <b>verte</b> vient d'être exécutée et son résultat s'affiche au bout de la ligne ; la ligne <b>orange</b> sera exécutée au prochain clic.</p>
+<p>Le panneau <b>Explication</b> détaille le calcul et montre chaque variable avant → après, avec l'évolution de ses valeurs. L'onglet <b>Déroulement</b> construit le tableau de déroulement. <b>Précédent</b> (Maj+F10) revient en arrière ; un clic sur une ligne du tableau y ramène directement.</p>
 <h4>Opérateurs</h4>
 <table>
 <tr><td>+ − * /</td><td>calcul (/ donne un Réel)</td></tr>
@@ -2466,7 +2682,8 @@ $('#help').innerHTML = `
 <h4>Raccourcis</h4>
 <table>
 <tr><td><kbd>F5</kbd></td><td>exécuter / continuer</td></tr>
-<tr><td><kbd>F10</kbd></td><td>pas à pas</td></tr>
+<tr><td><kbd>F10</kbd></td><td>pas à pas : exécute et explique une instruction</td></tr>
+<tr><td><kbd>Maj</kbd>+<kbd>F10</kbd></td><td>revenir à l'étape précédente</td></tr>
 <tr><td><kbd>Maj</kbd>+<kbd>F5</kbd></td><td>arrêter</td></tr>
 <tr><td><kbd>F9</kbd></td><td>point d'arrêt sur la ligne</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>enregistrer</td></tr>
@@ -2510,6 +2727,7 @@ $('#clearBtn').addEventListener('click', () => { con.innerHTML = ''; });
 
 function cLine(text, cls) {
   const d = document.createElement('div'); d.className = 'cl' + (cls ? ' ' + cls : ''); d.textContent = text;
+  if (S.running) d.dataset.s = S.hist.length;
   const pend = S.pendingRead && S.pendingRead.row;
   if (pend && pend.parentNode === con) con.insertBefore(d, pend); else con.appendChild(d);
   while (con.childElementCount > 4000) con.firstElementChild.remove();
@@ -2533,7 +2751,7 @@ function renderProblems() {
 $('#problems').addEventListener('click', e => { const p = e.target.closest('.prob'); if (p) gotoLine(+p.dataset.l); });
 $('#stProb').addEventListener('click', () => showTab('problems'));
 
-/* ---------- variables ---------- */
+/* ---------- variables & explications pas à pas ---------- */
 function valCls(v) { return typeof v === 'number' ? 'num' : typeof v === 'string' ? 'str' : typeof v === 'boolean' ? 'bool' : ''; }
 function shownRange(arr, k) {
   if (!arr.lenient[k]) return [arr.lo[k], arr.hi[k]];
@@ -2550,86 +2768,436 @@ function shownRange(arr, k) {
   if (!u0) return [1, arr.hi[k]];
   return [0, used(arr.hi[k]) ? arr.hi[k] : arr.hi[k] - 1];
 }
-function varHTML(cell, key, snap) {
-  const v = cell.get();
-  const mark = (k, s) => { snap.set(k, s); const p = S.prevSnap.get(k); return p !== undefined && p !== s ? ' chg' : ''; };
-  if (v instanceof C.ArrayVal) {
-    let body = '';
-    if (v.lo.length === 1) {
-      const [a, b] = shownRange(v, 0); let cells = '';
-      for (let i = a; i <= b; i++) {
-        const x = v.data[i - v.lo[0]]; const s = x === undefined ? '?' : C.fmt(x);
-        cells += `<div class="ac${mark(key + '[' + i + ']', s)}"><span class="ai">${i}</span><span class="av${x === undefined ? ' undef' : ''}">${esc(s)}</span></div>`;
-      }
-      body = `<div class="arr">${cells}</div>`;
-    } else if (v.lo.length === 2) {
-      const [r0, r1] = shownRange(v, 0), [c0, c1] = shownRange(v, 1);
-      let t = '<tr><th></th>'; for (let j = c0; j <= c1; j++) t += `<th>${j}</th>`; t += '</tr>';
-      for (let i = r0; i <= r1; i++) {
-        t += `<tr><th>${i}</th>`;
-        for (let j = c0; j <= c1; j++) {
-          const x = v.data[(i - v.lo[0]) * v.sizes[1] + (j - v.lo[1])]; const s = x === undefined ? '?' : C.fmt(x);
-          t += `<td class="${mark(key + '[' + i + ',' + j + ']', s)}${x === undefined ? ' undef' : ''}">${esc(s)}</td>`;
-        }
-        t += '</tr>';
-      }
-      body = `<div class="mat-wrap"><table class="mat">${t}</table></div>`;
-    } else body = `<div class="vt">${v.data.length} éléments</div>`;
-    return `<div class="var"><div class="var-h"><span class="vn">${esc(cell.name)}</span><span class="vt">${esc(v.label())}${cell.alias ? ' · Var' : ''}</span></div>${body}</div>`;
-  }
-  const s = v === undefined ? '?' : C.fmtQ(v);
-  const tl = cell.type && typeof cell.type === 'string' ? C.TYPE_LABEL[cell.type] : (v === undefined ? '' : '');
-  return `<div class="var${mark(key, s)}"><div class="var-h"><span class="vn">${esc(cell.name)}</span><span class="vt">${esc(tl)}${cell.alias ? ' · Var' : ''}</span>${cell.isConst ? '<span class="const-tag">const</span>' : ''}<span class="vv ${valCls(v)}">${v === undefined ? '<span class="undef">non initialisée</span>' : esc(s)}</span></div></div>`;
+const HIST_MAX = 5000, RECORD_LIMIT = 2000;
+const cellHist = new WeakMap();
+const rootCell = r => { let c = r; while (c && c.alias) c = c.target; return c; };
+const isNarrow = () => window.matchMedia('(max-width:1100px)').matches;
+
+/* instantané sérialisé de l'état, pour l'affichage et le retour en arrière */
+function serArr(v) {
+  if (v.data.length > 400) return { big: true, label: v.label(), n: v.data.length };
+  return { label: v.label(), lo: v.lo, sizes: v.sizes, ranges: v.lo.map((_, k) => shownRange(v, k)), data: v.data.map(x => (x === undefined ? null : C.fmt(x))) };
 }
-function renderVars(interp, frame) {
-  S.lastVars = { interp, frame };
-  let h = '';
-  const snap = new Map();
-  if (!interp) h = '<div class="vars-empty">Lancez l\'algorithme (Exécuter ou Pas à pas) pour voir ici la valeur de chaque variable.</div>';
-  else {
-    const groups = [];
-    if (frame && frame !== interp.global) groups.push([`Locales · ${frame.name}`, frame]);
-    groups.push(['Programme principal', interp.global]);
-    for (const [title, fr] of groups) {
-      const cells = [...fr.vars.entries()];
-      h += `<div class="vg"><div class="vg-title">${esc(title)}</div>`;
-      h += cells.length ? cells.map(([k, c]) => varHTML(c, fr.name + '/' + k, snap)).join('') : '<div class="vars-empty">Aucune variable</div>';
-      h += '</div>';
-    }
-  }
-  S.prevSnap = snap.size ? snap : S.prevSnap;
-  $('#varsR').innerHTML = h; $('#varsB').innerHTML = h;
-  renderStack(interp);
+function serFrame(fr, title) {
+  return {
+    id: fr.id, title, cells: [...fr.vars.values()].map(c => {
+      const v = c.get();
+      const o = { name: c.name, isConst: c.isConst, alias: !!c.alias, tl: c.type && typeof c.type === 'string' ? C.TYPE_LABEL[c.type] : '' };
+      if (v instanceof C.ArrayVal) { o.arr = serArr(v); return o; }
+      o.val = v === undefined ? null : C.fmtQ(v); o.cls = valCls(v);
+      const h = cellHist.get(rootCell(c));
+      if (h && h.length > 1) { o.hist = h.slice(-7).map(x => (x.length > 14 ? x.slice(0, 12) + '…' + (x[0] === '"' ? '"' : '') : x)); o.more = h.length > 7 || h.cut; }
+      return o;
+    })
+  };
 }
-function renderStack(interp) {
-  const st = $('#stack');
-  if (!interp || !S.running) { st.innerHTML = '<div class="vars-empty">Visible pendant une pause.</div>'; return; }
-  const cs = interp.callStack.slice().reverse();
-  st.innerHTML = cs.map((c, i) => `<div class="sf${i === 0 ? ' top' : ''}">${esc(c.name)}<span>${i === 0 ? 'ligne ' + interp.line : 'appel ligne ' + cs[i - 1].line}</span></div>`).join('');
+function flatOf(frames) {
+  const m = new Map();
+  for (const fr of frames) for (const c of fr.cells) {
+    const k = fr.id + '/' + c.name.toLowerCase();
+    if (c.arr) { if (!c.arr.big) c.arr.data.forEach((x, i) => m.set(k + '#' + i, x)); }
+    else m.set(k, c.val);
+  }
+  return m;
+}
+function buildSnap(interp, line, frame, extra) {
+  const frames = [];
+  if (frame && frame !== interp.global) frames.push(serFrame(frame, 'Locales · ' + frame.name));
+  frames.push(serFrame(interp.global, 'Programme principal'));
+  const flat = flatOf(frames);
+  const snap = Object.assign({ line, events: S.pendingEv, frames, flat, prevFlat: S.lastFlat, steps: interp.steps,
+    stack: interp.callStack.map(c => ({ name: c.name, line: c.line })).reverse(), consts: interp.prog.consts.length }, extra || {});
+  S.pendingEv = []; S.lastFlat = flat;
+  return snap;
 }
 
-/* ---------- trace ---------- */
-function traceStart(prog) {
-  const cols = prog.vars.filter(d => !d.type || typeof d.type === 'string').map(d => d.name);
-  S.trace = { cols, rows: 0, capped: false };
-  $('#traceWrap').innerHTML = `<table class="trace"><thead><tr><th>N°</th><th>Ligne</th><th>Instruction</th>${cols.map(c => `<th class="var-col">${esc(c)}</th>`).join('')}</tr></thead><tbody id="traceBody"></tbody></table>`;
+/* ---- textes pédagogiques ---- */
+const V = s => `<b class="xv">${esc(s)}</b>`;
+const BOOL = b => (b ? '<b class="vt-true">Vrai</b>' : '<b class="vt-false">Faux</b>');
+const ARW = ' <i class="xa">→</i> ';
+const OLDNEW = (o, n) => `<span class="vold">${esc(o == null ? '?' : o)}</span>${ARW}${V(n)}`;
+const plural = (n, w) => `${n} ${w}${n > 1 ? 's' : ''}`;
+function chain(parts) { const out = []; for (const p of parts) if (p != null && p !== out[out.length - 1]) out.push(p); return out; }
+function condChain(ev) {
+  const parts = chain([ev.code, ev.sub, ev.mid]);
+  const vt = ev.val ? 'Vrai' : 'Faux';
+  if (parts.length > 1 && parts[parts.length - 1] === vt) parts.pop();
+  return parts.map(p => esc(p)).join(ARW) + ARW + BOOL(ev.val);
 }
-function traceRow(interp, line, instr, kind, name, frame) {
+const COND_LABEL = { si: 'Test Si', sinonsi: 'Test SinonSi', tantque: 'Test TantQue', jusqua: "Test Jusqu'à" };
+const COND_KW = { si: 'Si', sinonsi: 'SinonSi', tantque: 'TantQue', jusqua: "Jusqu'à" };
+const mentions = (expr, name) => new RegExp('(^|[^A-Za-z0-9_\\u00C0-\\u024F])' + name.replace(/[^\wÀ-ɏ]/g, '') + '(?![A-Za-z0-9_\\u00C0-\\u024F\\[])', 'i').test(expr);
+
+function evInfo(ev) {
+  switch (ev.type) {
+    case 'assign': {
+      const rows = [];
+      if (!(ev.expr === ev.sub && ev.sub === ev.val)) {
+        let calc;
+        if (ev.sub === ev.val) calc = esc(ev.expr) + ARW + V(ev.val);
+        else if (ev.expr === ev.sub) calc = esc(ev.expr) + ' = ' + V(ev.val);
+        else calc = esc(ev.expr) + ARW + esc(ev.sub) + ' = ' + V(ev.val);
+        rows.push(['Calcul', calc]);
+      }
+      rows.push([ev.target, OLDNEW(ev.old, ev.val)]);
+      const literal = ev.expr === ev.val;
+      let say = literal ? `${ev.target} reçoit la valeur ${ev.val}.` : `On calcule d'abord ce qui est à droite de la flèche ←, puis on range le résultat dans ${ev.target}.`;
+      if (ev.old === undefined) say += ` C'est la première valeur de ${ev.target}.`;
+      else if (ev.old === ev.val) say += ` ${ev.target} valait déjà ${ev.val} : sa valeur ne change pas.`;
+      else say += ` L'ancienne valeur (${ev.old}) est effacée et remplacée par ${ev.val}.`;
+      let tip = null;
+      if (ev.old !== undefined && !ev.target.includes('[') && mentions(ev.expr, ev.target)) tip = `${ev.target} apparaît des deux côtés de ←. Le calcul utilise l'ancienne valeur (${ev.old}), puis le résultat écrase ${ev.target}.`;
+      return { cls: 'k-assign', label: 'Affectation', code: ev.code, rows, say, tip };
+    }
+    case 'read': {
+      const reads = ev.group || [ev];
+      return {
+        cls: 'k-io', label: 'Lecture', code: ev.code,
+        rows: reads.map(r => [r.target, OLDNEW(r.old, r.val) + ' <span class="xn">(tapé au clavier)</span>']),
+        say: reads.length > 1
+          ? `Lire attend que l'utilisateur tape une valeur pour chaque variable, dans l'ordre : ${reads.map(r => r.target + ' = ' + r.val).join(', ')}.`
+          : `L'algorithme attend que l'utilisateur tape une valeur. La valeur tapée (${ev.val}) est rangée dans ${ev.target}.`
+      };
+    }
+    case 'write': {
+      const hasVars = /[A-Za-zÀ-ɏ]/.test(ev.code.slice(7, -1).replace(/"[^"]*"/g, ''));
+      return {
+        cls: 'k-io', label: 'Affichage', code: ev.code, rows: [['Écran', `<span class="xout">${esc(ev.text) || '&nbsp;'}</span>`]],
+        say: hasVars ? 'Ecrire affiche à l\'écran : le texte entre guillemets est recopié tel quel, et chaque variable ou calcul est remplacé par sa valeur.' : 'Ecrire affiche à l\'écran le texte entre guillemets, tel quel.'
+      };
+    }
+    case 'cond': {
+      const rows = [['Évaluation', condChain(ev)]];
+      let say = '', tip = null;
+      if (ev.kind === 'si' || ev.kind === 'sinonsi') {
+        if (ev.val) say = 'La condition est vraie : on exécute les instructions qui suivent « Alors ». Les autres branches (SinonSi, Sinon) sont ignorées.';
+        else if (ev.next === 'sinonsi') say = 'La condition est fausse : on saute ce bloc et on teste la condition du SinonSi suivant.';
+        else if (ev.next === 'sinon') say = 'La condition est fausse : on saute ce bloc et on exécute les instructions du Sinon.';
+        else say = 'La condition est fausse et il n\'y a pas de Sinon : on saute directement après FinSi.';
+      } else if (ev.kind === 'tantque') {
+        if (ev.val) say = ev.iter === 1 ? 'La condition est vraie : on entre dans la boucle (tour n° 1).' : `La condition est toujours vraie : on refait un tour de boucle (tour n° ${ev.iter}).`;
+        else say = ev.iter === 1 ? 'La condition est fausse dès le départ : on n\'entre pas dans la boucle et on continue après FinTantQue.' : `La condition est devenue fausse : on sort de la boucle après ${plural(ev.iter - 1, 'tour')} et on continue après FinTantQue.`;
+        if (ev.val && ev.iter >= 2) rows.push(['Tours', `${ev.iter - 1} terminé${ev.iter > 2 ? 's' : ''}`]);
+      } else {
+        say = ev.val ? `La condition d'arrêt est vraie : la boucle s'arrête après ${plural(ev.iter, 'tour')}.` : `La condition d'arrêt est fausse : on recommence les instructions après Répéter (tour n° ${ev.iter + 1}).`;
+        tip = 'Répéter … Jusqu\'à recommence tant que la condition est FAUSSE et s\'arrête dès qu\'elle devient VRAIE (c\'est l\'inverse de TantQue).';
+      }
+      return { cls: ev.val ? 'k-true' : 'k-false', label: COND_LABEL[ev.kind], code: COND_KW[ev.kind] + ' ' + ev.code, rows, say, tip };
+    }
+    case 'for-init': {
+      const st = Number(ev.step), from = Number(ev.from);
+      const rows = [[ev.target, OLDNEW(ev.old, ev.from)]];
+      if (ev.count === 0) rows.push(['Tours prévus', 'aucun']);
+      else {
+        const vals = []; for (let k = 0; k < Math.min(ev.count, 5); k++) vals.push(C.fmt(from + k * st));
+        const last = C.fmt(from + (ev.count - 1) * st);
+        rows.push(['Tours prévus', `${V(ev.count)} <span class="xn">(${ev.target} = ${ev.count > 5 ? vals.slice(0, 3).join(', ') + ', …, ' + last : vals.join(', ')})</span>`]);
+      }
+      const dir = st > 0 ? `augmente de ${C.fmt(st)}` : `diminue de ${C.fmt(-st)}`;
+      const say = ev.count === 0
+        ? `${ev.target} vaut ${ev.from}, ce qui dépasse déjà la valeur de fin ${ev.to} : la boucle ne s'exécute aucune fois, on passe après FinPour.`
+        : `Le compteur ${ev.target} commence à ${ev.from}. À la fin de chaque tour il ${dir}, et la boucle s'arrête quand il dépasse ${ev.to}.`;
+      return { cls: 'k-loop', label: 'Boucle Pour', code: ev.code, rows, say };
+    }
+    case 'for-step': {
+      const cmp = ev.step > 0 ? (ev.cont ? '≤' : '>') : (ev.cont ? '≥' : '<');
+      const rows = [[ev.target, OLDNEW(ev.old, ev.val)], ['Test', `${esc(ev.val)} ${cmp} ${esc(ev.to)}${ARW}${ev.cont ? '<b class="vt-true">on continue</b>' : '<b class="vt-false">fin de la boucle</b>'}`]];
+      const say = ev.cont
+        ? `Fin du tour n° ${ev.iter}. Le compteur ${ev.target} passe à ${ev.val}. Comme ${ev.val} ${cmp} ${ev.to}, on fait un nouveau tour.`
+        : `Fin du tour n° ${ev.iter}. ${ev.target} vaut maintenant ${ev.val}, ce qui dépasse ${ev.to} : la boucle est terminée après ${plural(ev.iter, 'tour')}. On continue après FinPour.`;
+      return { cls: ev.cont ? 'k-loop' : 'k-false', label: `Pour · fin du tour ${ev.iter}`, code: `FinPour  (${ev.target} ← ${ev.target} ${ev.step > 0 ? '+' : '-'} ${C.fmt(Math.abs(ev.step))})`, rows, say };
+    }
+    case 'repeat-start':
+      return { cls: 'k-loop', label: 'Boucle Répéter', code: 'Répéter', rows: [], say: 'On entre dans la boucle Répéter. Ses instructions sont toujours exécutées au moins une fois ; la condition Jusqu\'à n\'est testée qu\'à la fin de chaque tour.' };
+    case 'switch': {
+      const subj = ev.code.replace(/^Selon /, '');
+      const rows = [['Valeur', (subj === ev.val ? '' : esc(subj) + ' = ') + V(ev.val)], ['Cas choisi', ev.matched ? V(ev.matched) : '<span class="xn">aucun</span>']];
+      const say = ev.matched === 'Sinon' ? `Aucun cas ne correspond à ${ev.val} : on exécute les instructions du Sinon.`
+        : ev.matched ? `${subj} vaut ${ev.val} : on exécute les instructions du cas « ${ev.matched} » et on ignore tous les autres cas.`
+          : `Aucun cas ne correspond à ${ev.val} et il n'y a pas de Sinon : on passe directement après FinSelon.`;
+      return { cls: 'k-loop', label: 'Selon', code: ev.code, rows, say };
+    }
+    case 'call': {
+      const what = ev.isFunc ? 'la fonction' : 'la procédure';
+      const rows = ev.params.map(p => [p.name, p.byRef ? `désigne la variable ${V(p.arg)} <span class="xn">(Var)</span>` : (p.val == null ? `tableau ${V(p.arg)}` : (p.arg === p.val ? V(p.val) : esc(p.arg) + ARW + V(p.val)))]);
+      const anyRef = ev.params.some(p => p.byRef);
+      let say = `On quitte provisoirement cet endroit pour exécuter ${what} ${ev.name} (ligne ${ev.fnLine}).` + (ev.params.length ? ' Chaque paramètre reçoit la valeur donnée dans l\'appel.' : '');
+      if (anyRef) say += ' Un paramètre Var est un autre nom pour la variable de l\'appelant : le modifier modifie aussi l\'original.';
+      return { cls: 'k-call', label: ev.isFunc ? 'Appel de fonction' : 'Appel de procédure', code: ev.code, rows, say };
+    }
+    case 'return':
+      return ev.isFunc
+        ? { cls: 'k-call', label: 'Retourner', code: 'Retourner ' + ev.val, rows: [['Résultat', V(ev.val)], ['Retour', `ligne ${ev.back}`]], say: `La fonction ${ev.name} se termine : la valeur ${ev.val} remplace l'appel ${ev.name}(…) à la ligne ${ev.back}. Ses variables locales disparaissent.` }
+        : { cls: 'k-call', label: 'Fin de procédure', code: 'FinProcédure', rows: [['Retour', `ligne ${ev.back}`]], say: `La procédure ${ev.name} est terminée : on revient à la ligne ${ev.back}, juste après l'appel. Ses variables locales disparaissent.` };
+  }
+  return null;
+}
+function inlineOf(ev) {
+  const cut = (t, n) => (t.length > n ? t.slice(0, n - 1) + '…' : t);
+  switch (ev.type) {
+    case 'assign': return { c: 'ia', t: `${ev.target} = ${ev.val}` };
+    case 'read': return { c: 'ia', t: `${ev.target} = ${ev.val}  (saisi)` };
+    case 'write': return { c: 'io', t: `affiche « ${cut(ev.text, 36)} »` };
+    case 'cond': { const sv = chain([ev.sub, ev.mid]).pop(); return { c: ev.val ? 'it' : 'if', t: `${sv && sv.length <= 34 && sv !== (ev.val ? 'Vrai' : 'Faux') ? sv + ' → ' : ''}${ev.val ? 'Vrai' : 'Faux'}` }; }
+    case 'for-init': return { c: 'ia', t: `${ev.target} = ${ev.from}` };
+    case 'for-step': return { c: ev.cont ? 'ia' : 'if', t: `${ev.target} = ${ev.val}${ev.cont ? '' : '  (fin de boucle)'}` };
+    case 'switch': return { c: 'ia', t: ev.matched ? `cas ${ev.matched}` : 'aucun cas' };
+    case 'call': return { c: 'ic', t: `appel de ${ev.name}` };
+    case 'return': return { c: 'ic', t: ev.isFunc ? `renvoie ${ev.val}` : `retour ligne ${ev.back}` };
+    case 'repeat-start': return { c: 'ic', t: 'début de boucle' };
+  }
+  return null;
+}
+function groupEvents(evs) {
+  const out = [];
+  for (const ev of evs) {
+    const p = out[out.length - 1];
+    if (ev.type === 'read' && p && p.type === 'read' && p.line === ev.line) { (p.group || (p.group = [Object.assign({}, p)])).push(ev); continue; }
+    out.push(Object.assign({}, ev));
+  }
+  return out;
+}
+function srcLine(l) { return (ta.value.split('\n')[l - 1] || '').trim(); }
+const hlCode = c => highlight(c).replace(/\n $/, '');
+
+function cardHTML(snap) {
+  if (!snap) {
+    return `<div class="xc"><div class="xc-intro"><b>Explications pas à pas</b>
+      <p>Cliquez sur <b>Pas à pas</b> (F10). À chaque clic, une instruction est exécutée et expliquée ici : le calcul effectué, le résultat, et la valeur des variables avant et après.</p>
+      <p>Le bouton <b>Précédent</b> permet de revenir en arrière pour revoir une étape.</p></div></div>`;
+  }
+  const L = S.hist.length ? S.hist.length - 1 : 0;
+  let h = '<div class="xc">';
+  h += `<div class="xc-top"><span class="xc-step">Étape ${snap.i}</span>${S.hi !== null ? `<span class="xc-sub">sur ${L}</span>` : ''}<span class="xc-legend"><i class="lg-done"></i>exécutée <i class="lg-next"></i>suivante</span></div>`;
+  if (S.hi !== null) h += `<div class="xc-review">Retour en arrière : vous revoyez l'étape ${snap.i}. <b>Suivant</b> avance d'une étape, <b>Exécuter</b> revient au présent.</div>`;
+  const evs = groupEvents(snap.events);
+  if (snap.i === 0 && !evs.length) {
+    h += `<div class="xe"><div class="xe-h"><span class="xe-kind k-start">Début</span></div><p class="xe-say">L'algorithme commence. Les variables sont créées mais n'ont pas encore de valeur : elles sont affichées « ? ».${snap.consts ? ' Les constantes ont déjà leur valeur.' : ''}</p></div>`;
+  }
+  for (const ev of evs) {
+    const x = evInfo(ev); if (!x) continue;
+    h += `<div class="xe"><div class="xe-h"><span class="xe-kind ${x.cls}">${esc(x.label)}</span><span class="xe-ln">ligne ${ev.line}</span></div>`;
+    h += `<pre class="xe-code syn">${hlCode(x.code)}</pre>`;
+    if (x.rows.length) h += `<dl class="xr">${x.rows.map(([a, b]) => `<dt>${esc(a)}</dt><dd>${b}</dd>`).join('')}</dl>`;
+    h += `<p class="xe-say">${esc(x.say)}</p>`;
+    if (x.tip) h += `<p class="xe-tip"><b>À retenir</b> ${esc(x.tip)}</p>`;
+    h += '</div>';
+  }
+  if (snap.end) {
+    if (snap.end === 'done') h += `<div class="xc-end ok"><b>Fin de l'algorithme.</b> ${plural(snap.steps, 'instruction')} exécutée${snap.steps > 1 ? 's' : ''}.</div>`;
+    else if (snap.end === 'error') h += `<div class="xc-end err"><b>Erreur ligne ${snap.errLine}.</b> ${esc(snap.err || '')}${srcLine(snap.errLine) ? `<pre class="xe-code syn xe-errcode">${hlCode(srcLine(snap.errLine))}</pre>` : ''}</div>`;
+    else h += '<div class="xc-end">Exécution arrêtée.</div>';
+  } else if (snap.line) {
+    h += `<div class="xc-next"><span>Prochaine instruction · ligne ${snap.line}</span><code class="syn">${hlCode(srcLine(snap.line))}</code></div>`;
+  }
+  if (S.hi === null && !S.running && S.hist.length > 1) h += `<button class="btn xc-replay" data-act="review0">${icon('back', 14)}Revoir depuis le début (${plural(S.hist.length - 1, 'étape')})</button>`;
+  if (S.hi === null && !S.running && S.truncated) h += '<p class="xn">Seules les 2 000 premières étapes ont été enregistrées.</p>';
+  return h + '</div>';
+}
+function varsHTML(snap) {
+  if (!snap) return '<div class="vars-empty">Lancez l\'algorithme (Exécuter ou Pas à pas) pour voir ici la valeur de chaque variable.</div>';
+  const prev = snap.prevFlat;
+  const changed = (k, v) => !!prev && prev.has(k) && prev.get(k) !== v;
+  let h = '';
+  for (const fr of snap.frames) {
+    h += `<div class="vg"><div class="vg-title">${esc(fr.title)}</div>`;
+    if (!fr.cells.length) h += '<div class="vars-empty">Aucune variable</div>';
+    for (const c of fr.cells) {
+      const k = fr.id + '/' + c.name.toLowerCase();
+      const tag = `<span class="vt">${esc(c.arr ? c.arr.label : c.tl)}${c.alias ? ' · Var' : ''}</span>${c.isConst ? '<span class="const-tag">const</span>' : ''}`;
+      if (c.arr) {
+        const a = c.arr; let body = '';
+        if (a.big) body = `<div class="vt">${a.n} éléments (trop grand pour être affiché)</div>`;
+        else if (a.lo.length === 1) {
+          const [r0, r1] = a.ranges[0]; let cells = '';
+          for (let i = r0; i <= r1; i++) {
+            const o = i - a.lo[0], x = a.data[o], ch = changed(k + '#' + o, x);
+            cells += `<div class="ac${ch ? ' chg' : ''}"${ch ? ` title="avant : ${esc(prev.get(k + '#' + o) ?? '?')}"` : ''}><span class="ai">${i}</span><span class="av${x == null ? ' undef' : ''}">${esc(x ?? '?')}</span></div>`;
+          }
+          body = `<div class="arr">${cells}</div>`;
+        } else if (a.lo.length === 2) {
+          const [r0, r1] = a.ranges[0], [c0, c1] = a.ranges[1];
+          let t = '<tr><th></th>'; for (let j = c0; j <= c1; j++) t += `<th>${j}</th>`; t += '</tr>';
+          for (let i = r0; i <= r1; i++) {
+            t += `<tr><th>${i}</th>`;
+            for (let j = c0; j <= c1; j++) {
+              const o = (i - a.lo[0]) * a.sizes[1] + (j - a.lo[1]), x = a.data[o];
+              t += `<td class="${changed(k + '#' + o, x) ? 'chg' : ''}${x == null ? ' undef' : ''}">${esc(x ?? '?')}</td>`;
+            }
+            t += '</tr>';
+          }
+          body = `<div class="mat-wrap"><table class="mat">${t}</table></div>`;
+        } else body = `<div class="vt">${a.data.length} éléments</div>`;
+        h += `<div class="var"><div class="var-h"><span class="vn">${esc(c.name)}</span>${tag}</div>${body}</div>`;
+        continue;
+      }
+      const ch = changed(k, c.val);
+      const val = c.val == null ? '<span class="undef" title="Pas encore de valeur">?</span>' : esc(c.val);
+      const shown = ch ? `<span class="vold">${esc(prev.get(k) ?? '?')}</span><span class="varr">→</span><span class="vv ${c.cls}">${val}</span>` : `<span class="vv ${c.cls}">${val}</span>`;
+      let hist = '';
+      if (c.hist) hist = `<div class="vhist" title="Évolution de ${esc(c.name)}">${c.more ? '<span>…</span><i>→</i>' : ''}${c.hist.map((x, n) => `<span${n === c.hist.length - 1 ? ' class="last"' : ''}>${esc(x)}</span>`).join('<i>→</i>')}</div>`;
+      h += `<div class="var${ch ? ' chg' : ''}"><div class="var-h"><span class="vn">${esc(c.name)}</span>${tag}<span class="vvw">${shown}</span></div>${hist}</div>`;
+    }
+    h += '</div>';
+  }
+  return h;
+}
+function renderStack(snap) {
+  const st = $('#stack');
+  if (!snap || snap.end || !snap.stack.length) { st.innerHTML = '<div class="vars-empty">Visible pendant le pas à pas.</div>'; return; }
+  st.innerHTML = snap.stack.map((c, i) => `<div class="sf${i === 0 ? ' top' : ''}">${esc(c.name)}<span>${i === 0 ? 'ligne ' + snap.line : 'appel ligne ' + snap.stack[i - 1].line}</span></div>`).join('');
+}
+function inlineMap(events) {
+  const m = new Map();
+  for (const ev of events) {
+    const it = inlineOf(ev); if (!it) continue;
+    if (!m.has(ev.line)) m.set(ev.line, []);
+    m.get(ev.line).push(it);
+  }
+  return m;
+}
+function showSnap(snap, opt) {
+  const o = Object.assign({ marks: true, scroll: true }, opt || {});
+  S.shown = snap;
+  S.execLine = snap && !snap.end && o.marks ? snap.line : 0;
+  S.doneMarks = snap && o.marks ? inlineMap(snap.events) : null;
+  refreshMarks();
+  if (snap && o.scroll) {
+    const l = S.execLine || (snap.events.length ? snap.events[snap.events.length - 1].line : 0);
+    if (l) scrollToLine(l);
+  }
+  const card = cardHTML(snap);
+  $('#explainR').innerHTML = card; $('#explainB').innerHTML = card;
+  const vh = varsHTML(snap);
+  $('#varsR').innerHTML = vh; $('#varsB').innerHTML = vh;
+  renderStack(snap);
+  syncReview(o.marks);
+  updateNav();
+}
+function clearSteps() {
+  S.hist = []; S.hi = null; S.liveSnap = null; S.doneMarks = null; S.truncated = false;
+  if (!S.running) { S.execLine = 0; showSnap(null); }
+}
+['#explainR', '#explainB'].forEach(sel => $(sel).addEventListener('click', e => {
+  const b = e.target.closest('[data-act="review0"]'); if (b && S.hist.length) reviewAt(0);
+}));
+
+/* ---------- tableau de déroulement ---------- */
+function traceStart() {
+  S.trace = { cols: null, rows: 0, capped: false, prev: null };
+  $('#traceWrap').innerHTML = '<div class="trace-note">Le tableau de déroulement se remplit pendant l\'exécution : une ligne par instruction, une colonne par variable.</div>';
+}
+function traceCols(interp) {
+  const cols = [];
+  for (const c of interp.global.vars.values()) {
+    const v = c.get();
+    if (v instanceof C.ArrayVal) { if (v.lo.length === 1 && v.data.length <= 12) cols.push(c); }
+    else if (!c.isConst) cols.push(c);
+  }
+  return cols;
+}
+function traceVals(T) {
+  return T.cols.map(c => {
+    const v = c.get();
+    if (v instanceof C.ArrayVal) return v.data.map(x => (x === undefined ? '?' : C.fmt(x))).join(' ');
+    return v === undefined ? '' : C.fmtQ(v);
+  });
+}
+function traceText(ev) {
+  switch (ev.type) {
+    case 'assign': return [ev.code, `${ev.target} = ${ev.val}`];
+    case 'read': return [`Lire(${ev.target})`, `${ev.target} = ${ev.val} (saisi)`];
+    case 'write': return [ev.code, `affiche « ${ev.text} »`];
+    case 'cond': return [COND_KW[ev.kind] + ' ' + ev.code, `${chain([ev.sub, ev.mid]).filter(x => x !== (ev.val ? 'Vrai' : 'Faux')).concat(ev.val ? 'Vrai' : 'Faux').join(' → ')}`];
+    case 'for-init': return [ev.code, `${ev.target} = ${ev.from}`];
+    case 'for-step': return [`FinPour : ${ev.target} ← ${ev.target} ${ev.step > 0 ? '+' : '-'} ${C.fmt(Math.abs(ev.step))}`, `${ev.target} = ${ev.val} → ${ev.cont ? 'on continue' : 'fin de boucle'}`];
+    case 'repeat-start': return ['Répéter', 'début de boucle'];
+    case 'switch': return [ev.code, ev.matched ? `cas ${ev.matched}` : 'aucun cas'];
+    case 'call': return [`appel ${ev.code}`, ev.params.map(p => p.byRef ? `${p.name} = ${p.arg} (Var)` : `${p.name} = ${p.val ?? p.arg}`).join(', ') || '—'];
+    case 'return': return ev.isFunc ? [`Retourner ${ev.val}`, `retour ligne ${ev.back}`] : ['FinProcédure', `retour ligne ${ev.back}`];
+  }
+  return [ev.type, ''];
+}
+function traceEv(ev, interp) {
   const T = S.trace; if (!T) return;
+  if (!T.cols) {
+    T.cols = traceCols(interp);
+    $('#traceWrap').innerHTML = `<table class="trace"><thead><tr><th>Étape</th><th>Ligne</th><th>Instruction</th><th>Résultat</th>${T.cols.map(c => `<th class="var-col">${esc(c.name)}</th>`).join('')}</tr></thead><tbody id="traceBody"></tbody></table>`;
+  }
   if (T.rows >= 1000) {
-    if (!T.capped) { T.capped = true; $('#traceWrap').insertAdjacentHTML('beforeend', '<div class="trace-note">Trace limitée aux 1 000 premières étapes.</div>'); }
+    if (!T.capped) { T.capped = true; $('#traceWrap').insertAdjacentHTML('beforeend', '<div class="trace-note">Tableau limité aux 1 000 premières lignes.</div>'); }
     return;
   }
   T.rows++;
-  const hitKey = frame === interp.global && name ? name.toLowerCase() : null;
-  const vals = T.cols.map(c => {
-    const cell = interp.global.vars.get(c.toLowerCase()); const v = cell ? cell.get() : undefined;
-    return `<td class="vc${hitKey === c.toLowerCase() ? ' hit' : ''}">${v === undefined ? '' : esc(C.fmtQ(v))}</td>`;
-  }).join('');
-  const tr = document.createElement('tr'); tr.className = kind;
-  tr.innerHTML = `<td class="ln">${T.rows}</td><td class="ln">${line}</td><td class="ins">${esc(instr)}</td>${vals}`;
+  const vals = traceVals(T), prev = T.prev;
+  T.prev = vals;
+  const [ins, res] = traceText(ev);
+  const kind = ev.type === 'cond' ? (ev.val ? 'ct' : 'cf') : ev.type === 'write' ? 'out' : ev.type === 'read' ? 'in' : (ev.type === 'call' || ev.type === 'return') ? 'call' : ev.type === 'for-step' && !ev.cont ? 'cf' : '';
+  const tr = document.createElement('tr');
+  tr.className = kind; tr.dataset.s = ev.s; tr.dataset.l = ev.line;
+  tr.innerHTML = `<td class="ln">${ev.s}</td><td class="ln">${ev.line}</td><td class="ins syn" title="${esc(ins)}">${hlCode(ins)}</td><td class="res" title="${esc(res)}">${esc(res)}</td>` +
+    vals.map((v, k) => `<td class="vc${prev && v !== prev[k] ? ' hit' : ''}">${esc(v)}</td>`).join('');
   $('#traceBody').appendChild(tr);
-  if (S.panelTab === 'trace') { const pv = $('#pv-trace'); pv.scrollTop = pv.scrollHeight; }
+  if (S.panelTab === 'trace' && !(S.running && (S.running.stepping || S.running.delay))) { const pv = $('#pv-trace'); pv.scrollTop = pv.scrollHeight; }
+}
+$('#traceWrap').addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-s]'); if (!tr) return;
+  const s = +tr.dataset.s;
+  if (S.state === 'reading' || (S.running && !S.paused) || !S.hist[s]) { gotoLine(+tr.dataset.l); return; }
+  if (S.hist[s] === S.liveSnap) exitReview(); else reviewAt(s);
+});
+function syncReview(highlightNow) {
+  const cut = S.hi === null ? Infinity : S.hi;
+  for (const el of con.children) { if (el.dataset.s !== undefined) el.classList.toggle('fut', +el.dataset.s > cut); }
+  const tb = $('#traceBody'); if (!tb) return;
+  const now = S.shown && highlightNow ? S.shown.i : -1;
+  let first = null;
+  for (const tr of tb.children) {
+    const s = +tr.dataset.s;
+    tr.classList.toggle('fut', s > cut);
+    const isNow = s === now;
+    tr.classList.toggle('now', isNow);
+    if (isNow && !first) first = tr;
+  }
+  if (first && S.panelTab === 'trace') {
+    const pv = $('#pv-trace');
+    const top = first.offsetTop - 30, bottom = first.offsetTop + first.offsetHeight;
+    if (top < pv.scrollTop || bottom > pv.scrollTop + pv.clientHeight) pv.scrollTop = Math.max(0, top - pv.clientHeight / 3);
+  } else if (!first && S.hi !== null && S.panelTab === 'trace') {
+    $('#pv-trace').scrollTop = 0;
+  }
+}
+
+/* ---------- navigation dans les étapes ---------- */
+function curIndex() { return S.hi !== null ? S.hi : (S.shown && S.shown.i !== undefined ? S.shown.i : S.hist.length); }
+function canNavigate() { return S.state !== 'reading' && !(S.running && !S.paused); }
+function reviewAt(i) {
+  if (!S.hist[i] || !canNavigate()) return;
+  S.hi = i;
+  showSnap(S.hist[i]);
+  $('#stText').textContent = `Retour en arrière · étape ${i} / ${S.hist.length - 1}`;
+}
+function exitReview() {
+  if (S.hi === null) return;
+  S.hi = null;
+  if (S.liveSnap) showSnap(S.liveSnap, { marks: S.liveMarks !== false });
+  setState(S.state, S.running ? S.running.line : S.lastEndLine);
+}
+function goBack() {
+  if (!canNavigate() || S.hist.length < 2) return;
+  const i = curIndex();
+  if (i - 1 >= 0) reviewAt(Math.min(i - 1, S.hist.length - 1));
+}
+function reviewNext() {
+  const i = S.hi + 1;
+  if (i < S.hist.length && S.hist[i] !== S.liveSnap) reviewAt(i);
+  else { exitReview(); if (!S.running) toast('Vous êtes revenu à la dernière étape'); }
+}
+function updateNav() {
+  const back = $('#btnBack');
+  back.disabled = !(canNavigate() && S.hist.length > 1 && curIndex() > 0);
+  $('#stepLbl').textContent = S.hi !== null ? 'Suivant' : 'Pas à pas';
+  $('#btnStep').title = S.hi !== null ? 'Étape suivante (F10)' : 'Exécuter une instruction et l\'expliquer (F10)';
 }
 
 /* ---------- exécution ---------- */
@@ -2638,25 +3206,27 @@ function setState(st, line) {
   S.state = st; app.dataset.state = st;
   const running = !!S.running;
   const paused = st === 'paused';
-  $('#runLbl').textContent = paused ? 'Continuer' : 'Exécuter';
+  $('#runLbl').textContent = paused || S.hi !== null ? 'Continuer' : 'Exécuter';
   $('#btnRun').title = paused ? 'Continuer jusqu\'au prochain point d\'arrêt (F5)' : 'Exécuter l\'algorithme (F5)';
-  $('#btnRun').disabled = running && !paused;
+  $('#btnRun').disabled = (running && !paused) || st === 'reading';
   $('#btnStep').disabled = st === 'reading';
   $('#btnPause').hidden = !(running && (st === 'running'));
   $('#btnStop').disabled = !running;
   ta.readOnly = running; $('#roBadge').hidden = !running;
   const txt = {
-    idle: 'Prêt', running: 'Exécution…', reading: `Saisie attendue · ligne ${line}`, paused: `Pause · ligne ${line}`,
-    stopped: 'Arrêté', error: `Erreur ligne ${line}`
+    idle: 'Prêt', running: 'Exécution…', reading: `Saisie attendue · ligne ${line}`, paused: `Pas à pas · prochaine ligne ${line}`,
+    stopped: 'Arrêté', error: `Erreur ligne ${line}`, done: 'Terminé'
   }[st] || st;
-  if (st !== 'done') $('#stText').textContent = txt;
+  $('#stText').textContent = txt;
+  updateNav();
 }
 function hooks(interp) {
   let lastAnim = 0;
   return {
-    write(text, line) { cLine(text); traceRow(interp, line, 'Écrire : ' + text, 'out', null, interp.frame); },
+    write(text) { cLine(text); },
     read(name, type, line) {
       return new Promise((resolve, reject) => {
+        const back = S.panelTab;
         showTab('console'); setState('reading', line);
         S.execLine = line; refreshMarks(); scrollToLine(line);
         const row = document.createElement('div'); row.className = 'cl in-row';
@@ -2677,33 +3247,47 @@ function hooks(interp) {
           const d = cLine('', 'echo'); d.innerHTML = `› ${esc(inp.value)}<span class="en">→ ${esc(name)}</span>`;
           if (!interp.stepping && !interp.delay) S.execLine = 0;
           setState('running'); refreshMarks();
+          if (back && back !== 'console' && (interp.stepping || interp.delay)) setTimeout(() => showTab(back), 350);
           resolve(r.v);
         });
       });
     },
-    onAssign(name, v, line, frame, how) {
-      traceRow(interp, line, how === 'lire' ? `Lire ${name} → ${C.fmtQ(v)}` : `${name} ← ${C.fmtQ(v)}`, how === 'lire' ? 'in' : '', name, frame);
+    onAssign(r, v, old) {
+      if (!interp.explain) return;
+      const c = rootCell(r);
+      if (!(c instanceof C.Cell) || c.isConst || v instanceof C.ArrayVal) return;
+      let h = cellHist.get(c);
+      if (!h) { h = [old === undefined ? '?' : C.fmtQ(old)]; cellHist.set(c, h); }
+      h.push(C.fmtQ(v));
+      if (h.length > 40) { h.splice(0, h.length - 40); h.cut = true; }
     },
-    onPause(line, frame) {
-      S.paused = true; S.execLine = line;
-      setState('paused', line); refreshMarks(); scrollToLine(line);
-      renderVars(interp, frame);
+    onEvent(ev) { ev.s = S.hist.length; S.pendingEv.push(ev); traceEv(ev, interp); },
+    onTick(line, frame) {
+      const live = interp.stepping || interp.delay > 0 || interp.breakpoints.has(line);
+      if (S.truncated && !live) { S.pendingEv = []; S.lastFlat = null; return; }
+      const snap = buildSnap(interp, line, frame);
+      snap.i = S.hist.length;
+      if (!S.truncated && S.hist.length < (live ? HIST_MAX : RECORD_LIMIT)) S.hist.push(snap);
+      else S.truncated = true;
+      S.liveSnap = snap;
+    },
+    onPause(line) {
+      S.paused = true; S.stepUsed = true;
+      setState('paused', line);
+      if (S.hi === null) showSnap(S.liveSnap);
       return new Promise(res => { S.resume = res; });
     },
-    onLine(line, frame) {
-      S.execLine = line; refreshMarks(); scrollToLine(line);
+    onLine(line) {
+      S.stepUsed = true;
+      if (S.hi !== null) return;
       const now = performance.now();
-      if (now - lastAnim > 40) { lastAnim = now; renderVars(interp, frame); }
+      if (now - lastAnim > 45 || interp.delay >= 120) { lastAnim = now; showSnap(S.liveSnap); }
+      else { S.execLine = line; refreshMarks(); scrollToLine(line); }
     }
   };
 }
 async function run(stepping) {
-  if (S.running) {
-    if (S.paused) { stepping ? stepNext() : contRun(); }
-    else if (stepping) S.running.stepping = true;
-    return;
-  }
-  const f = cur(); if (!f) return;
+  const f = cur(); if (!f || S.running) return;
   storeView();
   con.innerHTML = '';
   S.runErr = null; S.execLine = 0;
@@ -2712,25 +3296,28 @@ async function run(stepping) {
   catch (e) {
     if (!(e instanceof C.AlgoError)) throw e;
     S.syntaxErr = { line: e.line, col: e.col, msg: e.message, kind: 'syntax' };
+    clearSteps();
     cError(S.syntaxErr); renderProblems(); refreshMarks(); gotoLine(e.line); setState('error', e.line); showTab('console');
-    renderVars(null); return;
+    return;
   }
   renderProblems();
   const interp = new C.Interp(prog, null, { stepping, breakpoints: new Set(f.bps), delay: S.mode === 'anim' ? speedToDelay(S.speed) : 0 });
   interp.h = hooks(interp);
-  S.running = interp; S.paused = false; S.prevSnap = new Map();
-  traceStart(prog);
-  renderVars(interp, interp.global);
+  S.hist = []; S.hi = null; S.pendingEv = []; S.lastFlat = null; S.truncated = false; S.liveSnap = null; S.liveMarks = true; S.restartArmed = false;
+  S.stepUsed = stepping || S.mode === 'anim';
+  S.running = interp; S.paused = false;
+  traceStart();
+  showSnap(null);
   setState('running');
-  if (S.panelTab === 'problems') showTab('console');
+  if (stepping || S.mode === 'anim') showTab(isNarrow() ? 'vars' : 'trace');
+  else showTab('console');
   cLine(`▶ ${prog.name}`, 'info');
   const t0 = performance.now();
   let endState = 'done', endLine = 0;
   try {
     await interp.run();
     const ms = performance.now() - t0;
-    cLine(`✓ Terminé — ${interp.steps.toLocaleString('fr-FR')} instruction${interp.steps > 1 ? 's' : ''} exécutée${interp.steps > 1 ? 's' : ''}${S.mode === 'normal' && !stepping ? ' en ' + (ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(1) + ' s') : ''}`, 'ok');
-    $('#stText').textContent = `Terminé · ${interp.steps.toLocaleString('fr-FR')} instructions`;
+    cLine(`✓ Terminé — ${interp.steps.toLocaleString('fr-FR')} instruction${interp.steps > 1 ? 's' : ''} exécutée${interp.steps > 1 ? 's' : ''}${S.mode === 'normal' && !S.stepUsed ? ' en ' + (ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(1) + ' s') : ''}`, 'ok');
   } catch (e) {
     if (e instanceof C.StopSignal) { cLine('■ Exécution arrêtée', 'warn'); endState = 'stopped'; }
     else if (e instanceof C.AlgoError) {
@@ -2743,23 +3330,51 @@ async function run(stepping) {
     }
   } finally {
     if (S.pendingRead) { S.pendingRead.row.remove(); S.pendingRead = null; }
-    S.running = null; S.paused = false; S.resume = null; S.execLine = 0;
-    renderVars(interp, endState === 'error' ? interp.frame : interp.global);
+    const fin = buildSnap(interp, 0, endState === 'error' ? interp.frame : interp.global, { end: endState, err: S.runErr && S.runErr.msg, errLine: endLine });
+    fin.i = S.hist.length;
+    if (!S.truncated) S.hist.push(fin);
+    S.liveSnap = fin; S.liveMarks = S.stepUsed; S.lastEndLine = endLine;
+    if (!S.stepUsed && S.hist.length > 2 && endState !== 'stopped') {
+      const d = cLine('↺ Revoir cette exécution pas à pas, avec l\'explication de chaque instruction', 'link');
+      d.addEventListener('click', () => reviewAt(0));
+    }
+    S.running = null; S.paused = false; S.resume = null; S.hi = null;
     setState(endState, endLine);
+    if (endState === 'done') $('#stText').textContent = `Terminé · ${interp.steps.toLocaleString('fr-FR')} instructions`;
+    showSnap(fin, { marks: S.stepUsed, scroll: S.stepUsed });
     renderProblems(); refreshMarks();
     if (endState === 'error') scrollToLine(endLine);
   }
 }
-function contRun() { if (!S.running || !S.paused) return; S.running.stepping = false; S.paused = false; S.execLine = 0; setState('running'); refreshMarks(); const r = S.resume; S.resume = null; r && r(); }
+function contRun() { if (!S.running || !S.paused) return; S.running.stepping = false; S.paused = false; S.execLine = 0; S.doneMarks = null; setState('running'); refreshMarks(); const r = S.resume; S.resume = null; r && r(); }
 function stepNext() { if (!S.running || !S.paused) return; S.running.stepping = true; S.paused = false; setState('running'); const r = S.resume; S.resume = null; r && r(); }
 function stopRun() {
   const it = S.running; if (!it) return;
+  if (S.hi !== null) S.hi = null;
   it.stop();
   if (S.pendingRead) { const p = S.pendingRead; S.pendingRead = null; p.row.remove(); p.reject(new C.StopSignal()); }
   if (S.resume) { const r = S.resume; S.resume = null; r(); }
 }
-$('#btnRun').addEventListener('click', () => run(false));
-$('#btnStep').addEventListener('click', () => run(true));
+function stepAction() {
+  if (S.state === 'reading') return;
+  if (S.hi !== null) { reviewNext(); return; }
+  if (S.running) { if (S.paused) stepNext(); else S.running.stepping = true; return; }
+  if (S.liveSnap && S.liveSnap.end && S.liveMarks && !S.restartArmed) {
+    S.restartArmed = true;
+    toast('L\'algorithme est terminé. Appuyez encore sur Pas à pas pour recommencer.');
+    return;
+  }
+  run(true);
+}
+function runAction() {
+  if (S.state === 'reading') return;
+  if (S.hi !== null) { exitReview(); if (S.running && S.paused) contRun(); return; }
+  if (S.running) { if (S.paused) contRun(); return; }
+  run(false);
+}
+$('#btnRun').addEventListener('click', runAction);
+$('#btnStep').addEventListener('click', stepAction);
+$('#btnBack').addEventListener('click', goBack);
 $('#btnPause').addEventListener('click', () => { if (S.running) S.running.stepping = true; });
 $('#btnStop').addEventListener('click', stopRun);
 function setMode(m) {
@@ -2827,14 +3442,15 @@ $('#fsDown').addEventListener('click', () => setFont(S.fs - 1));
 document.addEventListener('keydown', e => {
   const k = e.key;
   if (k === 'F5' && e.shiftKey) { e.preventDefault(); stopRun(); return; }
-  if (k === 'F5') { e.preventDefault(); run(false); return; }
-  if (k === 'F10') { e.preventDefault(); run(true); return; }
+  if (k === 'F5') { e.preventDefault(); runAction(); return; }
+  if (k === 'F10' && e.shiftKey) { e.preventDefault(); goBack(); return; }
+  if (k === 'F10') { e.preventDefault(); stepAction(); return; }
   if (k === 'F9') { e.preventDefault(); toggleBp(caretLine()); return; }
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (k === 's' || k === 'S')) { e.preventDefault(); saveCopy(); return; }
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && (k === 'f' || k === 'F')) { e.preventDefault(); doFormat(); return; }
   if ((e.ctrlKey || e.metaKey) && (k === '=' || k === '+')) { e.preventDefault(); setFont(S.fs + 1); return; }
   if ((e.ctrlKey || e.metaKey) && k === '-') { e.preventDefault(); setFont(S.fs - 1); return; }
-  if ((e.ctrlKey || e.metaKey) && k === 'Enter') { e.preventDefault(); run(false); }
+  if ((e.ctrlKey || e.metaKey) && k === 'Enter') { e.preventDefault(); runAction(); }
 });
 window.addEventListener('resize', () => { syncScroll(); if (S.panelTab === 'vars') showTab('vars'); });
 
@@ -2842,7 +3458,7 @@ window.addEventListener('resize', () => { syncScroll(); if (S.panelTab === 'vars
 setMode(S.mode);
 setFont(S.fs);
 if (window.matchMedia('(max-width:760px)').matches) { setSidebar(false); $$('.activity button').forEach(b => b.classList.remove('on')); }
-loadActive(); renderAll(); renderVars(null); setState('idle'); showTab('console');
+loadActive(); renderAll(); showSnap(null); setState('idle'); showTab('console'); S.booted = true;
 if (firstVisit && S.active === 'ex:TriABulles.algo') {
   LS.set('visited', true);
   const m = S.mode; S.mode = 'normal';
