@@ -79,9 +79,3 @@ apprenants qui découvrent ou révisent les bases de l'algorithmique.
 
 **Wahiba BOUZYAN**\
 Formatrice en Développement Digital et Intelligence Artificielle
-
-## 📄 Licence
-
-Aucune licence n'est précisée dans ce fichier. Si vous souhaitez
-autoriser clairement la réutilisation ou la modification du code,
-ajoutez une licence adaptée au dépôt.
