@@ -66,20 +66,7 @@ Releases :\
 
 ## 🎥 Guide vidéo
 
-Une vidéo de démonstration pourra accompagner cette application afin de
-guider les utilisateurs pas à pas : présentation de l'interface,
-utilisation des principales fonctionnalités et exemple de test d'un
-algorithme.
 
-**Lien de la vidéo :** *À ajouter lorsque la vidéo sera publiée.*
-
-Pour ajouter la vidéo plus tard, remplacez la ligne ci-dessus par un
-lien YouTube, GitHub ou tout autre lien accessible aux utilisateurs. Par
-exemple :
-
-``` text
-https://youtu.be/IDENTIFIANT_DE_LA_VIDEO
-```
 
 ## 📘 Conseils pour commencer
 
