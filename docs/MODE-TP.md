@@ -49,6 +49,43 @@ plus transparent, et c'est aussi ce qui dissuade le plus.
 
 ---
 
+## Les contrôles
+
+Dans l'espace formatrice, **Nouveau → Un contrôle** :
+
+1. Téléversez le **sujet en PDF** (5 Mo maximum). AlgoLab repère les titres
+   « Exercice 1 (4 pts) », « Exercice 2 : … (6 points) »… et pré-remplit les
+   exercices et le barème. Vérifiez et corrigez si besoin.
+2. Fixez la **durée** (en minutes) et la **pénalité par tentative** (0,5 par défaut).
+3. **Créer le contrôle** → donnez le code aux stagiaires (bouton « Afficher le code en grand »).
+
+Côté stagiaire (AlgoLab → **Mode TP** → code du contrôle) :
+
+- le contrôle passe en **plein écran** ; en sortir bloque l'écran jusqu'au retour ;
+- le sujet PDF s'affiche dans la fenêtre (bouton **Sujet**) ;
+- un fichier par exercice, exécution possible pour tester ;
+- **tout copier-coller est désactivé** ;
+- un compte à rebours s'affiche ; à la fin, la copie est **rendue automatiquement** ;
+- une copie rendue ne peut plus être modifiée.
+
+**Tentatives de triche pénalisées** (−0,5 chacune par défaut) : collage venant de
+l'extérieur, glisser-déposer, sortie de la fenêtre ou du plein écran de plus de
+5 secondes. Le stagiaire voit le nombre de tentatives dans sa barre.
+
+**Correction** : bouton **Corriger** sur chaque stagiaire → saisissez les points de
+chaque exercice et un commentaire. La note finale se calcule seule :
+points − pénalités (jamais en dessous de 0). Une fausse alerte peut être annulée en
+décochant la tentative.
+
+**Copies en PDF** : bouton **PDF** (une copie) ou **Télécharger toutes les copies**
+(un zip avec un PDF par stagiaire et un tableau des notes). Chaque PDF contient le
+nom du stagiaire, le barème, l'énoncé et la réponse de chaque exercice, les points,
+les commentaires, les tentatives de triche et la note finale.
+
+> Pensez à **fermer le contrôle** à la fin : plus aucune copie ne peut alors être modifiée.
+
+---
+
 ## Mise en place (une seule fois, environ 15 minutes)
 
 Tant que Firebase n'est pas configuré, AlgoLab fonctionne en **mode démo** : tout
@@ -71,6 +108,10 @@ onglet et l'espace formatrice dans un autre), mais inutilisable avec une classe.
 2. Emplacement : `eur3 (Europe)` ou `europe-west1` → **Démarrer en mode production**.
 
 ### 4. Coller les règles de sécurité
+
+> Si vous aviez déjà publié des règles avant l'ajout des contrôles, recollez le
+> nouveau fichier `firestore.rules` et publiez à nouveau (il ajoute le sujet PDF et
+> les notes).
 
 1. Dans Firestore, onglet **Règles**.
 2. Remplacez tout le contenu par celui du fichier `firestore.rules` du dépôt.

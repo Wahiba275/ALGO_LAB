@@ -168,7 +168,45 @@ tr.hot td:first-child{box-shadow:inset 3px 0 0 var(--err)}
 
 .modal{position:fixed;inset:0;z-index:50;background:rgba(8,12,18,.55);display:grid;place-items:center;padding:16px}
 .mcard{width:min(560px,100%);max-height:calc(100% - 8px);display:flex;flex-direction:column;background:var(--win);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
-.mcard.wide{width:min(860px,100%)}
+.mcard.wide{width:min(900px,100%)}
+.choice{display:grid;gap:10px}
+.choice-b{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.choice-b:hover{border-color:var(--accent);background:var(--sel)}
+.choice-b b{font-size:15px}
+.choice-b span{color:var(--muted);font-size:13px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.pdfdrop{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border:1.5px dashed var(--accent);border-radius:10px;background:var(--sel)}
+.pdfdrop p{margin:0;font-size:12.5px}
+.pdfdrop .btn{align-self:flex-start}
+.exhead{display:flex;align-items:center;gap:10px;margin-top:4px}
+.exhead .btn{margin-left:auto}
+.exrow{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.exrow-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.exrow-h b{white-space:nowrap}
+.exrow-h .exT{flex:1;min-width:140px;height:32px}
+.exrow-h .pts{flex-direction:row;align-items:center;gap:6px;white-space:nowrap}
+.exrow-h .pts input{width:76px;height:32px}
+.exrow textarea{min-height:64px}
+.kind-ctrl{display:inline-block;font:700 10.5px var(--ui);letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:4px;background:var(--errbg);color:var(--err)}
+.kind-ctrl.sm{font-size:9.5px;padding:1px 6px;vertical-align:1px}
+.final{font:700 15px var(--mono);color:var(--accent-ink)}
+td.acts{white-space:nowrap;text-align:right}
+td.acts .btn{margin-left:4px}
+.grade{display:flex;flex-direction:column;gap:14px}
+.g-ex{display:flex;flex-direction:column;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.g-h{display:flex;align-items:center;gap:10px}
+.g-h b{flex:1;font-size:14px}
+.g-pts{flex-direction:row;align-items:center;gap:6px;font:600 14px var(--mono);color:var(--fg)}
+.g-pts input{width:84px;height:34px;font:700 15px var(--mono);text-align:center}
+.g-comm{height:34px}
+.g-t{flex-direction:row;align-items:baseline;gap:8px;font-weight:400;color:var(--fg);padding:5px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.g-t input{width:16px;height:16px;padding:0;accent-color:var(--err);align-self:center}
+.g-t .tm{font:12px var(--mono);color:var(--faint)}
+.g-t b{font-size:13px;color:var(--err)}
+.g-t .msg{font-size:12.5px;color:var(--muted);flex-basis:100%;padding-left:24px}
+.g-sum{margin-right:auto;font-size:13.5px;align-self:center}
+.g-sum b{font:700 15px var(--mono);color:var(--accent-ink)}
+@media (max-width:760px){.grid3{grid-template-columns:1fr}}
 .mh{display:flex;align-items:center;gap:10px;padding:16px 18px 10px}
 .mh h2{margin:0;font-size:17px;font-weight:600;flex:1;min-width:0}
 .mb{padding:4px 18px 18px;overflow:auto;display:flex;flex-direction:column;gap:12px}
@@ -194,7 +232,7 @@ summary{cursor:pointer;font-size:12.5px;color:var(--accent-ink)}
 .proj p{margin:0;color:var(--muted);font-size:16px}
 .proj .url{font:600 15px var(--mono);color:var(--fg)}
 
-.toasts{position:fixed;right:max(16px, env(safe-area-inset-right, 0px));bottom:max(16px, env(safe-area-inset-bottom, 0px));z-index:60;display:flex;flex-direction:column;gap:8px;width:min(360px, calc(100% - 32px))}
+.toasts{position:fixed;right:max(16px, env(safe-area-inset-right, 0px));top:calc(60px + env(safe-area-inset-top, 0px));z-index:60;display:flex;flex-direction:column;gap:8px;width:min(360px, calc(100% - 32px))}
 .toast{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--faint);border-radius:9px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:2px;animation:tin .25s ease-out;cursor:pointer}
 .toast.haute{border-left-color:var(--err)} .toast.moyenne{border-left-color:var(--amber)} .toast.ok{border-left-color:var(--ok)}
 .toast b{font-size:13px}
@@ -264,6 +302,17 @@ function checkName(prenom, nom) {
   if (cleanName(prenom).length < 2) throw fail('form', 'Indiquez votre prénom.');
   if (cleanName(nom).length < 2) throw fail('form', 'Indiquez votre nom.');
   if (!slug(prenom) || !slug(nom)) throw fail('form', 'Le prénom et le nom doivent contenir des lettres.');
+}
+/* champs d'un TP ou d'un contrôle */
+const CHUNK = 900000;
+function tpFields(tp) {
+  const o = { titre: String(tp.titre || '').slice(0, 200), enonce: String(tp.enonce || '').slice(0, 20000), groupe: String(tp.groupe || '').slice(0, 60), exemples: !!tp.exemples, type: tp.type === 'controle' ? 'controle' : 'tp' };
+  if (o.type === 'controle') {
+    o.exercices = (tp.exercices || []).map(x => ({ titre: String(x.titre || '').slice(0, 200), enonce: String(x.enonce || '').slice(0, 8000), points: Math.max(0, Number(x.points) || 0) }));
+    o.duree = Math.max(0, Math.round(Number(tp.duree) || 0));
+    o.penalite = Math.max(0, Number(tp.penalite) || 0);
+  }
+  return o;
 }
 function checkPassword(pw) { if (String(pw || '').length < 6) throw fail('form', 'Mot de passe trop court : 6 caractères minimum.'); }
 async function sha256(s) {
@@ -358,7 +407,7 @@ function DemoImpl() {
     async createTP(tp) {
       needF(); const d = db(); const code = normCode(tp.code);
       if (d.tps[code]) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
-      d.tps[code] = { titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', exemples: !!tp.exemples, ouvert: true, createdAt: Date.now(), updatedAt: Date.now() };
+      d.tps[code] = Object.assign(tpFields(tp), { ouvert: true, createdAt: Date.now(), updatedAt: Date.now() });
       write(d); return code;
     },
     async updateTP(code, patch) { needF(); const d = db(); code = normCode(code); if (!d.tps[code]) throw fail('not-found', 'TP introuvable.'); Object.assign(d.tps[code], patch, { updatedAt: Date.now() }); write(d); },
@@ -392,7 +441,16 @@ function DemoImpl() {
       write(d);
     },
     watchParticipants(code, cb) { code = normCode(code); return watch(() => { const p = db().parts[code] || {}; cb(Object.values(p).map(x => Object.assign({}, x))); }); },
-    watchEvents(code, cb) { code = normCode(code); return watch(() => { const l = (db().events[code] || []).slice(-400).reverse(); cb(l.map(x => Object.assign({}, x))); }); },
+    watchEvents(code, cb) { code = normCode(code); return watch(() => { const l = (db().events[code] || []).slice(-1500).reverse(); cb(l.map(x => Object.assign({}, x))); }); },
+    async setSujet(code, b64, nom) {
+      needF(); code = normCode(code);
+      try { localStorage.setItem('algolab.demo.sujet.' + code, b64); }
+      catch (e) { throw fail('stockage', 'En mode démo, le PDF est trop lourd pour le navigateur (2 Mo maximum).'); }
+      const d = db(); if (d.tps[code]) { d.tps[code].sujetParts = Math.ceil(b64.length / CHUNK); d.tps[code].sujetNom = nom || 'sujet.pdf'; write(d); }
+    },
+    async getSujet(code) { me(); try { return localStorage.getItem('algolab.demo.sujet.' + normCode(code)) || ''; } catch (e) { return ''; } },
+    async setNote(code, uid, data) { needF(); const d = db(); d.notes = d.notes || {}; code = normCode(code); (d.notes[code] = d.notes[code] || {})[uid] = Object.assign({}, data, { updatedAt: Date.now() }); write(d); },
+    watchNotes(code, cb) { code = normCode(code); return watch(() => { const d = db(); cb(Object.assign({}, (d.notes || {})[code] || {})); }); },
     async resetDemo() { needF(); try { localStorage.removeItem(KEY); } catch (e) { /* rien */ } if (chan) chan.postMessage('change'); setSession(null); notifyAuth(); }
   };
 }
@@ -493,7 +551,7 @@ function FirebaseImpl() {
       const ref = tpRef(tp.code);
       const ex = await ref.get();
       if (ex.exists) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
-      await ref.set({ titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', exemples: !!tp.exemples, ouvert: true, createdAt: ts(), updatedAt: ts() });
+      await ref.set(Object.assign(tpFields(tp), { ouvert: true, createdAt: ts(), updatedAt: ts() }));
       return ref.id;
     }),
     updateTP: wrap(async (code, patch) => { await tpRef(code).update(Object.assign({}, patch, { updatedAt: ts() })); }),
@@ -526,9 +584,30 @@ function FirebaseImpl() {
       ready().then(() => { if (!stop) un = tpRef(code).collection('participants').onSnapshot(s => cb(snapList(s)), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
       return () => { stop = true; if (un) un(); };
     },
+    setSujet: wrap(async (code, b64, nom) => {
+      const ref = tpRef(code);
+      const old = (await ref.get()).data() || {};
+      const n = Math.ceil(b64.length / CHUNK);
+      for (let i = 0; i < n; i++) await ref.collection('sujet').doc(String(i)).set({ i, data: b64.slice(i * CHUNK, (i + 1) * CHUNK) });
+      for (let i = n; i < (old.sujetParts || 0); i++) await ref.collection('sujet').doc(String(i)).delete();
+      await ref.update({ sujetParts: n, sujetNom: nom || 'sujet.pdf', updatedAt: ts() });
+    }),
+    getSujet: wrap(async code => {
+      const ref = tpRef(code);
+      const t = (await ref.get()).data() || {};
+      let out = '';
+      for (let i = 0; i < (t.sujetParts || 0); i++) { const d = await ref.collection('sujet').doc(String(i)).get(); out += d.exists ? d.data().data : ''; }
+      return out;
+    }),
+    setNote: wrap(async (code, u, data) => { await tpRef(code).collection('notes').doc(u).set(Object.assign({}, data, { updatedAt: ts() })); }),
+    watchNotes(code, cb, onErr) {
+      let un = null, stop = false;
+      ready().then(() => { if (!stop) un = tpRef(code).collection('notes').onSnapshot(s => { const o = {}; s.docs.forEach(d => { o[d.id] = conv(d.data()); }); cb(o); }, e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
+      return () => { stop = true; if (un) un(); };
+    },
     watchEvents(code, cb, onErr) {
       let un = null, stop = false;
-      ready().then(() => { if (!stop) un = tpRef(code).collection('evenements').orderBy('at', 'desc').limit(400).onSnapshot(s => cb(snapList(s)), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
+      ready().then(() => { if (!stop) un = tpRef(code).collection('evenements').orderBy('at', 'desc').limit(1500).onSnapshot(s => cb(snapList(s)), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
       return () => { stop = true; if (un) un(); };
     }
   };
@@ -578,7 +657,7 @@ if (typeof module !== 'undefined') module.exports = AlgoBackend;
   </header>
   <div class="layout">
     <aside class="col tps">
-      <div class="col-h">Mes TP <span class="grow"></span><button class="btn sm primary" id="newTpBtn">Nouveau TP</button></div>
+      <div class="col-h">TP et contrôles <span class="grow"></span><button class="btn sm primary" id="newTpBtn">Nouveau</button></div>
       <div class="col-b" id="tpList"></div>
     </aside>
     <main class="main" id="main"></main>
@@ -605,7 +684,7 @@ const LS = { get(k, d) { try { const v = localStorage.getItem('algolab.f.' + k);
 const EV = {
   collage_bloque: 'Collage externe bloqué', depot_bloque: 'Glisser-déposer bloqué', texte_ia: 'Texte typique d\'une IA',
   insertion_massive: 'Gros bloc inséré d\'un coup', frappe_rapide: 'Frappe anormalement rapide', sortie_fenetre: 'A quitté la fenêtre AlgoLab',
-  import_fichier: 'Ouverture de fichier', connexion: 'A rejoint le TP', reconnexion: 'Reconnexion', rendu: 'TP rendu', quitte_tp: 'A quitté le TP'
+  import_fichier: 'Ouverture de fichier', connexion: 'A rejoint le TP', reconnexion: 'Reconnexion', rendu: 'Travail rendu', quitte_tp: 'A quitté le TP'
 };
 const ONLINE_MS = 150000;
 const hhmm = t => (t ? new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '');
@@ -699,6 +778,7 @@ function startDash() {
 }
 function stopAll() {
   if (F.unTPs) { F.unTPs(); F.unTPs = null; }
+  if (F.unNotes) { F.unNotes(); F.unNotes = null; } F.notesCode = null; F.notes = {};
   if (F.unPartsSel) { F.unPartsSel(); F.unPartsSel = null; }
   for (const k in F.watchers) F.watchers[k]();
   F.watchers = {}; F.parts = []; F.partsCode = null;
@@ -756,9 +836,9 @@ function selectTP(code) {
 
 function renderTPs() {
   const box = $('#tpList');
-  if (!F.tps.length) { box.innerHTML = '<div class="empty"><b>Aucun TP pour l\'instant.</b><br>Cliquez sur « Nouveau TP » : vous obtiendrez un code à donner à vos stagiaires.</div>'; return; }
+  if (!F.tps.length) { box.innerHTML = '<div class="empty"><b>Aucun TP ni contrôle pour l\'instant.</b><br>Cliquez sur « Nouveau » : vous obtiendrez un code à donner à vos stagiaires.</div>'; return; }
   box.innerHTML = F.tps.map(t => `<button class="tpi${t.code === F.sel ? ' on' : ''}" data-code="${esc(t.code)}">
-    <b>${esc(t.titre)}</b>
+    <b>${isCtrl(t) ? '<span class="kind-ctrl sm">Contrôle</span> ' : ''}${esc(t.titre)}</b>
     <span class="l2"><span class="code">${esc(t.code)}</span>${t.groupe ? '· ' + esc(t.groupe) : ''}<span class="state${t.ouvert ? ' open' : ''}">${t.ouvert ? 'ouvert' : 'fermé'}</span></span>
     ${F.unseen[t.code] ? `<span class="unseen">${F.unseen[t.code]}</span>` : ''}
   </button>`).join('');
@@ -779,8 +859,10 @@ const online = p => p.enLigne !== false && p.lastSeen && Date.now() - p.lastSeen
 function renderMain() {
   const main = $('#main');
   const tp = F.tps.find(t => t.code === F.sel);
+  syncNotes();
+  if (isCtrl(tp)) { renderMainCtrl(tp); return; }
   if (!tp) {
-    main.innerHTML = `<div class="empty" style="max-width:520px;margin:40px auto"><b>Bienvenue dans votre espace formatrice.</b><br><br>1. Créez un TP avec « Nouveau TP ».<br>2. Donnez le code à vos stagiaires : dans AlgoLab, ils cliquent sur « Mode TP », créent leur compte et entrent le code.<br>3. Suivez ici leur travail et les alertes en direct.</div>`;
+    main.innerHTML = `<div class="empty" style="max-width:520px;margin:40px auto"><b>Bienvenue dans votre espace formatrice.</b><br><br>1. Créez un TP ou un contrôle avec « Nouveau ».<br>2. Donnez le code à vos stagiaires : dans AlgoLab, ils cliquent sur « Mode TP », créent leur compte et entrent le code.<br>3. Suivez ici leur travail et les alertes en direct.</div>`;
     return;
   }
   const by = statsFor(tp.code);
@@ -899,7 +981,7 @@ function tpForm(tp) {
     }
   });
 }
-$('#newTpBtn').addEventListener('click', () => tpForm(null));
+$('#newTpBtn').addEventListener('click', () => newChoice());
 function appUrl() { try { return new URL('../app/', location.href).href; } catch (e) { return 'AlgoLab'; } }
 function projector(tp) {
   modal({
@@ -910,6 +992,7 @@ function projector(tp) {
   });
 }
 function openStudent(uid) {
+  if (isCtrl(F.tps.find(t => t.code === F.sel))) { gradeModal(uid); return; }
   const p = (F.partsCode === F.sel ? F.parts : []).find(x => x.uid === uid);
   const evs = (F.events[F.sel] || []).filter(e => e.uid === uid);
   const name = p ? `${p.nom} ${p.prenom}` : (evs[0] ? `${evs[0].nom} ${evs[0].prenom}` : 'Stagiaire');
@@ -984,6 +1067,485 @@ $('#notifBtn').addEventListener('click', async () => {
 });
 $('#soundBtn').addEventListener('click', () => { F.sound = !F.sound; LS.set('sound', F.sound); renderToggles(); if (F.sound) beep(false); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden && F.sel) { F.unseen[F.sel] = 0; LS.set('unseen', F.unseen); updateTitle(); renderTPs(); } });
+
+/* ============================================================
+   Contrôles : création (PDF), correction, note finale, copies PDF
+   ============================================================ */
+const PEN_TYPES = ['collage_bloque', 'depot_bloque', 'sortie_fenetre'];
+const fmtN = n => (Math.round(n * 100) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+const isCtrl = tp => tp && tp.type === 'controle';
+const ctrlTotal = tp => (tp.exercices || []).reduce((a, x) => a + (Number(x.points) || 0), 0);
+
+/* ---------- chargement des bibliothèques (copie locale, sinon CDN) ---------- */
+function loadLib(globalName, local, cdn) {
+  if (window[globalName]) return Promise.resolve(window[globalName]);
+  const one = src => new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src;
+    s.onload = () => (window[globalName] ? res(window[globalName]) : rej(new Error(globalName)));
+    s.onerror = () => { s.remove(); rej(new Error(globalName)); };
+    document.head.appendChild(s);
+  });
+  return one(local).catch(() => one(cdn)).catch(() => { throw new Error('Bibliothèque introuvable (' + globalName + ') : vérifiez la connexion internet.'); });
+}
+const libPdfJs = () => loadLib('pdfjsLib', '../assets/lib/pdf.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js').then(l => {
+  l.GlobalWorkerOptions.workerSrc = window.__pdfWorkerOk === false ? 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js' : new URL('../assets/lib/pdf.worker.min.js', location.href).href;
+  return l;
+});
+const libJsPdf = () => loadLib('jspdf', '../assets/lib/jspdf.umd.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+const libZip = () => loadLib('JSZip', '../assets/lib/jszip.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+let FONTS = null;
+async function loadFonts() {
+  if (FONTS) return FONTS;
+  const get = async n => {
+    const r = await fetch(new URL('../assets/fonts/' + n, location.href).href);
+    if (!r.ok) throw new Error('Police introuvable : ' + n);
+    const buf = new Uint8Array(await r.arrayBuffer());
+    let bin = ''; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+    return btoa(bin);
+  };
+  const [reg, bold, mono] = await Promise.all([get('DejaVuSans.ttf'), get('DejaVuSans-Bold.ttf'), get('DejaVuSansMono.ttf')]);
+  FONTS = { reg, bold, mono };
+  return FONTS;
+}
+
+/* ---------- lecture du PDF et détection des exercices ---------- */
+async function pdfToText(bytes) {
+  const lib = await libPdfJs();
+  const pdf = await lib.getDocument({ data: bytes.slice(0) }).promise;
+  let out = '';
+  for (let n = 1; n <= pdf.numPages; n++) {
+    const page = await pdf.getPage(n);
+    const tc = await page.getTextContent();
+    const lines = [];
+    for (const it of tc.items) {
+      if (!('str' in it)) continue;
+      const y = Math.round(it.transform[5]);
+      let ln = lines.find(l => Math.abs(l.y - y) <= 2);
+      if (!ln) { ln = { y, parts: [] }; lines.push(ln); }
+      ln.parts.push({ x: it.transform[4], s: it.str });
+    }
+    lines.sort((a, b) => b.y - a.y);
+    out += lines.map(l => l.parts.sort((a, b) => a.x - b.x).map(p => p.s).join(' ').replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n') + '\n';
+  }
+  return out;
+}
+function detectExercices(text) {
+  const lines = text.split('\n');
+  const head = /^\s*(exercice|exo|ex)\s*(n\s*°|no|n°)?\s*(\d{1,2})\b\s*[:.\-–—)]?\s*(.*)$/i;
+  const ptsRe = /(\d+(?:[.,]\d+)?)\s*(pts?|points?)\b/i;
+  const out = []; let curEx = null;
+  for (const raw of lines) {
+    const m = raw.match(head);
+    if (m) {
+      curEx = { titre: '', points: 0, lignes: [] };
+      let rest = m[4] || '';
+      const pm = rest.match(ptsRe);
+      if (pm) { curEx.points = parseFloat(pm[1].replace(',', '.')); rest = rest.replace(/[(\[]?\s*\d+(?:[.,]\d+)?\s*(pts?|points?)\s*[)\]]?/i, ''); }
+      curEx.titre = rest.replace(/^[\s:.\-–—)]+|[\s:.\-–—(]+$/g, '').trim();
+      out.push(curEx); continue;
+    }
+    if (curEx) {
+      if (!curEx.points && curEx.lignes.length < 2) { const pm = raw.match(ptsRe); if (pm) curEx.points = parseFloat(pm[1].replace(',', '.')); }
+      curEx.lignes.push(raw);
+    }
+  }
+  return out.map(x => ({ titre: x.titre.slice(0, 120), points: x.points || 0, enonce: x.lignes.join('\n').trim().slice(0, 8000) }));
+}
+
+/* ---------- création / modification d'un contrôle ---------- */
+function newChoice() {
+  modal({
+    title: 'Créer…',
+    body: `<div class="choice">
+      <button class="choice-b" id="chTp"><b>Un TP</b><span>Un fichier, surveillance du copier-coller et des sorties de fenêtre, suivi en direct.</span></button>
+      <button class="choice-b" id="chCtrl"><b>Un contrôle</b><span>Sujet en PDF, plusieurs exercices, plein écran, durée limitée, pénalités et note finale, copies en PDF.</span></button>
+    </div>`,
+    onOpen(box, close) {
+      $('#chTp').onclick = () => { close(); tpForm(null); };
+      $('#chCtrl').onclick = () => { close(); ctrlForm(null); };
+    }
+  });
+}
+function ctrlForm(tp) {
+  const edit = !!tp;
+  let ex = edit ? (tp.exercices || []).map(x => Object.assign({}, x)) : [];
+  let pdf = null; // { b64, nom }
+  const exHtml = () => ex.length ? ex.map((x, i) => `<div class="exrow" data-i="${i}">
+      <div class="exrow-h"><b>Exercice ${i + 1}</b><input class="exT" value="${esc(x.titre)}" placeholder="Titre (facultatif)"><label class="pts">Barème <input class="exP" type="number" min="0" step="0.25" value="${esc(x.points)}"> pts</label><button class="btn sm ghost exDel" type="button" title="Supprimer cet exercice">Supprimer</button></div>
+      <textarea class="exE" rows="3" placeholder="Énoncé de l'exercice">${esc(x.enonce)}</textarea>
+    </div>`).join('') : '<p class="empty" style="padding:12px 0">Aucun exercice : téléversez le sujet PDF ou ajoutez-les à la main.</p>';
+  const total = () => ex.reduce((a, x) => a + (Number(x.points) || 0), 0);
+  modal({
+    title: edit ? 'Modifier le contrôle' : 'Nouveau contrôle', wide: true,
+    body: `<form id="cF" novalidate>
+      <label>Titre<input id="cTitre" value="${esc(edit ? tp.titre : '')}" placeholder="ex. Contrôle n°1 : boucles et tableaux"></label>
+      <div class="grid3">
+        <label>Groupe <span class="opt">(facultatif)</span><input id="cGroupe" value="${esc(edit ? tp.groupe || '' : '')}" placeholder="ex. DEV101"></label>
+        <label>Durée <span class="opt">(minutes)</span><input id="cDuree" type="number" min="5" step="5" value="${esc(edit ? tp.duree || 60 : 60)}"></label>
+        <label>Pénalité par tentative <span class="opt">(points)</span><input id="cPen" type="number" min="0" step="0.25" value="${esc(edit ? tp.penalite : 0.5)}"></label>
+      </div>
+      <label>Code d'accès <span class="opt">${edit ? '(non modifiable)' : '(à donner aux stagiaires)'}</span><input id="cCode" class="code-in" value="${esc(edit ? tp.code : '')}" ${edit ? 'disabled' : ''}></label>
+      <div class="pdfdrop" id="cDrop">
+        <input type="file" id="cPdf" accept="application/pdf,.pdf" hidden>
+        <div><b>Sujet en PDF</b> <span class="opt" id="cPdfName">${edit && tp.sujetNom ? '(actuel : ' + esc(tp.sujetNom) + ')' : '(5 Mo maximum)'}</span></div>
+        <p class="opt">AlgoLab lit le PDF et repère les exercices (« Exercice 1 (4 pts) »…). Vérifiez ensuite la liste ci-dessous.</p>
+        <button class="btn sm" type="button" id="cPdfBtn">${edit && tp.sujetNom ? 'Remplacer le PDF' : 'Choisir le PDF du sujet'}</button>
+      </div>
+      <div class="exhead"><b>Exercices et barème</b><span class="opt" id="cTotal">Total : ${fmtN(total())} pts</span><button class="btn sm" type="button" id="cAdd">Ajouter un exercice</button></div>
+      <div id="cEx">${exHtml()}</div>
+      <p class="err" id="cErr" hidden></p>
+    </form>`,
+    actions: `<button class="btn" data-x>Annuler</button><button class="btn primary" id="cSave">${edit ? 'Enregistrer' : 'Créer le contrôle'}</button>`,
+    onOpen(box, close) {
+      const err = m => { $('#cErr').textContent = m; $('#cErr').hidden = !m; };
+      const code = $('#cCode');
+      if (!edit) { let touched = false; code.addEventListener('input', () => { touched = true; }); $('#cTitre').addEventListener('input', () => { if (!touched) code.value = genCode($('#cTitre').value); }); code.value = genCode('CTRL'); }
+      const sync = () => {
+        box.querySelectorAll('.exrow').forEach(r => { const i = +r.dataset.i; ex[i].titre = r.querySelector('.exT').value; ex[i].points = parseFloat(r.querySelector('.exP').value) || 0; ex[i].enonce = r.querySelector('.exE').value; });
+        $('#cTotal').textContent = `Total : ${fmtN(total())} pts`;
+      };
+      const redraw = () => { $('#cEx').innerHTML = exHtml(); bindRows(); $('#cTotal').textContent = `Total : ${fmtN(total())} pts`; };
+      const bindRows = () => {
+        box.querySelectorAll('.exrow input, .exrow textarea').forEach(el => el.addEventListener('input', sync));
+        box.querySelectorAll('.exDel').forEach(b => b.addEventListener('click', () => { sync(); ex.splice(+b.closest('.exrow').dataset.i, 1); redraw(); }));
+      };
+      bindRows();
+      $('#cAdd').onclick = () => { sync(); ex.push({ titre: '', points: 0, enonce: '' }); redraw(); };
+      $('#cPdfBtn').onclick = () => $('#cPdf').click();
+      $('#cPdf').onchange = async e => {
+        const file = e.target.files[0]; if (!file) return;
+        err('');
+        if (file.size > 5 * 1024 * 1024) { err('Le PDF dépasse 5 Mo : compressez-le ou retirez les images lourdes.'); return; }
+        $('#cPdfName').textContent = '(lecture en cours…)';
+        try {
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+          pdf = { b64: btoa(bin), nom: file.name };
+          const found = detectExercices(await pdfToText(bytes));
+          $('#cPdfName').textContent = `(${file.name} · ${found.length} exercice${found.length > 1 ? 's' : ''} détecté${found.length > 1 ? 's' : ''})`;
+          if (found.length) {
+            sync();
+            if (!ex.length || ex.every(x => !x.enonce && !x.titre)) ex = found;
+            else ex = found;
+            redraw();
+            if (!$('#cTitre').value.trim()) $('#cTitre').value = file.name.replace(/\.pdf$/i, '');
+          } else err('Aucun « Exercice 1 », « Exercice 2 »… trouvé dans le PDF : ajoutez les exercices à la main. Le PDF sera quand même montré aux stagiaires.');
+        } catch (x) { pdf = null; $('#cPdfName').textContent = ''; err('Lecture du PDF impossible : ' + x.message); }
+      };
+      $('#cSave').onclick = async () => {
+        sync(); err('');
+        const titre = $('#cTitre').value.trim();
+        if (titre.length < 3) return err('Donnez un titre au contrôle.');
+        if (!ex.length) return err('Ajoutez au moins un exercice (ou téléversez le sujet PDF).');
+        if (ex.some(x => !(Number(x.points) > 0))) return err('Chaque exercice doit avoir un barème (en points).');
+        const duree = parseInt($('#cDuree').value, 10);
+        if (!(duree >= 5)) return err('Indiquez une durée d\'au moins 5 minutes.');
+        const data = { type: 'controle', titre, groupe: $('#cGroupe').value.trim(), duree, penalite: Math.max(0, parseFloat($('#cPen').value) || 0), exercices: ex, enonce: '', exemples: false };
+        const btn = $('#cSave'); btn.disabled = true; btn.textContent = 'Enregistrement…';
+        try {
+          let c;
+          if (edit) { c = tp.code; await B.updateTP(c, { titre: data.titre, groupe: data.groupe, duree: data.duree, penalite: data.penalite, exercices: data.exercices.map(x => ({ titre: String(x.titre || ''), points: Number(x.points) || 0, enonce: String(x.enonce || '') })) }); }
+          else {
+            c = B.normCode(code.value);
+            if (!/^[A-Z0-9-]{4,20}$/.test(c)) throw new Error('Le code doit contenir 4 à 20 lettres, chiffres ou tirets.');
+            await B.createTP(Object.assign({ code: c }, data));
+          }
+          if (pdf) { btn.textContent = 'Envoi du PDF…'; await B.setSujet(c, pdf.b64, pdf.nom); }
+          close();
+          if (!edit) { selectTP(c); setTimeout(() => projector(Object.assign({ code: c }, data)), 50); }
+          toast({ cls: 'ok', title: edit ? 'Contrôle mis à jour' : 'Contrôle créé', body: edit ? '' : 'Code à donner aux stagiaires : ' + c });
+        } catch (x) { err(x.message); btn.disabled = false; btn.textContent = edit ? 'Enregistrer' : 'Créer le contrôle'; }
+      };
+    }
+  });
+}
+
+/* ---------- calcul des notes ---------- */
+function tentatives(code, uid, note) {
+  const ann = new Set((note && note.annulees) || []);
+  return (F.events[code] || []).filter(e => e.uid === uid && PEN_TYPES.includes(e.type) && !(e.details && e.details.enCours))
+    .sort((a, b) => (a.at || 0) - (b.at || 0)).map(e => Object.assign({}, e, { annulee: ann.has(e.id) }));
+}
+function noteOf(tp, uid) {
+  const note = (F.notes || {})[uid] || null;
+  const ex = tp.exercices || [];
+  const pts = ex.map((x, i) => { const v = note && note.points ? note.points[i] : undefined; return v === undefined || v === null || v === '' ? null : Number(v); });
+  const corrige = pts.every(v => v !== null);
+  const obtenus = pts.reduce((a, v) => a + (v || 0), 0);
+  const tent = tentatives(tp.code, uid, note);
+  const nb = tent.filter(t => !t.annulee).length;
+  const pen = nb * (Number(tp.penalite) || 0);
+  return { note, pts, corrige, obtenus, tent, nb, pen, finale: Math.max(0, obtenus - pen), total: ctrlTotal(tp) };
+}
+function syncNotes() {
+  const tp = F.tps.find(t => t.code === F.sel);
+  const want = isCtrl(tp) ? tp.code : null;
+  if (F.notesCode === want) return;
+  if (F.unNotes) { F.unNotes(); F.unNotes = null; }
+  F.notes = {}; F.notesCode = want;
+  if (want) F.unNotes = B.watchNotes(want, o => { F.notes = o; renderMain(); }, e => toast({ cls: 'haute', title: 'Erreur de lecture des notes', body: e.message }));
+}
+
+/* ---------- tableau de bord d'un contrôle ---------- */
+function ctrlStatus(tp, p) {
+  if (p.rendu) return `<span class="pill done">Rendu à ${hhmm(p.renduAt)}</span>`;
+  const dl = p.joinedAt && tp.duree ? p.joinedAt + tp.duree * 60000 : 0;
+  if (dl && Date.now() > dl + 60000) return '<span class="pill">Temps écoulé</span>';
+  const left = dl ? Math.max(0, Math.round((dl - Date.now()) / 60000)) : null;
+  return online(p) ? `<span class="pill on">En cours${left !== null ? ' · reste ' + left + ' min' : ''}</span>` : '<span class="pill">Hors ligne</span>';
+}
+function renderMainCtrl(tp) {
+  syncNotes();
+  const main = $('#main');
+  const parts = (F.partsCode === tp.code ? F.parts.slice() : []).sort((a, b) => (a.nom || '').localeCompare(b.nom || '') || (a.prenom || '').localeCompare(b.prenom || ''));
+  const rows = parts.map(p => ({ p, n: noteOf(tp, p.uid) }));
+  const total = ctrlTotal(tp);
+  const corr = rows.filter(r => r.n.corrige);
+  const moy = corr.length ? corr.reduce((a, r) => a + r.n.finale, 0) / corr.length : null;
+  const scroll = main.scrollTop;
+  main.innerHTML = `<div class="tp-head">
+      <div class="tp-h1"><span class="kind-ctrl">Contrôle</span><h1>${esc(tp.titre)}</h1><span class="bigcode">${esc(tp.code)}</span><span class="state${tp.ouvert ? ' open' : ''}">${tp.ouvert ? 'ouvert' : 'fermé'}</span></div>
+      <div class="tp-meta">${(tp.exercices || []).length} exercices · noté sur ${fmtN(total)} · ${tp.duree} min · pénalité ${fmtN(tp.penalite || 0)} par tentative${tp.groupe ? ' · Groupe ' + esc(tp.groupe) : ''}${tp.sujetNom ? ' · sujet : ' + esc(tp.sujetNom) : ''}</div>
+      <div class="tp-actions">
+        <button class="btn sm" id="aToggle">${tp.ouvert ? 'Fermer le contrôle' : 'Rouvrir le contrôle'}</button>
+        <button class="btn sm" id="aShow">Afficher le code en grand</button>
+        <button class="btn sm" id="aEdit">Modifier</button>
+        <button class="btn sm primary" id="aZip">Télécharger toutes les copies (PDF)</button>
+        <button class="btn sm" id="aCsv">Exporter les notes (CSV)</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="n">${parts.length}</span><span class="t">stagiaires</span></div>
+      <div class="stat ok"><span class="n">${parts.filter(p => p.rendu).length}</span><span class="t">copies rendues</span></div>
+      <div class="stat"><span class="n">${corr.length}</span><span class="t">copies corrigées</span></div>
+      <div class="stat"><span class="n">${moy === null ? '—' : fmtN(moy)}</span><span class="t">moyenne / ${fmtN(total)}</span></div>
+    </div>
+    <div class="tablewrap">${parts.length ? `<table><thead><tr><th>Stagiaire</th><th>Statut</th><th>Tentatives</th><th>Points</th><th>Note finale</th><th></th></tr></thead><tbody>
+      ${rows.map(({ p, n }) => `<tr data-uid="${esc(p.uid)}" class="${n.nb ? 'hot' : ''}">
+        <td class="nm"><b>${esc(p.nom)} ${esc(p.prenom)}</b><span>${esc(p.groupe || '')}</span></td>
+        <td>${ctrlStatus(tp, p)}</td>
+        <td>${n.nb ? `<span class="c h">${n.nb}</span> <span class="time">−${fmtN(n.pen)}</span>` : '<span class="c z">0</span>'}</td>
+        <td class="time">${n.pts.some(v => v !== null) ? fmtN(n.obtenus) + ' / ' + fmtN(total) : 'à corriger'}</td>
+        <td>${n.corrige ? `<b class="final">${fmtN(n.finale)}</b><span class="time"> / ${fmtN(total)}</span>` : '<span class="time">—</span>'}</td>
+        <td class="acts"><button class="btn sm" data-g="${esc(p.uid)}">Corriger</button><button class="btn sm ghost" data-pdf="${esc(p.uid)}">PDF</button></td>
+      </tr>`).join('')}</tbody></table>` : `<div class="empty">Aucun stagiaire n'a encore commencé ce contrôle.<br>Code à donner : <b class="mono">${esc(tp.code)}</b> (AlgoLab → <b>Mode TP</b> → entrer le code).</div>`}</div>`;
+  main.scrollTop = scroll;
+  $('#aToggle').onclick = async () => { try { await B.updateTP(tp.code, { ouvert: !tp.ouvert }); toast({ cls: 'ok', title: tp.ouvert ? 'Contrôle fermé' : 'Contrôle rouvert', body: tp.ouvert ? 'Les copies ne peuvent plus être modifiées.' : '' }); } catch (e) { toast({ cls: 'haute', title: 'Action impossible', body: e.message }); } };
+  $('#aShow').onclick = () => projector(tp);
+  $('#aEdit').onclick = () => ctrlForm(tp);
+  $('#aZip').onclick = () => downloadAll(tp, rows.map(r => r.p));
+  $('#aCsv').onclick = () => exportCtrlCsv(tp, rows);
+  main.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); gradeModal(b.dataset.g); }));
+  main.querySelectorAll('[data-pdf]').forEach(b => b.addEventListener('click', async e => { e.stopPropagation(); const p = parts.find(x => x.uid === b.dataset.pdf); b.disabled = true; try { await downloadOne(tp, p); } catch (x) { toast({ cls: 'haute', title: 'PDF impossible', body: x.message }); } b.disabled = false; }));
+  main.querySelectorAll('tbody tr').forEach(tr => tr.addEventListener('click', () => gradeModal(tr.dataset.uid)));
+}
+
+/* ---------- correction d'une copie ---------- */
+function gradeModal(uid) {
+  const tp = F.tps.find(t => t.code === F.sel); if (!isCtrl(tp)) return;
+  const p = (F.partsCode === tp.code ? F.parts : []).find(x => x.uid === uid);
+  if (!p) return;
+  const ex = tp.exercices || [];
+  const n0 = noteOf(tp, uid);
+  const st = { points: Object.assign({}, (n0.note && n0.note.points) || {}), comm: Object.assign({}, (n0.note && n0.note.commentaires) || {}), ann: new Set((n0.note && n0.note.annulees) || []) };
+  const rep = i => (p.reponses && p.reponses[i] != null ? String(p.reponses[i]) : '');
+  const body = `<div class="grade">
+      ${ex.map((x, i) => `<section class="g-ex">
+        <div class="g-h"><b>Exercice ${i + 1}${x.titre ? ' · ' + esc(x.titre) : ''}</b><label class="g-pts"><input type="number" min="0" max="${esc(x.points)}" step="0.25" data-pt="${i}" value="${st.points[i] ?? ''}" placeholder="—"> / ${fmtN(Number(x.points) || 0)}</label></div>
+        ${x.enonce ? `<details><summary>Énoncé</summary><pre class="extrait">${esc(x.enonce)}</pre></details>` : ''}
+        ${rep(i).trim() && !untouched(rep(i)) ? `<pre class="codebox">${rep(i).split('\n').map((l, k) => `<span class="ln">${k + 1}</span>${esc(l)}`).join('\n')}</pre>` : '<p class="empty" style="padding:6px 0">Pas de réponse.</p>'}
+        <input class="g-comm" data-cm="${i}" value="${esc(st.comm[i] || '')}" placeholder="Commentaire (facultatif, apparaît dans le PDF)">
+      </section>`).join('')}
+      <section class="g-ex"><div class="g-h"><b>Tentatives de triche</b><span class="time">${fmtN(tp.penalite || 0)} point par tentative</span></div>
+        <div id="gTent"></div></section>
+    </div>`;
+  modal({
+    title: `${esc(p.nom)} ${esc(p.prenom)} <span class="time">· ${esc(p.groupe || '')} · ${p.rendu ? 'rendu à ' + hhmm(p.renduAt) : 'non rendu'}</span>`, wide: true, body,
+    actions: `<span class="g-sum" id="gSum"></span><button class="btn" data-x>Fermer</button><button class="btn" id="gPdf">Enregistrer et PDF</button><button class="btn primary" id="gSave">Enregistrer</button>`,
+    onOpen(box, close) {
+      const tents = n0.tent;
+      const drawT = () => {
+        $('#gTent').innerHTML = tents.length ? tents.map(t => `<label class="g-t"><input type="checkbox" data-t="${esc(t.id)}" ${st.ann.has(t.id) ? '' : 'checked'}><span class="tm">${hhmmss(t.at)}</span><b>${esc(EV[t.type] || t.type)}</b><span class="msg">${esc(t.message || '')}</span></label>`).join('') + '<p class="time">Décochez une tentative pour annuler sa pénalité (fausse alerte).</p>' : '<p class="empty" style="padding:6px 0">Aucune tentative de triche détectée.</p>';
+        $('#gTent').querySelectorAll('[data-t]').forEach(c => c.addEventListener('change', () => { if (c.checked) st.ann.delete(c.dataset.t); else st.ann.add(c.dataset.t); sum(); }));
+      };
+      const sum = () => {
+        const pts = ex.map((x, i) => (st.points[i] === undefined || st.points[i] === '' || st.points[i] === null ? null : Number(st.points[i])));
+        const ob = pts.reduce((a, v) => a + (v || 0), 0);
+        const nb = tents.filter(t => !st.ann.has(t.id)).length;
+        const pen = nb * (Number(tp.penalite) || 0);
+        $('#gSum').innerHTML = `Points ${fmtN(ob)} − pénalités ${fmtN(pen)} = <b>${fmtN(Math.max(0, ob - pen))} / ${fmtN(ctrlTotal(tp))}</b>${pts.some(v => v === null) ? ' <span class="time">(correction incomplète)</span>' : ''}`;
+      };
+      box.querySelectorAll('[data-pt]').forEach(inp => inp.addEventListener('input', () => {
+        const i = +inp.dataset.pt, max = Number(ex[i].points) || 0;
+        let v = inp.value === '' ? '' : Math.min(max, Math.max(0, parseFloat(inp.value.replace(',', '.')) || 0));
+        st.points[i] = v; if (v !== '' && String(v) !== inp.value) inp.value = v; sum();
+      }));
+      box.querySelectorAll('[data-cm]').forEach(inp => inp.addEventListener('input', () => { st.comm[+inp.dataset.cm] = inp.value; }));
+      drawT(); sum();
+      const save = async () => {
+        const points = {}; ex.forEach((x, i) => { if (st.points[i] !== undefined && st.points[i] !== '' && st.points[i] !== null) points[i] = Number(st.points[i]); });
+        const data = { points, commentaires: st.comm, annulees: [...st.ann], nom: p.nom, prenom: p.prenom };
+        await B.setNote(tp.code, uid, data);
+        F.notes = Object.assign({}, F.notes, { [uid]: Object.assign({}, data, { updatedAt: Date.now() }) });
+      };
+      $('#gSave').onclick = async () => { try { await save(); toast({ cls: 'ok', title: 'Correction enregistrée' }); close(); renderMain(); } catch (e) { toast({ cls: 'haute', title: 'Enregistrement impossible', body: e.message }); } };
+      $('#gPdf').onclick = async () => { try { await save(); await downloadOne(tp, p); close(); renderMain(); } catch (e) { toast({ cls: 'haute', title: 'PDF impossible', body: e.message }); } };
+    }
+  });
+}
+
+/* ---------- copie en PDF ---------- */
+async function buildPdf(tp, p) {
+  const [{ jsPDF }, fonts] = await Promise.all([libJsPdf(), loadFonts()]);
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
+  doc.addFileToVFS('DejaVuSans.ttf', fonts.reg); doc.addFont('DejaVuSans.ttf', 'DV', 'normal');
+  doc.addFileToVFS('DejaVuSans-Bold.ttf', fonts.bold); doc.addFont('DejaVuSans-Bold.ttf', 'DV', 'bold');
+  doc.addFileToVFS('DejaVuSansMono.ttf', fonts.mono); doc.addFont('DejaVuSansMono.ttf', 'DVM', 'normal');
+  const W = 210, H = 297, M = 16, CW = W - 2 * M, BOTTOM = H - 18;
+  const TEAL = [14, 138, 121], INK = [28, 34, 48], MUTED = [91, 100, 116], RED = [201, 54, 46], LINE = [214, 219, 226], SOFT = [241, 243, 246];
+  const n = noteOf(tp, p.uid);
+  const ex = tp.exercices || [];
+  let y = M;
+  const color = c => doc.setTextColor(c[0], c[1], c[2]);
+  const font = (f, st, sz) => { doc.setFont(f, st); doc.setFontSize(sz); };
+  const need = h => { if (y + h > BOTTOM) { doc.addPage(); y = M; } };
+  const para = (txt, sz = 9.5, c = INK, indent = 0, lh = 4.4) => {
+    font('DV', 'normal', sz); color(c);
+    for (const line of doc.splitTextToSize(String(txt || ''), CW - indent)) { need(lh); doc.text(line, M + indent, y + 3.2); y += lh; }
+  };
+  // en-tête
+  doc.setFillColor(...TEAL); doc.rect(0, 0, W, 4, 'F');
+  font('DV', 'bold', 9); color(TEAL); doc.text('AlgoLab · Contrôle', M, y + 4);
+  font('DV', 'normal', 8.5); color(MUTED); doc.text(`Code ${tp.code}${tp.groupe ? ' · Groupe ' + tp.groupe : ''}`, W - M, y + 4, { align: 'right' });
+  y += 8;
+  font('DV', 'bold', 16); color(INK);
+  for (const l of doc.splitTextToSize(tp.titre || 'Contrôle', CW)) { doc.text(l, M, y + 6); y += 7; }
+  y += 2;
+  // stagiaire + note
+  const boxH = 30;
+  doc.setFillColor(...SOFT); doc.setDrawColor(...LINE); doc.roundedRect(M, y, CW, boxH, 2, 2, 'FD');
+  font('DV', 'bold', 13); color(INK); doc.text(`${p.nom || ''} ${p.prenom || ''}`.trim(), M + 5, y + 8);
+  font('DV', 'normal', 9); color(MUTED);
+  const dt = t => (t ? new Date(t).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—');
+  doc.text(`Groupe : ${p.groupe || '—'}`, M + 5, y + 14);
+  doc.text(`Début : ${dt(p.joinedAt)}`, M + 5, y + 19);
+  doc.text(`Copie rendue : ${p.rendu ? dt(p.renduAt) : 'non rendue'}${p.rendu && p.joinedAt ? ' (' + Math.round((p.renduAt - p.joinedAt) / 60000) + ' min)' : ''}`, M + 5, y + 24);
+  const nx = W - M - 58;
+  doc.setFillColor(255, 255, 255); doc.setDrawColor(...TEAL); doc.setLineWidth(0.6); doc.roundedRect(nx, y + 3, 54, boxH - 6, 2, 2, 'FD'); doc.setLineWidth(0.2);
+  font('DV', 'normal', 7.5); color(MUTED); doc.text('NOTE FINALE', nx + 27, y + 8.5, { align: 'center' });
+  font('DV', 'bold', 17); color(n.corrige ? TEAL : MUTED); doc.text(n.corrige ? `${fmtN(n.finale)} / ${fmtN(n.total)}` : 'à corriger', nx + 27, y + 17, { align: 'center' });
+  font('DV', 'normal', 7.5); color(MUTED); doc.text(`points ${fmtN(n.obtenus)} · pénalités −${fmtN(n.pen)}`, nx + 27, y + 22.5, { align: 'center' });
+  y += boxH + 6;
+  // barème
+  font('DV', 'bold', 11); color(INK); doc.text('Barème et points obtenus', M, y + 4); y += 7;
+  const col = [M, M + CW - 50, M + CW - 25];
+  font('DV', 'bold', 8.5); color(MUTED); doc.text('Exercice', col[0] + 2, y + 4); doc.text('Barème', col[1], y + 4); doc.text('Obtenu', col[2], y + 4);
+  y += 6; doc.setDrawColor(...LINE); doc.line(M, y, M + CW, y);
+  ex.forEach((x, i) => {
+    need(6.5);
+    font('DV', 'normal', 9); color(INK);
+    doc.text(doc.splitTextToSize(`${i + 1}. ${x.titre || 'Exercice ' + (i + 1)}`, CW - 58)[0], col[0] + 2, y + 4.4);
+    doc.text(fmtN(Number(x.points) || 0), col[1], y + 4.4);
+    doc.text(n.pts[i] === null ? '—' : fmtN(n.pts[i]), col[2], y + 4.4);
+    y += 6.5; doc.line(M, y, M + CW, y);
+  });
+  need(6.5); font('DV', 'normal', 9); color(RED);
+  doc.text(`Pénalités : ${n.nb} tentative${n.nb > 1 ? 's' : ''} de triche × ${fmtN(tp.penalite || 0)}`, col[0] + 2, y + 4.4); doc.text('−' + fmtN(n.pen), col[2], y + 4.4); y += 6.5;
+  doc.line(M, y, M + CW, y);
+  need(7); font('DV', 'bold', 10); color(INK); doc.text('Note finale', col[0] + 2, y + 5); doc.text(n.corrige ? `${fmtN(n.finale)} / ${fmtN(n.total)}` : 'à corriger', col[2] - 6, y + 5); y += 10;
+  // exercices
+  ex.forEach((x, i) => {
+    need(20);
+    doc.setFillColor(...TEAL); doc.rect(M, y, 1.4, 7, 'F');
+    font('DV', 'bold', 12); color(INK); doc.text(doc.splitTextToSize(`Exercice ${i + 1}${x.titre ? ' · ' + x.titre : ''}`, CW - 40)[0], M + 4, y + 5.2);
+    font('DV', 'bold', 10); color(TEAL); doc.text(`${n.pts[i] === null ? '—' : fmtN(n.pts[i])} / ${fmtN(Number(x.points) || 0)} pts`, W - M, y + 5.2, { align: 'right' });
+    y += 10;
+    if (x.enonce) { font('DV', 'bold', 8.5); color(MUTED); need(5); doc.text('ÉNONCÉ', M, y + 3); y += 5; para(x.enonce, 9.2, INK); y += 2; }
+    font('DV', 'bold', 8.5); color(MUTED); need(5); doc.text('RÉPONSE DU STAGIAIRE', M, y + 3); y += 5;
+    const code = p.reponses && p.reponses[i] != null ? String(p.reponses[i]).replace(/\t/g, '   ').replace(/\s+$/, '') : '';
+    if (!code.trim() || untouched(code)) { para('Pas de réponse (le modèle de départ n\'a pas été complété).', 9, MUTED); }
+    else {
+      font('DVM', 'normal', 8.2);
+      const lh = 3.9, numW = 9;
+      code.split('\n').forEach((ln, k) => {
+        const parts = doc.splitTextToSize(ln || ' ', CW - numW - 4);
+        parts.forEach((seg, j) => {
+          need(lh);
+          doc.setFillColor(...SOFT); doc.rect(M, y, CW, lh, 'F');
+          if (j === 0) { color(MUTED); doc.text(String(k + 1), M + numW - 2, y + 2.9, { align: 'right' }); }
+          color(INK); doc.text(seg, M + numW + 1, y + 2.9);
+          y += lh;
+        });
+      });
+      y += 1.5;
+    }
+    const cm = n.note && n.note.commentaires && n.note.commentaires[i];
+    if (cm) { y += 1; font('DV', 'bold', 8.5); color(TEAL); need(5); doc.text('COMMENTAIRE', M, y + 3); y += 5; para(cm, 9.2, INK); }
+    y += 5;
+  });
+  // triche
+  need(16);
+  font('DV', 'bold', 12); color(INK); doc.text('Tentatives de triche', M, y + 5); y += 9;
+  if (!n.tent.length) para('Aucune tentative de triche détectée pendant le contrôle.', 9.2, MUTED);
+  else n.tent.forEach(t => {
+    const txt = `${new Date(t.at).toLocaleTimeString('fr-FR')} · ${EV[t.type] || t.type}${t.message ? ' : ' + t.message : ''}`;
+    font('DV', 'normal', 9);
+    const lines = doc.splitTextToSize(txt, CW - 28);
+    need(lines.length * 4.4 + 1.5);
+    font('DV', 'normal', 9); color(INK);
+    lines.forEach((l, k) => doc.text(l, M + 2, y + 3.4 + k * 4.4));
+    font('DV', 'bold', 9); color(t.annulee ? MUTED : RED);
+    doc.text(t.annulee ? 'annulée' : '−' + fmtN(tp.penalite || 0), W - M, y + 3.4, { align: 'right' });
+    y += lines.length * 4.4 + 1.5;
+    doc.setDrawColor(...LINE); doc.line(M, y, M + CW, y); y += 1;
+  });
+  // pied de page
+  const pages = doc.getNumberOfPages();
+  const gen = new Date().toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    font('DV', 'normal', 7.5); color(MUTED);
+    doc.text(`AlgoLab · © 2026 Wahiba BOUZYAN · ${p.nom || ''} ${p.prenom || ''} · généré le ${gen}`, M, H - 9);
+    doc.text(`Page ${i} / ${pages}`, W - M, H - 9, { align: 'right' });
+  }
+  return doc;
+}
+const untouched = code => /^Algorithme\s*Exercice\d+\s*(Variables)?\s*Début\s*Fin$/i.test(code.split('\n').filter(l => !/^\s*\/\//.test(l)).join(' ').replace(/\s+/g, ' ').trim().replace(/ /g, ' '));
+const fileSafe = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9-]+/g, '_').replace(/^_+|_+$/g, '');
+const pdfName = (tp, p) => `${fileSafe(p.nom).toUpperCase()}_${fileSafe(p.prenom)}_${fileSafe(tp.code)}.pdf`;
+function saveBlob(blob, name) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+async function downloadOne(tp, p) {
+  toast({ cls: 'ok', title: 'Création du PDF…', body: `${p.nom} ${p.prenom}` });
+  const doc = await buildPdf(tp, p);
+  saveBlob(doc.output('blob'), pdfName(tp, p));
+}
+async function downloadAll(tp, parts) {
+  if (!parts.length) { toast({ cls: 'moyenne', title: 'Aucune copie à télécharger' }); return; }
+  const btn = $('#aZip'); if (btn) { btn.disabled = true; btn.textContent = 'Préparation des PDF…'; }
+  try {
+    const JSZip = await libZip();
+    const zip = new JSZip();
+    for (let i = 0; i < parts.length; i++) {
+      if (btn) btn.textContent = `PDF ${i + 1} / ${parts.length}…`;
+      const doc = await buildPdf(tp, parts[i]);
+      zip.file(pdfName(tp, parts[i]), doc.output('arraybuffer'));
+    }
+    zip.file(`Notes_${fileSafe(tp.code)}.csv`, ctrlCsv(tp, parts.map(p => ({ p, n: noteOf(tp, p.uid) }))));
+    saveBlob(await zip.generateAsync({ type: 'blob' }), `Copies_${fileSafe(tp.code)}.zip`);
+    toast({ cls: 'ok', title: 'Copies téléchargées', body: `${parts.length} PDF dans le fichier zip` });
+  } catch (e) { toast({ cls: 'haute', title: 'Téléchargement impossible', body: e.message }); }
+  if (btn) { btn.disabled = false; btn.textContent = 'Télécharger toutes les copies (PDF)'; }
+}
+function ctrlCsv(tp, rows) {
+  const ex = tp.exercices || [];
+  const head = ['Nom', 'Prénom', 'Groupe', 'Rendu à'].concat(ex.map((x, i) => `Ex${i + 1} (/${fmtN(Number(x.points) || 0)})`), ['Points', 'Tentatives', 'Pénalités', `Note finale (/${fmtN(ctrlTotal(tp))})`]);
+  const out = [head].concat(rows.map(({ p, n }) => [p.nom, p.prenom, p.groupe, p.rendu ? hhmm(p.renduAt) : 'non rendu'].concat(n.pts.map(v => (v === null ? '' : fmtN(v))), [fmtN(n.obtenus), n.nb, fmtN(n.pen), n.corrige ? fmtN(n.finale) : 'à corriger'])));
+  return '﻿' + out.map(r => r.map(csvCell).join(';')).join('\r\n');
+}
+function exportCtrlCsv(tp, rows) { saveBlob(new Blob([ctrlCsv(tp, rows)], { type: 'text/csv;charset=utf-8' }), `Notes_${fileSafe(tp.code)}_${new Date().toISOString().slice(0, 10)}.csv`); }
 
 /* ---------- démarrage ---------- */
 B.ready().then(() => B.onAuth(route)).catch(e => showLogin(e.message));

@@ -38,6 +38,17 @@ service cloud.firestore {
         allow delete: if formatrice();
       }
 
+      // Sujet du contrôle (PDF découpé en morceaux) : lisible par les connectés.
+      match /sujet/{part} {
+        allow read: if connecte();
+        allow write: if formatrice();
+      }
+
+      // Notes des contrôles : réservées à la formatrice.
+      match /notes/{uid} {
+        allow read, write: if formatrice();
+      }
+
       // Signalements : un stagiaire peut seulement en ajouter (jamais lire,
       // modifier ni effacer). La formatrice lit tout.
       match /evenements/{id} {

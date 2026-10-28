@@ -433,6 +433,26 @@ svg{display:block;flex:none}
 .md-enonce{white-space:pre-wrap;font-size:13.5px;line-height:1.6;padding:10px 12px;border-radius:7px;background:var(--pane);border:1px solid var(--line);max-height:46vh;overflow:auto}
 .md-warn{color:var(--amber);font-weight:600}
 .tp-hidden-note{font-style:italic}
+.tp-badge.ctrl{background:var(--err);color:var(--on-err)}
+.tp-clock.warn{color:var(--amber)}
+.tp-clock.crit{color:var(--err);animation:tpPulse 1s ease-in-out infinite}
+.tp-pen{color:var(--err);font-weight:600}
+.ctrl-facts{display:flex;gap:10px;flex-wrap:wrap}
+.ctrl-facts span{padding:6px 12px;border-radius:7px;background:var(--pane);border:1px solid var(--line);font-size:13px}
+.md-card.xl{width:min(1080px,100%);height:calc(100% - 8px);display:flex;flex-direction:column}
+.md-card.xl .md-body{flex:1;min-height:0;overflow:hidden}
+.sujet-box{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;align-items:center;padding:4px 2px 12px;background:var(--pane);border-radius:8px;border:1px solid var(--line)}
+.sujet-box .md-note,.sujet-box .md-err{align-self:stretch;margin:12px}
+.sujet-page{width:100%;max-width:1000px;height:auto;box-shadow:0 4px 18px rgba(0,0,0,.18);background:#fff}
+.ex-item{align-self:stretch;padding:12px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.ex-item h3{margin:0;font:600 14px var(--ui);text-transform:none;letter-spacing:0;color:var(--fg);display:flex;gap:10px;align-items:baseline}
+.ex-pts{font:600 12px var(--mono);color:var(--accent);margin-left:auto}
+.ex-item .linkbtn{align-self:flex-start;margin:0}
+.fsgate{position:absolute;inset:0;z-index:90;display:grid;place-items:center;padding:16px;background:rgba(8,12,18,.86)}
+.fs-card{width:min(440px,100%);background:var(--win);border:1px solid var(--line);border-top:4px solid var(--err);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:12px;text-align:center}
+.fs-card h2{margin:0;font:600 19px var(--ui);color:var(--err)}
+.fs-card p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.55}
+.fs-card .btn{align-self:center;height:38px}
 @media (max-width:760px){.tp-who,.tp-chip{display:none}.md-row{grid-template-columns:1fr}}
 
 /* ---------- responsive ---------- */
@@ -594,6 +614,7 @@ svg{display:block;flex:none}
     <button class="si" id="fsUp" title="Agrandir la taille du texte (utile au vidéoprojecteur)">A+</button>
   </footer>
   <div class="toast" id="toast" role="status"></div>
+  <div class="fsgate" id="fsGate" hidden></div>
   <div class="modal" id="modal" hidden></div>
 </div>
 
@@ -651,6 +672,17 @@ function checkName(prenom, nom) {
   if (cleanName(prenom).length < 2) throw fail('form', 'Indiquez votre prénom.');
   if (cleanName(nom).length < 2) throw fail('form', 'Indiquez votre nom.');
   if (!slug(prenom) || !slug(nom)) throw fail('form', 'Le prénom et le nom doivent contenir des lettres.');
+}
+/* champs d'un TP ou d'un contrôle */
+const CHUNK = 900000;
+function tpFields(tp) {
+  const o = { titre: String(tp.titre || '').slice(0, 200), enonce: String(tp.enonce || '').slice(0, 20000), groupe: String(tp.groupe || '').slice(0, 60), exemples: !!tp.exemples, type: tp.type === 'controle' ? 'controle' : 'tp' };
+  if (o.type === 'controle') {
+    o.exercices = (tp.exercices || []).map(x => ({ titre: String(x.titre || '').slice(0, 200), enonce: String(x.enonce || '').slice(0, 8000), points: Math.max(0, Number(x.points) || 0) }));
+    o.duree = Math.max(0, Math.round(Number(tp.duree) || 0));
+    o.penalite = Math.max(0, Number(tp.penalite) || 0);
+  }
+  return o;
 }
 function checkPassword(pw) { if (String(pw || '').length < 6) throw fail('form', 'Mot de passe trop court : 6 caractères minimum.'); }
 async function sha256(s) {
@@ -745,7 +777,7 @@ function DemoImpl() {
     async createTP(tp) {
       needF(); const d = db(); const code = normCode(tp.code);
       if (d.tps[code]) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
-      d.tps[code] = { titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', exemples: !!tp.exemples, ouvert: true, createdAt: Date.now(), updatedAt: Date.now() };
+      d.tps[code] = Object.assign(tpFields(tp), { ouvert: true, createdAt: Date.now(), updatedAt: Date.now() });
       write(d); return code;
     },
     async updateTP(code, patch) { needF(); const d = db(); code = normCode(code); if (!d.tps[code]) throw fail('not-found', 'TP introuvable.'); Object.assign(d.tps[code], patch, { updatedAt: Date.now() }); write(d); },
@@ -779,7 +811,16 @@ function DemoImpl() {
       write(d);
     },
     watchParticipants(code, cb) { code = normCode(code); return watch(() => { const p = db().parts[code] || {}; cb(Object.values(p).map(x => Object.assign({}, x))); }); },
-    watchEvents(code, cb) { code = normCode(code); return watch(() => { const l = (db().events[code] || []).slice(-400).reverse(); cb(l.map(x => Object.assign({}, x))); }); },
+    watchEvents(code, cb) { code = normCode(code); return watch(() => { const l = (db().events[code] || []).slice(-1500).reverse(); cb(l.map(x => Object.assign({}, x))); }); },
+    async setSujet(code, b64, nom) {
+      needF(); code = normCode(code);
+      try { localStorage.setItem('algolab.demo.sujet.' + code, b64); }
+      catch (e) { throw fail('stockage', 'En mode démo, le PDF est trop lourd pour le navigateur (2 Mo maximum).'); }
+      const d = db(); if (d.tps[code]) { d.tps[code].sujetParts = Math.ceil(b64.length / CHUNK); d.tps[code].sujetNom = nom || 'sujet.pdf'; write(d); }
+    },
+    async getSujet(code) { me(); try { return localStorage.getItem('algolab.demo.sujet.' + normCode(code)) || ''; } catch (e) { return ''; } },
+    async setNote(code, uid, data) { needF(); const d = db(); d.notes = d.notes || {}; code = normCode(code); (d.notes[code] = d.notes[code] || {})[uid] = Object.assign({}, data, { updatedAt: Date.now() }); write(d); },
+    watchNotes(code, cb) { code = normCode(code); return watch(() => { const d = db(); cb(Object.assign({}, (d.notes || {})[code] || {})); }); },
     async resetDemo() { needF(); try { localStorage.removeItem(KEY); } catch (e) { /* rien */ } if (chan) chan.postMessage('change'); setSession(null); notifyAuth(); }
   };
 }
@@ -880,7 +921,7 @@ function FirebaseImpl() {
       const ref = tpRef(tp.code);
       const ex = await ref.get();
       if (ex.exists) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
-      await ref.set({ titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', exemples: !!tp.exemples, ouvert: true, createdAt: ts(), updatedAt: ts() });
+      await ref.set(Object.assign(tpFields(tp), { ouvert: true, createdAt: ts(), updatedAt: ts() }));
       return ref.id;
     }),
     updateTP: wrap(async (code, patch) => { await tpRef(code).update(Object.assign({}, patch, { updatedAt: ts() })); }),
@@ -913,9 +954,30 @@ function FirebaseImpl() {
       ready().then(() => { if (!stop) un = tpRef(code).collection('participants').onSnapshot(s => cb(snapList(s)), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
       return () => { stop = true; if (un) un(); };
     },
+    setSujet: wrap(async (code, b64, nom) => {
+      const ref = tpRef(code);
+      const old = (await ref.get()).data() || {};
+      const n = Math.ceil(b64.length / CHUNK);
+      for (let i = 0; i < n; i++) await ref.collection('sujet').doc(String(i)).set({ i, data: b64.slice(i * CHUNK, (i + 1) * CHUNK) });
+      for (let i = n; i < (old.sujetParts || 0); i++) await ref.collection('sujet').doc(String(i)).delete();
+      await ref.update({ sujetParts: n, sujetNom: nom || 'sujet.pdf', updatedAt: ts() });
+    }),
+    getSujet: wrap(async code => {
+      const ref = tpRef(code);
+      const t = (await ref.get()).data() || {};
+      let out = '';
+      for (let i = 0; i < (t.sujetParts || 0); i++) { const d = await ref.collection('sujet').doc(String(i)).get(); out += d.exists ? d.data().data : ''; }
+      return out;
+    }),
+    setNote: wrap(async (code, u, data) => { await tpRef(code).collection('notes').doc(u).set(Object.assign({}, data, { updatedAt: ts() })); }),
+    watchNotes(code, cb, onErr) {
+      let un = null, stop = false;
+      ready().then(() => { if (!stop) un = tpRef(code).collection('notes').onSnapshot(s => { const o = {}; s.docs.forEach(d => { o[d.id] = conv(d.data()); }); cb(o); }, e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
+      return () => { stop = true; if (un) un(); };
+    },
     watchEvents(code, cb, onErr) {
       let un = null, stop = false;
-      ready().then(() => { if (!stop) un = tpRef(code).collection('evenements').orderBy('at', 'desc').limit(400).onSnapshot(s => cb(snapList(s)), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
+      ready().then(() => { if (!stop) un = tpRef(code).collection('evenements').orderBy('at', 'desc').limit(1500).onSnapshot(s => cb(snapList(s)), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
       return () => { stop = true; if (un) un(); };
     }
   };
@@ -2909,7 +2971,7 @@ function openFile(id) {
 }
 function closeTab(id) {
   if (S.running && id === S.active) return toast('Arrêtez l\'exécution avant de fermer ce fichier');
-  if (TP.active && id === TP.fileId) return toast('Le fichier du TP reste ouvert pendant toute la durée du TP');
+  if (tpIsFile(id)) return toast('Ce fichier reste ouvert pendant toute la durée du TP ou du contrôle');
   storeView();
   const i = S.tabs.indexOf(id); if (i < 0) return;
   S.tabs.splice(i, 1);
@@ -2917,7 +2979,7 @@ function closeTab(id) {
   saveTabs(); loadActive(); renderAll();
 }
 function deleteFile(id) {
-  if (TP.active && id === TP.fileId) { S.confirmDel = null; renderExplorer(); toast('Le fichier du TP ne peut pas être supprimé pendant le TP'); return; }
+  if (tpIsFile(id)) { S.confirmDel = null; renderExplorer(); toast('Ce fichier ne peut pas être supprimé pendant le TP ou le contrôle'); return; }
   files = files.filter(f => f.id !== id); saveFiles();
   S.confirmDel = null;
   if (S.tabs.includes(id)) closeTab(id); else renderExplorer();
@@ -2933,6 +2995,7 @@ function loadActive() {
   if (!S.running && S.booted) clearSteps();
   if (!f) { ta.value = ''; refreshEditor(); renderProblems(); return; }
   ta.value = f.content;
+  ta.readOnly = !!S.running || tpLocked();
   refreshEditor();
   if (f.view) { ta.setSelectionRange(f.view.s, f.view.e); ta.scrollTop = f.view.st; ta.scrollLeft = f.view.sl; }
   else { ta.setSelectionRange(0, 0); ta.scrollTop = 0; ta.scrollLeft = 0; }
@@ -2949,8 +3012,9 @@ function fileRow(f) {
 }
 function renderExplorer() {
   const mine = files.filter(tpVisible);
+  if (TP.active && TP.isCtrl) mine.sort((a, b) => TP.fileIds.indexOf(a.id) - TP.fileIds.indexOf(b.id));
   $('#userFiles').innerHTML = (mine.length ? mine.map(fileRow).join('') : '<div class="empty-note">Aucun algorithme pour l\'instant.</div>')
-    + (TP.active && mine.length < files.length ? '<div class="empty-note tp-hidden-note">Vos autres algorithmes sont masqués pendant le TP.</div>' : '');
+    + (TP.active && mine.length < files.length ? `<div class="empty-note tp-hidden-note">Vos autres algorithmes sont masqués pendant le ${TP.isCtrl ? 'contrôle' : 'TP'}.</div>` : '');
   let h = '', g = null;
   for (const f of EX.filter(tpVisible)) { if (f.group !== g) { g = f.group; h += `<div class="tg-sub">${esc(g)}</div>`; } h += fileRow(f); }
   $('#exFiles').innerHTML = h;
@@ -3615,7 +3679,7 @@ function setState(st, line) {
   $('#btnStep').disabled = st === 'reading';
   $('#btnPause').hidden = !(running && (st === 'running'));
   $('#btnStop').disabled = !running;
-  ta.readOnly = running; $('#roBadge').hidden = !running;
+  ta.readOnly = running || tpLocked(); $('#roBadge').hidden = !running;
   const txt = {
     idle: 'Prêt', running: 'Exécution…', reading: `Saisie attendue · ligne ${line}`, paused: `Pas à pas · prochaine ligne ${line}`,
     stopped: 'Arrêté', error: `Erreur ligne ${line}`, done: 'Terminé'
@@ -3864,7 +3928,8 @@ const B = typeof AlgoBackend !== 'undefined' ? AlgoBackend : null;
 const TP = {
   active: false, user: null, tp: null, code: null, fileId: null, startedAt: 0, rendu: false, renduAt: 0, nbSignal: 0,
   clips: [], pasteOk: false, typed: [], lastFlag: {}, aiFlagged: new Set(), blurAt: 0, awayT: 0,
-  dirty: false, lastWrite: 0, lastSaved: '', loop: 0, clock: 0, unsubTP: null, closed: false, busy: false
+  dirty: false, lastWrite: 0, lastSaved: '', loop: 0, clock: 0, unsubTP: null, closed: false, busy: false,
+  fileIds: [], isCtrl: false, deadline: 0, finished: false, penalites: 0
 };
 const TP_KEY = 'algolab.tp', TPQ_KEY = 'algolab.tp.queue';
 const AI_PATTERNS = [
@@ -3883,25 +3948,30 @@ const aiMarkers = text => AI_PATTERNS.filter(([re]) => re.test(text)).map(([, la
 const normTxt = s => String(s || '').replace(/\r\n?/g, '\n').split('\n').map(l => l.replace(/\s+$/, '')).join('\n').trim();
 const fmtDur = ms => { const s = Math.round(ms / 1000); return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, '0')} s`; };
 const hhmm = t => new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-const tpFile = () => (TP.fileId ? files.find(f => f.id === TP.fileId) : null);
+const tpIsFile = id => TP.active && TP.fileIds.includes(id);
+const tpFile = () => { const c = cur(); if (c && TP.fileIds.includes(c.id)) return c; return TP.fileId ? files.find(f => f.id === TP.fileId) : null; };
+const tpFiles = () => TP.fileIds.map(id => files.find(f => f.id === id)).filter(Boolean);
+const tpLocked = () => TP.active && TP.isCtrl && TP.finished;
+const PENALISES = ['collage_bloque', 'depot_bloque', 'sortie_fenetre'];
+const fmtPts = n => String(Math.round(n * 100) / 100).replace('.', ',');
 const tpExemples = () => !!(TP.tp && TP.tp.exemples);
 /* pendant le TP, seul le fichier du TP est visible (et les exemples si la formatrice les autorise) */
 function tpVisible(f) {
   if (!TP.active || !f) return true;
-  if (f.id === TP.fileId) return true;
+  if (TP.fileIds.includes(f.id)) return true;
   return !!f.ex && tpExemples();
 }
 function tpCanOpen(id) {
   if (!TP.active) return true;
   const f = byId(id);
   if (f && tpVisible(f)) return true;
-  toast(f && f.ex ? 'Les exemples ne sont pas autorisés pendant ce TP.' : 'Pendant le TP, seul le fichier du TP est accessible.');
+  toast(f && f.ex ? 'Les exemples ne sont pas autorisés pendant ce TP.' : (TP.isCtrl ? 'Pendant le contrôle, seuls les fichiers des exercices sont accessibles.' : 'Pendant le TP, seul le fichier du TP est accessible.'));
   return false;
 }
 function tpLockTabs(prev) {
-  if (!TP.prevTabs) TP.prevTabs = (prev || S.tabs).filter(id => id !== TP.fileId);
-  S.tabs = S.tabs.filter(id => id === TP.fileId || (byId(id) && byId(id).ex && tpExemples()));
-  if (TP.fileId && byId(TP.fileId) && !S.tabs.includes(TP.fileId)) S.tabs.unshift(TP.fileId);
+  if (!TP.prevTabs) TP.prevTabs = (prev || S.tabs).filter(id => !TP.fileIds.includes(id));
+  S.tabs = S.tabs.filter(id => TP.fileIds.includes(id) || (byId(id) && byId(id).ex && tpExemples()));
+  TP.fileIds.slice().reverse().forEach(id => { if (byId(id) && !S.tabs.includes(id)) S.tabs.unshift(id); });
   if (!S.tabs.includes(S.active)) S.active = S.tabs[0] || null;
 }
 function tpUnlockTabs() {
@@ -3980,10 +4050,10 @@ function authModal(onDone) {
 function joinModal() {
   const p = TP.user.profile || {};
   modal({
-    title: 'Rejoindre un TP',
+    title: 'Rejoindre un TP ou un contrôle',
     body: `${demoNote()}<p class="md-who">Connecté : <b>${esc(p.prenom || '')} ${esc(p.nom || '')}</b>${p.groupe ? ' · ' + esc(p.groupe) : ''} <button class="linkbtn" id="tpLogout">Changer de compte</button></p>
       <form class="md-form" id="joinForm" novalidate>
-        <label>Code du TP <span class="opt">(donné par votre formatrice)</span><input id="fCode" class="code-in" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ex. PGCD-4821"></label>
+        <label>Code du TP ou du contrôle <span class="opt">(donné par votre formatrice)</span><input id="fCode" class="code-in" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ex. PGCD-4821"></label>
         <p class="md-err" hidden></p>
         <button class="btn primary md-submit" id="joinSubmit" type="submit">Continuer</button>
       </form>`,
@@ -3994,11 +4064,15 @@ function joinModal() {
         const btn = $('#joinSubmit'); modalError(box, ''); busy(btn, true, 'Recherche…');
         try {
           const code = B.normCode($('#fCode').value);
-          if (!code) throw new Error('Entrez le code du TP.');
+          if (!code) throw new Error('Entrez le code.');
           const tp = await B.getTP(code);
-          if (!tp) throw new Error(`Aucun TP avec le code « ${code} ». Vérifiez le code auprès de votre formatrice.`);
-          if (!tp.ouvert) throw new Error('Ce TP est fermé. Demandez à votre formatrice de l\'ouvrir.');
-          close(); rulesModal(tp);
+          if (!tp) throw new Error(`Aucun TP ni contrôle avec le code « ${code} ». Vérifiez le code auprès de votre formatrice.`);
+          if (!tp.ouvert) throw new Error(tp.type === 'controle' ? 'Ce contrôle est fermé.' : 'Ce TP est fermé. Demandez à votre formatrice de l\'ouvrir.');
+          if (tp.type === 'controle') {
+            const mine = await B.getMyParticipant(code).catch(() => null);
+            if (mine && mine.rendu) throw new Error('Vous avez déjà rendu votre copie pour ce contrôle.');
+          }
+          close(); tp.type === 'controle' ? ctrlRulesModal(tp) : rulesModal(tp);
         } catch (err) { busy(btn, false); modalError(box, err.message); }
       });
     }
@@ -4022,32 +4096,101 @@ function rulesModal(tp) {
   });
 }
 
+function ctrlRulesModal(tp) {
+  const ex = tp.exercices || [];
+  const total = ex.reduce((a, x) => a + (Number(x.points) || 0), 0);
+  modal({
+    title: 'Contrôle · ' + esc(tp.titre), wide: true,
+    body: `<div class="md-rules">
+      <div class="ctrl-facts"><span><b>${ex.length}</b> exercice${ex.length > 1 ? 's' : ''}</span><span>noté sur <b>${fmtPts(total)}</b></span>${tp.duree ? `<span>durée <b>${tp.duree} min</b></span>` : ''}</div>
+      <p class="md-lead">Règles du contrôle :</p>
+      <ul>
+        <li><b>Le contrôle se fait en plein écran.</b> Quitter le plein écran ou la fenêtre plus de quelques secondes compte comme une tentative de triche.</li>
+        <li><b>Le copier-coller est désactivé.</b> Un collage venant de l'extérieur compte comme une tentative de triche.</li>
+        <li class="md-warn">Chaque tentative de triche enlève ${fmtPts(tp.penalite || 0)} point${(tp.penalite || 0) > 1 ? 's' : ''} sur la note finale.</li>
+        <li>Un fichier par exercice : vous pouvez exécuter vos algorithmes pour les tester. Vos réponses sont enregistrées automatiquement.</li>
+        ${tp.duree ? `<li>À la fin des ${tp.duree} minutes, votre copie est <b>rendue automatiquement</b>.</li>` : ''}
+        <li>Une fois la copie rendue, elle ne peut plus être modifiée.</li>
+      </ul>
+    </div>`,
+    actions: [{ label: 'Annuler', cls: 'ghost' }, { label: 'Commencer le contrôle (plein écran)', cls: 'primary', onClick: () => { enterFullscreen(); startTP(tp, false); } }]
+  });
+}
+
+/* ----- plein écran (contrôle) ----- */
+const fsSupported = () => !!(document.documentElement.requestFullscreen && document.fullscreenEnabled !== false);
+function enterFullscreen() {
+  if (!fsSupported()) return Promise.resolve(false);
+  try { return document.documentElement.requestFullscreen().then(() => true, () => false); } catch (e) { return Promise.resolve(false); }
+}
+function renderFsGate() {
+  const g = $('#fsGate');
+  const need = TP.active && TP.isCtrl && !TP.finished && fsSupported() && !document.fullscreenElement;
+  g.hidden = !need;
+  if (need && !g.dataset.ready) {
+    g.dataset.ready = '1';
+    g.innerHTML = `<div class="fs-card"><h2>Revenez en plein écran</h2><p>Le contrôle se fait en plein écran. Le temps passé hors du plein écran est signalé à votre formatrice et peut coûter une pénalité.</p><button class="btn primary" id="fsBack">Revenir en plein écran</button></div>`;
+    $('#fsBack').addEventListener('click', () => { enterFullscreen().then(renderFsGate); });
+  }
+}
+document.addEventListener('fullscreenchange', () => {
+  if (!TP.active || !TP.isCtrl || TP.finished) { renderFsGate(); return; }
+  if (!document.fullscreenElement) goneAway(true); else cameBack();
+  renderFsGate();
+});
+
 /* ----- démarrage / reprise du TP ----- */
 async function startTP(tp, resumed) {
   const p = TP.user.profile || {};
   TP.code = tp.code; TP.tp = tp; TP.closed = false; TP.aiFlagged = new Set(); TP.lastFlag = {}; TP.clips = [];
+  TP.isCtrl = tp.type === 'controle'; TP.finished = false;
   let mine = null;
   try { mine = await B.getMyParticipant(tp.code); } catch (e) { mine = null; }
   let saved = null; try { saved = JSON.parse(localStorage.getItem(TP_KEY) || 'null'); } catch (e) { saved = null; }
-  let f = saved && saved.code === tp.code ? files.find(x => x.id === saved.fileId) : null;
-  if (!f) {
-    const start = mine && mine.algo ? mine.algo : `Algorithme ${(tp.titre || 'TP').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '') || 'TP'}\nVariables\n   \nDébut\n   \nFin\n`;
-    f = { id: 'tp' + Date.now(), name: uniqueName(`TP ${tp.titre}.algo`.replace(/[\\/:*?"<>|]/g, '-')), content: start, bps: [] };
-    files.unshift(f); saveFiles();
+  const savedIds = saved && saved.code === tp.code ? (saved.fileIds || [saved.fileId]) : [];
+  const slugT = t => (t || 'TP').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '') || 'TP';
+  const safe = n => n.replace(/[\\/:*?"<>|]/g, '-');
+  const fids = [];
+  if (TP.isCtrl) {
+    const ex = tp.exercices && tp.exercices.length ? tp.exercices : [{ titre: 'Exercice 1', points: 0, enonce: '' }];
+    const created = [];
+    ex.forEach((x, i) => {
+      let f = savedIds[i] ? files.find(y => y.id === savedIds[i]) : null;
+      if (!f) {
+        const prev = mine && mine.reponses && mine.reponses[i] != null ? mine.reponses[i] : null;
+        f = { id: 'ct' + Date.now() + '-' + i, name: uniqueName(safe(`Ex${i + 1} ${x.titre || ''}`.trim() + '.algo')), content: prev != null ? prev : `// Exercice ${i + 1}${x.titre ? ' : ' + x.titre : ''} (${fmtPts(Number(x.points) || 0)} pts)\nAlgorithme Exercice${i + 1}\nVariables\n   \nDébut\n   \nFin\n`, bps: [] };
+        created.push(f);
+      }
+      fids.push(f.id);
+    });
+    files.unshift(...created);
+    saveFiles();
+  } else {
+    let f = savedIds[0] ? files.find(x => x.id === savedIds[0]) : null;
+    if (!f) {
+      const start = mine && mine.algo ? mine.algo : `Algorithme ${slugT(tp.titre)}\nVariables\n   \nDébut\n   \nFin\n`;
+      f = { id: 'tp' + Date.now(), name: uniqueName(safe(`TP ${tp.titre}.algo`)), content: start, bps: [] };
+      files.unshift(f); saveFiles();
+    }
+    fids.push(f.id);
   }
-  TP.fileId = f.id;
+  TP.fileIds = fids; TP.fileId = fids[0];
+  const f = files.find(x => x.id === TP.fileId);
   TP.rendu = !!(mine && mine.rendu); TP.renduAt = mine && mine.renduAt || 0;
   TP.startedAt = mine && mine.joinedAt ? mine.joinedAt : Date.now();
-  TP.nbSignal = 0; TP.lastSaved = mine && mine.algo || ''; TP.lastWrite = Date.now();
+  TP.deadline = TP.isCtrl && tp.duree ? TP.startedAt + tp.duree * 60000 : 0;
+  TP.finished = TP.isCtrl && TP.rendu;
+  TP.nbSignal = 0; TP.penalites = 0; TP.lastSaved = TP.isCtrl ? JSON.stringify(mine && mine.reponses || {}) : (mine && mine.algo || ''); TP.lastWrite = Date.now();
   const prevTabs = TP.prevTabs || (saved && saved.code === tp.code && saved.prevTabs) || S.tabs.slice();
   TP.active = true;
   app.dataset.tp = '1';
   TP.prevTabs = null; tpLockTabs(prevTabs);
-  try { localStorage.setItem(TP_KEY, JSON.stringify({ code: tp.code, fileId: f.id, uid: TP.user.uid, prevTabs: TP.prevTabs })); } catch (e) { /* stockage indisponible */ }
+  try { localStorage.setItem(TP_KEY, JSON.stringify({ code: tp.code, fileId: f.id, fileIds: TP.fileIds, uid: TP.user.uid, prevTabs: TP.prevTabs })); } catch (e) { /* stockage indisponible */ }
   openFile(f.id);
-  renderTPBar();
+  renderTPBar(); renderFsGate();
   try {
-    await B.joinTP(tp.code, { prenom: p.prenom || '', nom: p.nom || '', groupe: p.groupe || '', algo: f.content });
+    await B.joinTP(tp.code, Object.assign({ prenom: p.prenom || '', nom: p.nom || '', groupe: p.groupe || '' }, TP.isCtrl ? { reponses: tpReponses(), algo: tpAlgoConcat() } : { algo: f.content }));
+    if (!mine || !mine.joinedAt) { const me = await B.getMyParticipant(tp.code).catch(() => null); if (me && me.joinedAt) { TP.startedAt = me.joinedAt; TP.deadline = TP.isCtrl && tp.duree ? me.joinedAt + tp.duree * 60000 : 0; } }
     await sendEvent({ type: resumed ? 'reconnexion' : 'connexion', gravite: 'info', message: resumed ? 'S\'est reconnecté(e) au TP' : 'A rejoint le TP' });
     flushQueue();
   } catch (e) { toast('Mode TP : ' + e.message); }
@@ -4058,18 +4201,44 @@ async function startTP(tp, resumed) {
     const exChanged = !!t.exemples !== tpExemples();
     TP.tp = t; TP.closed = !t.ouvert;
     if (exChanged) { tpLockTabs(); loadActive(); renderAll(); }
-    if (wasOpen && TP.closed) modal({ title: 'TP fermé', tone: 'warn', body: '<p>Votre formatrice a fermé ce TP. Votre dernier code enregistré est celui qu\'elle verra.</p>', actions: [{ label: 'D\'accord', cls: 'primary' }] });
+    if (wasOpen && TP.closed) {
+      if (TP.isCtrl && !TP.finished) { TP.finished = true; afterFinish('Votre formatrice a fermé le contrôle. Vos dernières réponses enregistrées sont celles qu\'elle corrigera.'); }
+      else modal({ title: TP.isCtrl ? 'Contrôle fermé' : 'TP fermé', tone: 'warn', body: '<p>Votre formatrice a fermé ce TP. Votre dernier code enregistré est celui qu\'elle verra.</p>', actions: [{ label: 'D\'accord', cls: 'primary' }] });
+    }
     renderTPBar();
   }, () => { });
   clearInterval(TP.loop); TP.loop = setInterval(tpTick, 5000);
   clearInterval(TP.clock); TP.clock = setInterval(renderClock, 1000);
-  if (!resumed) toast('TP commencé : bon courage !');
+  if (!resumed) toast(TP.isCtrl ? 'Contrôle commencé : bon courage !' : 'TP commencé : bon courage !');
+  if (TP.finished) { lockEditor(); exitFs(); }
+  else if (TP.isCtrl && TP.deadline && Date.now() >= TP.deadline) autoRendre();
   aiScan(ta.value, false);
 }
+const tpReponses = () => { const o = {}; tpFiles().forEach((f, i) => { o[i] = f.content; }); return o; };
+const tpAlgoConcat = () => tpFiles().map((f, i) => `// ===== Exercice ${i + 1} =====\n${f.content}`).join('\n\n');
+function lockEditor() { ta.readOnly = S.running || tpLocked(); }
+function exitFs() { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => { }); }
+function afterFinish(msg) {
+  lockEditor(); renderTPBar(); renderFsGate(); exitFs();
+  modal({ title: 'Copie rendue', body: `<p>${esc(msg)}</p><p class="md-note">Vous pouvez quitter le contrôle.</p>`, actions: [{ label: 'D\'accord', cls: 'primary' }] });
+}
+async function rendreCtrl(auto) {
+  if (TP.finished) return;
+  TP.finished = true; lockEditor();
+  const reps = tpReponses();
+  try {
+    await B.updateParticipant(TP.code, { reponses: reps, algo: tpAlgoConcat(), rendu: true, enLigne: true });
+    TP.lastSaved = JSON.stringify(reps); TP.lastWrite = Date.now();
+    await sendEvent({ type: 'rendu', gravite: 'info', message: auto ? 'Copie rendue automatiquement (temps écoulé)' : 'A rendu sa copie' });
+  } catch (e) { toast('Envoi : ' + e.message); }
+  TP.rendu = true; TP.renduAt = Date.now();
+  afterFinish(auto ? 'Le temps est écoulé : votre copie a été rendue automatiquement.' : 'Votre copie a bien été rendue. Elle ne peut plus être modifiée.');
+}
+function autoRendre() { if (TP.active && TP.isCtrl && !TP.finished) rendreCtrl(true); }
 async function tpResume() {
   let saved = null; try { saved = JSON.parse(localStorage.getItem(TP_KEY) || 'null'); } catch (e) { saved = null; }
   if (!saved || !saved.code || !B) return;
-  TP.active = true; TP.code = saved.code; TP.fileId = saved.fileId; app.dataset.tp = '1';
+  TP.active = true; TP.code = saved.code; TP.fileId = saved.fileId; TP.fileIds = saved.fileIds || [saved.fileId]; app.dataset.tp = '1';
   TP.tp = { titre: 'Reconnexion…', code: saved.code };
   TP.prevTabs = null; tpLockTabs(saved.prevTabs || S.tabs.slice());
   loadActive(); renderAll();
@@ -4093,17 +4262,27 @@ function stopTP(silent) {
   if (TP.unsubTP) { TP.unsubTP(); TP.unsubTP = null; }
   try { localStorage.removeItem(TP_KEY); } catch (e) { /* rien */ }
   tpUnlockTabs();
-  TP.code = null; TP.tp = null; TP.fileId = null; TP.clips = [];
-  loadActive(); renderAll();
-  renderTPBar();
+  TP.code = null; TP.tp = null; TP.fileId = null; TP.fileIds = []; TP.clips = []; TP.isCtrl = false; TP.finished = false; TP.deadline = 0;
+  loadActive(); renderAll(); lockEditor();
+  renderTPBar(); renderFsGate(); exitFs();
   if (!silent) toast('Vous avez quitté le mode TP');
 }
 
 /* ----- barre du TP ----- */
+const hms = s => `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 function renderClock() {
   const el = $('#tpClock'); if (!el || !TP.startedAt) return;
-  const s = Math.max(0, Math.floor((Date.now() - TP.startedAt) / 1000));
-  el.textContent = `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  if (TP.deadline && !TP.finished) {
+    const left = Math.max(0, Math.ceil((TP.deadline - Date.now()) / 1000));
+    el.textContent = 'Reste ' + hms(left);
+    el.classList.toggle('warn', left <= 300 && left > 60);
+    el.classList.toggle('crit', left <= 60);
+    if (left === 300) toast('Plus que 5 minutes !');
+    if (left <= 0) autoRendre();
+    return;
+  }
+  el.classList.remove('warn', 'crit');
+  el.textContent = hms(Math.max(0, Math.floor((Date.now() - TP.startedAt) / 1000)));
 }
 function renderTPBar() {
   const bar = $('#tpBar');
@@ -4111,6 +4290,7 @@ function renderTPBar() {
   if (!TP.active) { bar.hidden = true; bar.innerHTML = ''; return; }
   const p = (TP.user && TP.user.profile) || {};
   bar.hidden = false;
+  if (TP.isCtrl) { renderCtrlBar(bar, p); return; }
   bar.innerHTML = `<span class="tp-badge">${icon('shield', 14)}TP</span>
     <span class="tp-title" title="${esc((TP.tp && TP.tp.titre) || '')}">${esc((TP.tp && TP.tp.titre) || '')}</span>
     <span class="tp-chip">${esc(TP.code || '')}</span>
@@ -4127,6 +4307,86 @@ function renderTPBar() {
   $('#tpEnonce').onclick = () => modal({ title: esc((TP.tp && TP.tp.titre) || 'Énoncé'), wide: true, body: TP.tp && TP.tp.enonce ? `<div class="md-enonce">${esc(TP.tp.enonce)}</div>` : '<p>Pas d\'énoncé écrit pour ce TP : suivez les consignes de votre formatrice.</p>', actions: [{ label: 'Fermer', cls: 'primary' }] });
   $('#tpRendre').onclick = rendreModal;
   $('#tpQuit').onclick = quitModal;
+}
+function renderCtrlBar(bar, p) {
+  const pen = TP.penalites * ((TP.tp && TP.tp.penalite) || 0);
+  bar.innerHTML = `<span class="tp-badge ctrl">${icon('shield', 14)}Contrôle</span>
+    <span class="tp-title" title="${esc((TP.tp && TP.tp.titre) || '')}">${esc((TP.tp && TP.tp.titre) || '')}</span>
+    ${p.prenom ? `<span class="tp-who">${esc(p.prenom)} ${esc(p.nom)}${p.groupe ? ' · ' + esc(p.groupe) : ''}</span>` : ''}
+    <span class="tp-clock" id="tpClock">00:00:00</span>
+    <span class="tp-watch">${TP.finished ? 'Copie rendue' : 'Surveillance active'}${TP.penalites ? ` · <b class="tp-pen">${TP.penalites} tentative${TP.penalites > 1 ? 's' : ''} (−${fmtPts(pen)} pt${pen > 1 ? 's' : ''})</b>` : ''}</span>
+    ${B && B.mode === 'demo' ? '<span class="tp-demo">démo</span>' : ''}
+    <span class="tp-grow"></span>
+    ${TP.finished ? `<span class="tp-done">${icon('check', 14)}Rendu${TP.renduAt ? ' à ' + hhmm(TP.renduAt) : ''}</span>` : ''}
+    <button class="tp-btn" id="tpEnonce">Sujet</button>
+    ${TP.finished ? '' : '<button class="tp-btn main" id="tpRendre">Rendre ma copie</button>'}
+    ${TP.finished ? '<button class="tp-btn" id="tpQuit">Quitter</button>' : ''}`;
+  renderClock();
+  $('#tpEnonce').onclick = sujetModal;
+  if ($('#tpRendre')) $('#tpRendre').onclick = () => {
+    const fl = tpFiles();
+    modal({
+      title: 'Rendre ma copie ?', tone: 'warn',
+      body: `<p>Votre copie sera envoyée à votre formatrice : ${fl.map((f, i) => `<b>Exercice ${i + 1}</b> (${f.content.split('\n').filter(l => l.trim() && !/^\s*\/\//.test(l)).length} lignes)`).join(', ')}.</p><p><b>Attention : une fois rendue, la copie ne peut plus être modifiée.</b></p>`,
+      actions: [{ label: 'Continuer le contrôle', cls: 'ghost' }, { label: 'Rendre définitivement', cls: 'primary', onClick: () => { rendreCtrl(false); } }]
+    });
+  };
+  if ($('#tpQuit')) $('#tpQuit').onclick = quitModal;
+}
+/* ----- sujet du contrôle (PDF + exercices) ----- */
+function loadPdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  const tries = [['../assets/lib/pdf.min.js', '../assets/lib/pdf.worker.min.js'], ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js']];
+  return tries.reduce((p, [lib, worker]) => p.catch(() => new Promise((res, rej) => {
+    const sc = document.createElement('script'); sc.src = lib;
+    sc.onload = () => { if (window.pdfjsLib) { window.pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(worker, location.href).href; res(window.pdfjsLib); } else rej(new Error('pdf.js')); };
+    sc.onerror = () => { sc.remove(); rej(new Error('pdf.js')); };
+    document.head.appendChild(sc);
+  })), Promise.reject(new Error('start'))).catch(() => { throw new Error('Impossible d\'afficher le PDF (connexion internet ?).'); });
+}
+async function renderSujetPdf(box) {
+  if (!TP.tp || !TP.tp.sujetParts) { box.innerHTML = '<p class="md-note">Pas de sujet PDF pour ce contrôle : lisez les énoncés dans l\'onglet « Exercices ».</p>'; return; }
+  if (TP.sujetCanvases && TP.sujetCode === TP.code) { box.innerHTML = ''; TP.sujetCanvases.forEach(c => box.appendChild(c)); return; }
+  box.innerHTML = '<p class="md-note">Chargement du sujet…</p>';
+  try {
+    const [lib, b64] = await Promise.all([loadPdfJs(), B.getSujet(TP.code)]);
+    const bin = atob(b64); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const pdf = await lib.getDocument({ data: bytes }).promise;
+    const out = [];
+    const width = Math.min(1000, box.clientWidth || 900);
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const page = await pdf.getPage(n);
+      const v1 = page.getViewport({ scale: 1 });
+      const scale = (width / v1.width) * (window.devicePixelRatio || 1);
+      const vp = page.getViewport({ scale });
+      const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height; c.className = 'sujet-page';
+      await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      out.push(c);
+    }
+    TP.sujetCanvases = out; TP.sujetCode = TP.code;
+    box.innerHTML = ''; out.forEach(c => box.appendChild(c));
+  } catch (e) { box.innerHTML = `<p class="md-err">${esc(e.message)}</p>`; }
+}
+function sujetModal() {
+  const ex = (TP.tp && TP.tp.exercices) || [];
+  let tab = TP.tp && TP.tp.sujetParts ? 'pdf' : 'ex';
+  modal({
+    title: 'Sujet · ' + esc((TP.tp && TP.tp.titre) || ''), wide: true,
+    body: `<div class="md-tabs"><button data-st="pdf">Sujet (PDF)</button><button data-st="ex">Exercices et barème</button></div><div id="sujetBox" class="sujet-box"></div>`,
+    actions: [{ label: 'Retour au contrôle', cls: 'primary' }],
+    onOpen(box) {
+      box.querySelector('.md-card').classList.add('xl');
+      const draw = () => {
+        box.querySelectorAll('[data-st]').forEach(b => b.classList.toggle('on', b.dataset.st === tab));
+        const sb = $('#sujetBox');
+        if (tab === 'pdf') renderSujetPdf(sb);
+        else sb.innerHTML = ex.length ? ex.map((x, i) => `<div class="ex-item"><h3>Exercice ${i + 1}${x.titre ? ' · ' + esc(x.titre) : ''} <span class="ex-pts">${fmtPts(Number(x.points) || 0)} pts</span></h3>${x.enonce ? `<div class="md-enonce">${esc(x.enonce)}</div>` : ''}<button class="linkbtn" data-open="${i}">Ouvrir le fichier de l'exercice ${i + 1}</button></div>`).join('') : '<p class="md-note">Aucun exercice détaillé.</p>';
+        sb.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => { const id = TP.fileIds[+b.dataset.open]; $('#modal').hidden = true; $('#modal').innerHTML = ''; if (id) openFile(id); }));
+      };
+      box.querySelectorAll('[data-st]').forEach(b => b.addEventListener('click', () => { tab = b.dataset.st; draw(); }));
+      draw();
+    }
+  });
 }
 function rendreModal() {
   const f = tpFile();
@@ -4194,13 +4454,14 @@ async function flushQueue() {
   try { localStorage.setItem(TPQ_KEY, JSON.stringify(left)); } catch (e) { /* rien */ }
 }
 function flag(type, gravite, message, opt = {}) {
-  if (!TP.active) return false;
+  if (!TP.active || TP.finished) return false;
   const key = type + (opt.key || '');
   const now = Date.now();
   const thr = opt.throttle === undefined ? 8000 : opt.throttle;
   if (thr && TP.lastFlag[key] && now - TP.lastFlag[key] < thr) return false;
   TP.lastFlag[key] = now;
   TP.nbSignal++;
+  if (TP.isCtrl && PENALISES.includes(type) && !(opt.details && opt.details.enCours)) TP.penalites++;
   sendEvent({ type, gravite, message, extrait: opt.extrait ? String(opt.extrait).slice(0, 2000) : null, details: opt.details || null });
   renderTPBar();
   return true;
@@ -4228,6 +4489,15 @@ function isInternal(text) {
 ta.addEventListener('paste', e => {
   if (!TP.active) return;
   const text = (e.clipboardData && e.clipboardData.getData('text/plain')) || '';
+  if (TP.isCtrl) {
+    e.preventDefault();
+    if (TP.finished) return;
+    if (isInternal(text)) { blockModal('Copier-coller désactivé', '<p>Le copier-coller est désactivé pendant le contrôle. Écrivez votre réponse au clavier.</p><p class="md-note">Ce collage venait de votre propre copie : il n\'est pas compté comme une tentative de triche.</p>'); return; }
+    const n0 = text.length, pen = (TP.tp && TP.tp.penalite) || 0;
+    flag('collage_bloque', 'haute', `Collage bloqué : ${n0} caractère${n0 > 1 ? 's' : ''} venant de l'extérieur${aiMarkers(text).length ? ' (style IA : ' + aiMarkers(text).join(', ') + ')' : ''}`, { extrait: text, details: { longueur: n0, marqueurs: aiMarkers(text) }, key: String(n0), throttle: 4000 });
+    blockModal('Copier-coller interdit pendant le contrôle', `<p>Le texte que vous avez essayé de coller vient de l'<b>extérieur de votre copie</b>. Il n'a pas été collé.</p><p class="md-warn">Cette tentative est comptée comme une tentative de triche : −${fmtPts(pen)} point sur la note finale.</p>`);
+    return;
+  }
   if (isInternal(text)) { TP.pasteOk = true; setTimeout(() => { TP.pasteOk = false; }, 0); return; }
   e.preventDefault();
   const marks = aiMarkers(text);
@@ -4279,22 +4549,23 @@ ta.addEventListener('input', e => {
 }, true);
 
 /* ----- sortie de la fenêtre ----- */
-function goneAway() {
-  if (!TP.active || TP.blurAt) return;
-  TP.blurAt = Date.now();
+function goneAway(fs) {
+  if (!TP.active || TP.finished || TP.blurAt) return;
+  TP.blurAt = Date.now(); TP.blurFs = !!fs;
   clearTimeout(TP.awayT);
-  TP.awayT = setTimeout(() => { if (TP.blurAt) flag('sortie_fenetre', 'moyenne', 'A quitté la fenêtre AlgoLab (absent depuis plus de 20 s)', { key: 'encours', throttle: 0 }); }, 20000);
+  TP.awayT = setTimeout(() => { if (TP.blurAt) flag('sortie_fenetre', 'moyenne', `A quitté ${TP.blurFs ? 'le plein écran' : 'la fenêtre AlgoLab'} (absent depuis plus de 20 s)`, { key: 'encours', throttle: 0, details: { enCours: true } }); }, 20000);
 }
 function cameBack() {
   if (!TP.blurAt) return;
-  const d = Date.now() - TP.blurAt; TP.blurAt = 0; clearTimeout(TP.awayT);
-  if (!TP.active || d < 8000) return;
-  flag('sortie_fenetre', d >= 60000 ? 'haute' : 'moyenne', `A quitté la fenêtre AlgoLab pendant ${fmtDur(d)}`, { details: { duree: Math.round(d / 1000) }, throttle: 0 });
-  toast(`Vous avez quitté AlgoLab pendant ${fmtDur(d)} : c'est signalé à votre formatrice.`);
+  if (TP.isCtrl && !TP.finished && fsSupported() && !document.fullscreenElement && TP.blurFs) return; // toujours hors du plein écran
+  const d = Date.now() - TP.blurAt; const wasFs = TP.blurFs; TP.blurAt = 0; TP.blurFs = false; clearTimeout(TP.awayT);
+  if (!TP.active || TP.finished || d < (TP.isCtrl ? 5000 : 8000)) return;
+  flag('sortie_fenetre', d >= 60000 || TP.isCtrl ? 'haute' : 'moyenne', `A quitté ${wasFs ? 'le plein écran' : 'la fenêtre AlgoLab'} pendant ${fmtDur(d)}`, { details: { duree: Math.round(d / 1000), pleinEcran: wasFs }, throttle: 0 });
+  toast(TP.isCtrl ? `Sortie de ${fmtDur(d)} : tentative de triche comptée (−${fmtPts((TP.tp && TP.tp.penalite) || 0)} pt).` : `Vous avez quitté AlgoLab pendant ${fmtDur(d)} : c'est signalé à votre formatrice.`);
 }
-window.addEventListener('blur', goneAway);
+window.addEventListener('blur', () => goneAway(false));
 window.addEventListener('focus', cameBack);
-document.addEventListener('visibilitychange', () => { if (document.hidden) goneAway(); else cameBack(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) goneAway(false); else cameBack(); });
 
 /* ----- texte typique d'une IA ----- */
 function aiScan(text, showModal) {
@@ -4329,11 +4600,23 @@ function tpBlockOpen() {
 
 /* ----- sauvegarde automatique du code ----- */
 function tpOnEdit(f) {
-  if (!TP.active || !f || f.id !== TP.fileId) return;
+  if (!TP.active || !f || !TP.fileIds.includes(f.id)) return;
   TP.dirty = true;
 }
 async function saveNow(force) {
   if (!TP.active || !TP.code || TP.closed) return;
+  if (TP.isCtrl) {
+    if (TP.finished) return;
+    const reps = tpReponses(), js = JSON.stringify(reps);
+    const changed = js !== TP.lastSaved;
+    if (!changed && !force && Date.now() - TP.lastWrite < 60000) return;
+    try {
+      await B.updateParticipant(TP.code, changed ? { reponses: reps, algo: tpAlgoConcat(), enLigne: true } : { enLigne: true });
+      TP.lastSaved = js; TP.lastWrite = Date.now(); TP.dirty = false;
+      if (changed) aiScan(tpAlgoConcat(), false);
+    } catch (e) { if (/fermé|refusé|permission/i.test(e.message)) TP.closed = true; }
+    return;
+  }
   const f = tpFile(); if (!f) return;
   const changed = f.content !== TP.lastSaved;
   if (!changed && !force && Date.now() - TP.lastWrite < 60000) return;
@@ -4348,7 +4631,8 @@ function tpTick() {
   if (TP.dirty && Date.now() - TP.lastWrite >= 15000) saveNow(false);
   else if (Date.now() - TP.lastWrite >= 60000) saveNow(true);
 }
-window.addEventListener('beforeunload', () => { if (TP.active && TP.code) { try { B.updateParticipant(TP.code, { enLigne: false, algo: (tpFile() || {}).content || '' }); } catch (e) { /* rien */ } } });
+window.addEventListener('beforeunload', () => { if (TP.active) { try { saveFiles(); } catch (e) { /* rien */ } } });
+window.addEventListener('beforeunload', () => { if (TP.active && TP.code && !TP.finished) { try { B.updateParticipant(TP.code, TP.isCtrl ? { enLigne: false, reponses: tpReponses(), algo: tpAlgoConcat() } : { enLigne: false, algo: (tpFile() || {}).content || '' }); } catch (e) { /* rien */ } } });
 
 /* ---------- démarrage ---------- */
 setMode(S.mode);
