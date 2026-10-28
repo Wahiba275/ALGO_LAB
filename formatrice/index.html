@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Espace formatrice · AlgoLab</title>
+<meta name="author" content="Wahiba BOUZYAN">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e8a79'/%3E%3Cpath d='M46 32H20M30 21L19 32l11 11' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<style>
+:root{
+  /* Tableau de bord : TP à gauche · stagiaires au centre · alertes en direct à droite */
+  --bg:#eef1f4; --win:#f6f7f9; --card:#ffffff; --pane:#f1f3f6; --bar:#e8ebf0; --hover:#e1e6ed; --line:#d6dbe2;
+  --fg:#1c2230; --muted:#5b6474; --faint:#97a0ad;
+  --accent:#0e8a79; --accent-ink:#0b6e61; --on-accent:#ffffff; --sel:rgba(14,138,121,.14);
+  --amber:#b06c16; --amberbg:rgba(214,146,40,.16); --on-amber:#ffffff;
+  --err:#c9362e; --errbg:rgba(201,54,46,.10); --on-err:#ffffff;
+  --ok:#2b8a4f; --okbg:rgba(43,138,79,.12);
+  --shadow:0 18px 50px -20px rgba(30,40,60,.35);
+  --ui:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, "Liberation Mono", monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e1116; --win:#13171e; --card:#171c24; --pane:#1a1f28; --bar:#1d232d; --hover:#262d39; --line:#29303c;
+    --fg:#d7dce5; --muted:#8a93a4; --faint:#5c6577;
+    --accent:#3dbba8; --accent-ink:#5fd0be; --on-accent:#04211c; --sel:rgba(61,187,168,.16);
+    --amber:#e9a84e; --amberbg:rgba(233,168,78,.14); --on-amber:#2b1a02;
+    --err:#f07067; --errbg:rgba(240,112,103,.13); --on-err:#2c0806;
+    --ok:#72c78e; --okbg:rgba(114,199,142,.13);
+    --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1116; --win:#13171e; --card:#171c24; --pane:#1a1f28; --bar:#1d232d; --hover:#262d39; --line:#29303c;
+  --fg:#d7dce5; --muted:#8a93a4; --faint:#5c6577;
+  --accent:#3dbba8; --accent-ink:#5fd0be; --on-accent:#04211c; --sel:rgba(61,187,168,.16);
+  --amber:#e9a84e; --amberbg:rgba(233,168,78,.14); --on-amber:#2b1a02;
+  --err:#f07067; --errbg:rgba(240,112,103,.13); --on-err:#2c0806;
+  --ok:#72c78e; --okbg:rgba(114,199,142,.13);
+  --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 var(--ui);-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg{display:block;flex:none}
+.mono{font-family:var(--mono)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:34px;padding:0 14px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--fg);font-weight:500;font-size:13.5px;cursor:pointer;white-space:nowrap;text-decoration:none}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.primary{background:var(--accent);border-color:transparent;color:var(--on-accent);font-weight:600}
+.btn.danger{color:var(--err)}
+.btn.sm{height:28px;padding:0 10px;font-size:12.5px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover:not(:disabled){color:var(--fg);background:var(--hover)}
+.btn.on{background:var(--sel);border-color:var(--accent);color:var(--accent-ink)}
+
+/* ---------- connexion ---------- */
+.login{min-height:100%;display:grid;place-items:center;padding:24px max(16px, env(safe-area-inset-left, 0px))}
+.login-card{width:min(420px,100%);background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:28px;display:flex;flex-direction:column;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font:700 18px var(--mono)}
+.mark{width:32px;height:32px;border-radius:8px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center}
+.login h1{margin:0;font-size:22px;font-weight:600}
+.login p{margin:0;color:var(--muted)}
+form{display:flex;flex-direction:column;gap:12px;margin:0}
+label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)}
+label .opt{font-weight:400;color:var(--faint)}
+input,textarea,select{border:1px solid var(--line);background:var(--win);border-radius:7px;padding:0 11px;height:38px;font-size:14px;outline:0;min-width:0}
+textarea{height:auto;min-height:150px;padding:10px 11px;line-height:1.55;resize:vertical}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--sel)}
+.code-in{font:600 16px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.err{color:var(--err);background:var(--errbg);border-radius:7px;padding:8px 11px;font-size:13px}
+.demo-note{font-size:12.5px;color:var(--muted);border:1px dashed var(--faint);border-radius:7px;padding:8px 11px}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent-ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:13px}
+.credit{font-size:12px;color:var(--faint);text-align:center}
+
+/* ---------- tableau de bord ---------- */
+.dash{height:100%;display:grid;grid-template-rows:52px minmax(0,1fr)}
+.top{display:flex;align-items:center;gap:10px;padding:0 max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px));background:var(--bar);border-bottom:1px solid var(--line);min-width:0}
+.top .brand{font-size:15px}
+.top .brand .mark{width:28px;height:28px}
+.top .sub{color:var(--muted);font-size:13px;white-space:nowrap}
+.chip-demo{font:600 10.5px var(--ui);letter-spacing:.06em;text-transform:uppercase;color:var(--amber);border:1px dashed var(--amber);border-radius:4px;padding:1px 7px}
+.grow{flex:1}
+.who{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.layout{display:grid;grid-template-columns:260px minmax(0,1fr) 340px;min-height:0}
+.col{min-height:0;display:flex;flex-direction:column;background:var(--win)}
+.col-h{display:flex;align-items:center;gap:8px;height:44px;flex:none;padding:0 12px 0 16px;border-bottom:1px solid var(--line);font:600 11px var(--ui);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.col-b{flex:1;min-height:0;overflow:auto}
+.tps{border-right:1px solid var(--line)}
+.feed{border-left:1px solid var(--line)}
+.tpi{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;padding:10px 12px 10px 16px;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer;position:relative}
+.tpi:hover{background:var(--hover)}
+.tpi.on{background:var(--sel)}
+.tpi.on::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px;background:var(--accent)}
+.tpi b{font-weight:600;font-size:13.5px;padding-right:30px}
+.tpi .l2{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.tpi .code{font:600 11.5px var(--mono);color:var(--fg)}
+.state{display:inline-flex;align-items:center;gap:5px;font-size:11.5px}
+.state::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.state.open{color:var(--ok)} .state.open::before{background:var(--ok)}
+.unseen{position:absolute;right:12px;top:10px;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--err);color:var(--on-err);font:600 11px/20px var(--ui);text-align:center}
+.empty{padding:28px 20px;color:var(--muted);font-size:13.5px;line-height:1.6}
+.empty b{color:var(--fg)}
+
+.main{background:var(--bg);overflow:auto}
+.tp-head{padding:20px 24px 16px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--line);background:var(--win)}
+.tp-h1{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tp-h1 h1{margin:0;font-size:21px;font-weight:600}
+.bigcode{font:700 15px var(--mono);letter-spacing:.06em;padding:3px 10px;border-radius:6px;background:var(--card);border:1px solid var(--line)}
+.tp-meta{color:var(--muted);font-size:13px}
+.tp-actions{display:flex;gap:8px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:12px;padding:16px 24px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.stat .n{font:700 24px var(--mono);font-variant-numeric:tabular-nums}
+.stat .t{font-size:12px;color:var(--muted)}
+.stat.alert .n{color:var(--err)}
+.stat.ok .n{color:var(--ok)}
+.tablewrap{margin:16px 24px 24px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font:600 11px var(--ui);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--pane)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--hover)}
+tbody tr:last-child td{border-bottom:0}
+tr.hot td:first-child{box-shadow:inset 3px 0 0 var(--err)}
+.nm b{font-weight:600}
+.nm span{display:block;font-size:12px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--pane);color:var(--muted);white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.on{background:var(--okbg);color:var(--ok)}
+.pill.done{background:var(--sel);color:var(--accent-ink)}
+.cnt{display:inline-flex;gap:5px}
+.c{display:inline-block;min-width:24px;text-align:center;font:600 12px/20px var(--mono);border-radius:5px;padding:0 6px}
+.c.h{background:var(--errbg);color:var(--err)}
+.c.m{background:var(--amberbg);color:var(--amber)}
+.c.z{color:var(--faint)}
+.last{font-size:12.5px;color:var(--muted);max-width:280px}
+.last b{color:var(--fg);font-weight:500}
+.time{font-size:12px;color:var(--faint);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.filters{display:flex;gap:4px;margin-left:auto}
+.ev{display:grid;grid-template-columns:4px minmax(0,1fr);border-bottom:1px solid var(--line);cursor:pointer}
+.ev:hover{background:var(--hover)}
+.ev .bar{background:var(--faint)}
+.ev.haute .bar{background:var(--err)}
+.ev.moyenne .bar{background:var(--amber)}
+.ev.info .bar{background:var(--line)}
+.ev .in{padding:9px 12px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.ev .l1{display:flex;gap:8px;align-items:baseline}
+.ev .l1 b{font-weight:600;font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev .lbl{font-size:12.5px;font-weight:600}
+.ev.haute .lbl{color:var(--err)} .ev.moyenne .lbl{color:var(--amber)} .ev.info .lbl{color:var(--muted)}
+.ev .msg{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.ev.new{animation:flash 2.2s ease-out}
+@keyframes flash{from{background:var(--amberbg)}to{background:transparent}}
+
+.modal{position:fixed;inset:0;z-index:50;background:rgba(8,12,18,.55);display:grid;place-items:center;padding:16px}
+.mcard{width:min(560px,100%);max-height:calc(100% - 8px);display:flex;flex-direction:column;background:var(--win);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.mcard.wide{width:min(860px,100%)}
+.mh{display:flex;align-items:center;gap:10px;padding:16px 18px 10px}
+.mh h2{margin:0;font-size:17px;font-weight:600;flex:1;min-width:0}
+.mb{padding:4px 18px 18px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.mf{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:8px 10px;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--fg);border-bottom-color:var(--accent)}
+.codebox{margin:0;background:#11181f;color:#d7dee6;border-radius:9px;padding:12px 0;font:13px/1.65 var(--mono);overflow:auto;max-height:56vh}
+.codebox .ln{display:inline-block;width:42px;padding-right:12px;text-align:right;color:#5d6a78;user-select:none}
+.tl{display:flex;flex-direction:column}
+.tli{display:grid;grid-template-columns:62px 4px minmax(0,1fr);gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.tli .tm{font:12px var(--mono);color:var(--faint);padding-top:1px}
+.tli .bar{border-radius:2px;background:var(--line)}
+.tli.haute .bar{background:var(--err)} .tli.moyenne .bar{background:var(--amber)}
+.tli .lbl{font-weight:600;font-size:13px}
+.tli.haute .lbl{color:var(--err)} .tli.moyenne .lbl{color:var(--amber)}
+.tli .msg{font-size:13px;color:var(--muted)}
+details{margin-top:5px}
+summary{cursor:pointer;font-size:12.5px;color:var(--accent-ink)}
+.extrait{margin:6px 0 0;padding:9px 11px;border-radius:7px;background:var(--pane);border:1px solid var(--line);font:12.5px/1.55 var(--mono);white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto}
+.proj{display:flex;flex-direction:column;align-items:center;gap:14px;padding:22px 10px 8px;text-align:center}
+.proj .k{font:700 clamp(40px, 9vw, 92px)/1 var(--mono);letter-spacing:.06em;color:var(--accent-ink)}
+.proj p{margin:0;color:var(--muted);font-size:16px}
+.proj .url{font:600 15px var(--mono);color:var(--fg)}
+
+.toasts{position:fixed;right:max(16px, env(safe-area-inset-right, 0px));bottom:max(16px, env(safe-area-inset-bottom, 0px));z-index:60;display:flex;flex-direction:column;gap:8px;width:min(360px, calc(100% - 32px))}
+.toast{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--faint);border-radius:9px;box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:2px;animation:tin .25s ease-out;cursor:pointer}
+.toast.haute{border-left-color:var(--err)} .toast.moyenne{border-left-color:var(--amber)} .toast.ok{border-left-color:var(--ok)}
+.toast b{font-size:13px}
+.toast span{font-size:12.5px;color:var(--muted)}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}}
+
+@media (max-width:1180px){ .layout{grid-template-columns:230px minmax(0,1fr)} .feed{grid-column:1 / -1;border-left:0;border-top:1px solid var(--line);max-height:360px} .layout{grid-template-rows:minmax(0,1fr) auto;overflow:auto} }
+@media (max-width:760px){
+  .dash{height:auto;min-height:100%}
+  .layout{grid-template-columns:minmax(0,1fr);overflow:visible}
+  .tps{border-right:0;border-bottom:1px solid var(--line);max-height:260px}
+  .stats{grid-template-columns:repeat(2, minmax(0,1fr));padding:14px 16px 0}
+  .tp-head{padding:16px}
+  .tablewrap{margin:14px 16px 18px}
+  .top .sub,.who{display:none}
+}
+@media (prefers-reduced-motion:reduce){ .ev.new,.toast{animation:none} }
+</style>
+<script src="../algolab-config.js"></script>
+<script>
+/* ============================================================
+   AlgoLab — couche serveur du mode TP
+   - Firebase (Authentication + Firestore) quand algolab-config.js est rempli
+   - mode démo sinon : tout reste dans ce navigateur (pour essayer)
+   © 2026 Wahiba BOUZYAN
+   ============================================================ */
+const AlgoBackend = (() => {
+'use strict';
+const cfg = window.ALGOLAB_CONFIG || {};
+const fbCfg = cfg.firebase || {};
+const useFirebase = !!(fbCfg.apiKey && fbCfg.projectId && !/VOTRE|XXXX|^\s*$/i.test(fbCfg.apiKey));
+const DEMO_FORMATRICE = 'formatrice@demo.algolab';
+const formatriceEmail = String(useFirebase ? (cfg.formatriceEmail || '') : (cfg.formatriceEmail && !/exemple\.com$/i.test(cfg.formatriceEmail) ? cfg.formatriceEmail : DEMO_FORMATRICE)).trim().toLowerCase();
+const STUDENT_DOMAIN = 'stagiaires.algolab.invalid';
+const FB_VERSION = '10.12.2';
+
+/* ---------- outils ---------- */
+const cleanName = s => String(s || '').trim().replace(/\s+/g, ' ');
+const slug = s => cleanName(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const identifiant = (prenom, nom) => slug(prenom) + '.' + slug(nom);
+const isFormatriceEmail = e => !!e && !!formatriceEmail && String(e).toLowerCase() === formatriceEmail;
+const normCode = c => String(c || '').trim().toUpperCase().replace(/\s+/g, '');
+function fail(code, message) { const e = new Error(message); e.code = code; return e; }
+const ERR_FR = {
+  'auth/email-already-in-use': 'Un compte existe déjà avec ce prénom et ce nom. Utilisez « Se connecter ».',
+  'auth/invalid-credential': 'Prénom, nom ou mot de passe incorrect.',
+  'auth/invalid-login-credentials': 'Prénom, nom ou mot de passe incorrect.',
+  'auth/wrong-password': 'Mot de passe incorrect.',
+  'auth/user-not-found': 'Aucun compte avec ce prénom et ce nom. Créez d\'abord un compte.',
+  'auth/weak-password': 'Mot de passe trop court : 6 caractères minimum.',
+  'auth/invalid-email': 'Adresse e-mail invalide.',
+  'auth/too-many-requests': 'Trop de tentatives. Patientez une minute puis réessayez.',
+  'auth/network-request-failed': 'Pas de connexion internet. Vérifiez la connexion puis réessayez.',
+  'auth/operation-not-allowed': 'La connexion par mot de passe n\'est pas activée dans Firebase (Authentication › Méthode de connexion).',
+  'permission-denied': 'Accès refusé par le serveur. Vérifiez les règles Firestore (voir le guide).',
+  'unavailable': 'Serveur injoignable : vérifiez la connexion internet.',
+  'failed-precondition': 'La base Firestore n\'est pas encore créée dans Firebase.'
+};
+function frError(e) {
+  if (!e) return fail('inconnu', 'Erreur inconnue.');
+  if (e.fr) return e;
+  if (/api-key-not-valid|invalid-api-key/i.test(e.code || '')) { const k = fail(e.code, 'La clé apiKey de algolab-config.js est incorrecte. Recopiez-la depuis la console Firebase (Paramètres du projet › Vos applications).'); k.fr = true; return k; }
+  const msg = ERR_FR[e.code] || e.message || 'Erreur inconnue.';
+  const out = fail(e.code || 'inconnu', msg); out.fr = true; return out;
+}
+function checkName(prenom, nom) {
+  if (cleanName(prenom).length < 2) throw fail('form', 'Indiquez votre prénom.');
+  if (cleanName(nom).length < 2) throw fail('form', 'Indiquez votre nom.');
+  if (!slug(prenom) || !slug(nom)) throw fail('form', 'Le prénom et le nom doivent contenir des lettres.');
+}
+function checkPassword(pw) { if (String(pw || '').length < 6) throw fail('form', 'Mot de passe trop court : 6 caractères minimum.'); }
+async function sha256(s) {
+  try {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) { let h = 0; for (const ch of s) h = (h * 31 + ch.codePointAt(0)) | 0; return 'x' + h; }
+}
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src; s.async = false;
+    s.onload = () => res(); s.onerror = () => { s.remove(); rej(new Error('load ' + src)); };
+    document.head.appendChild(s);
+  });
+}
+const TIME_FIELDS = ['at', 'lastSeen', 'joinedAt', 'renduAt', 'createdAt', 'updatedAt', 'algoAt'];
+function conv(o) {
+  if (!o) return o;
+  const r = Object.assign({}, o);
+  for (const k of TIME_FIELDS) if (r[k] && typeof r[k].toMillis === 'function') r[k] = r[k].toMillis();
+  return r;
+}
+
+/* ============================================================
+   Mode démo : base locale (localStorage) partagée entre onglets
+   ============================================================ */
+function DemoImpl() {
+  const KEY = 'algolab.demo.v1', SESSION = 'algolab.demo.session';
+  const listeners = new Set();
+  let chan = null;
+  try { chan = new BroadcastChannel('algolab-demo'); chan.onmessage = () => fire(); } catch (e) { chan = null; }
+  window.addEventListener('storage', e => { if (e.key === KEY) fire(); });
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+  function write(db) {
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { throw fail('stockage', 'Stockage du navigateur indisponible : le mode démo ne peut pas enregistrer.'); }
+    if (chan) chan.postMessage('change');
+    setTimeout(fire, 0);
+  }
+  function fire() { for (const l of listeners) { try { l(); } catch (e) { console.error(e); } } }
+  const db = () => { const d = read(); d.users = d.users || {}; d.tps = d.tps || {}; d.parts = d.parts || {}; d.events = d.events || {}; return d; };
+  const getSession = () => { try { return sessionStorage.getItem(SESSION); } catch (e) { return null; } };
+  const setSession = uid => { try { if (uid) sessionStorage.setItem(SESSION, uid); else sessionStorage.removeItem(SESSION); } catch (e) { /* onglet sans stockage */ } };
+  const authCbs = new Set();
+  function userObj(uid) {
+    if (!uid) return null;
+    const u = db().users[uid]; if (!u) return null;
+    return { uid, email: u.email, emailVerified: true, isFormatrice: isFormatriceEmail(u.email), profile: u.role === 'stagiaire' ? { prenom: u.prenom, nom: u.nom, groupe: u.groupe, identifiant: u.identifiant } : null };
+  }
+  const notifyAuth = () => { const u = userObj(getSession()); for (const cb of authCbs) cb(u); };
+  const me = () => { const u = userObj(getSession()); if (!u) throw fail('auth', 'Vous n\'êtes pas connecté.'); return u; };
+  const needF = () => { const u = me(); if (!u.isFormatrice) throw fail('permission-denied', 'Réservé à la formatrice.'); return u; };
+  function watch(fn) { listeners.add(fn); setTimeout(fn, 0); return () => listeners.delete(fn); }
+
+  return {
+    async ready() { },
+    onAuth(cb) { authCbs.add(cb); setTimeout(() => cb(userObj(getSession())), 0); return () => authCbs.delete(cb); },
+    currentUser() { return userObj(getSession()); },
+    async registerStagiaire({ prenom, nom, groupe, password }) {
+      checkName(prenom, nom); checkPassword(password);
+      const d = db(); const id = identifiant(prenom, nom); const uid = 'demo-' + id;
+      if (d.users[uid]) throw fail('auth/email-already-in-use', ERR_FR['auth/email-already-in-use']);
+      d.users[uid] = { email: id + '@' + STUDENT_DOMAIN, prenom: cleanName(prenom), nom: cleanName(nom).toUpperCase(), groupe: cleanName(groupe), identifiant: id, role: 'stagiaire', pw: await sha256(password), createdAt: Date.now() };
+      write(d); setSession(uid); notifyAuth(); return userObj(uid);
+    },
+    async loginStagiaire({ prenom, nom, password }) {
+      checkName(prenom, nom);
+      const d = db(); const uid = 'demo-' + identifiant(prenom, nom); const u = d.users[uid];
+      if (!u) throw fail('auth/user-not-found', ERR_FR['auth/user-not-found']);
+      if (u.pw !== await sha256(password || '')) throw fail('auth/wrong-password', ERR_FR['auth/invalid-credential']);
+      setSession(uid); notifyAuth(); return userObj(uid);
+    },
+    async registerFormatrice(email, password) {
+      if (!isFormatriceEmail(email)) throw fail('form', `En mode démo, utilisez l'adresse ${formatriceEmail}.`);
+      checkPassword(password);
+      const d = db(); const uid = 'demo-formatrice';
+      if (d.users[uid]) throw fail('auth/email-already-in-use', 'Le compte formatrice existe déjà : connectez-vous.');
+      d.users[uid] = { email: formatriceEmail, role: 'formatrice', pw: await sha256(password), createdAt: Date.now() };
+      write(d); setSession(uid); notifyAuth(); return userObj(uid);
+    },
+    async loginFormatrice(email, password) {
+      const d = db(); const u = d.users['demo-formatrice'];
+      if (!isFormatriceEmail(email)) throw fail('form', `En mode démo, l'adresse de la formatrice est ${formatriceEmail}.`);
+      if (!u) throw fail('auth/user-not-found', 'Aucun compte formatrice : cliquez sur « Créer le compte formatrice ».');
+      if (u.pw !== await sha256(password || '')) throw fail('auth/wrong-password', 'Mot de passe incorrect.');
+      setSession('demo-formatrice'); notifyAuth(); return userObj('demo-formatrice');
+    },
+    async refreshUser() { return userObj(getSession()); },
+    async resendVerification() { },
+    async logout() { setSession(null); notifyAuth(); },
+    async getTP(code) { me(); const t = db().tps[normCode(code)]; return t ? Object.assign({ code: normCode(code) }, t) : null; },
+    async createTP(tp) {
+      needF(); const d = db(); const code = normCode(tp.code);
+      if (d.tps[code]) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
+      d.tps[code] = { titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', ouvert: true, createdAt: Date.now(), updatedAt: Date.now() };
+      write(d); return code;
+    },
+    async updateTP(code, patch) { needF(); const d = db(); code = normCode(code); if (!d.tps[code]) throw fail('not-found', 'TP introuvable.'); Object.assign(d.tps[code], patch, { updatedAt: Date.now() }); write(d); },
+    watchTPs(cb) { return watch(() => { const d = db(); cb(Object.entries(d.tps).map(([code, t]) => Object.assign({ code }, t)).sort((a, b) => b.createdAt - a.createdAt)); }); },
+    watchTP(code, cb) { code = normCode(code); return watch(() => { const t = db().tps[code]; cb(t ? Object.assign({ code }, t) : null); }); },
+    async getMyParticipant(code) { const u = me(); const p = (db().parts[normCode(code)] || {})[u.uid]; return p ? Object.assign({}, p) : null; },
+    async joinTP(code, data) {
+      const u = me(); const d = db(); code = normCode(code);
+      if (!d.tps[code]) throw fail('not-found', 'TP introuvable.');
+      if (!d.tps[code].ouvert) throw fail('permission-denied', 'Ce TP est fermé.');
+      const parts = d.parts[code] = d.parts[code] || {};
+      const now = Date.now();
+      parts[u.uid] = Object.assign({ joinedAt: now }, parts[u.uid] || {}, data, { uid: u.uid, lastSeen: now, enLigne: true });
+      write(d);
+    },
+    async updateParticipant(code, patch) {
+      const u = me(); const d = db(); code = normCode(code);
+      if (!d.tps[code] || !d.tps[code].ouvert) throw fail('permission-denied', 'Ce TP est fermé.');
+      const parts = d.parts[code] = d.parts[code] || {};
+      const extra = { lastSeen: Date.now() };
+      if ('algo' in patch) extra.algoAt = Date.now();
+      if (patch.rendu === true) extra.renduAt = Date.now();
+      parts[u.uid] = Object.assign(parts[u.uid] || { uid: u.uid }, patch, extra);
+      write(d);
+    },
+    async logEvent(code, ev) {
+      const u = me(); const d = db(); code = normCode(code);
+      const list = d.events[code] = d.events[code] || [];
+      list.push(Object.assign({}, ev, { id: 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), uid: u.uid, at: Date.now() }));
+      if (list.length > 2000) list.splice(0, list.length - 2000);
+      write(d);
+    },
+    watchParticipants(code, cb) { code = normCode(code); return watch(() => { const p = db().parts[code] || {}; cb(Object.values(p).map(x => Object.assign({}, x))); }); },
+    watchEvents(code, cb) { code = normCode(code); return watch(() => { const l = (db().events[code] || []).slice(-400).reverse(); cb(l.map(x => Object.assign({}, x))); }); },
+    async resetDemo() { needF(); try { localStorage.removeItem(KEY); } catch (e) { /* rien */ } if (chan) chan.postMessage('change'); setSession(null); notifyAuth(); }
+  };
+}
+
+/* ============================================================
+   Firebase : Authentication (e-mail + mot de passe) + Firestore
+   ============================================================ */
+function FirebaseImpl() {
+  let auth = null, fs = null, loading = null;
+  const ts = () => firebase.firestore.FieldValue.serverTimestamp();
+  async function ready() {
+    if (fs) return;
+    if (!loading) {
+      loading = (async () => {
+        if (!(window.firebase && window.firebase.firestore && window.firebase.auth)) {
+          let ok = false;
+          for (const base of [`https://www.gstatic.com/firebasejs/${FB_VERSION}/`, `https://cdn.jsdelivr.net/npm/firebase@${FB_VERSION}/`]) {
+            try {
+              await loadScript(base + 'firebase-app-compat.js');
+              await loadScript(base + 'firebase-auth-compat.js');
+              await loadScript(base + 'firebase-firestore-compat.js');
+              ok = true; break;
+            } catch (e) { /* essai suivant */ }
+          }
+          if (!ok) throw fail('unavailable', 'Impossible de joindre le serveur AlgoLab : vérifiez la connexion internet.');
+        }
+        const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(fbCfg);
+        auth = app.auth();
+        fs = app.firestore();
+        try { fs.settings({ experimentalAutoDetectLongPolling: true, merge: true }); } catch (e) { /* déjà configuré */ }
+      })();
+      loading.catch(() => { loading = null; });
+    }
+    await loading;
+  }
+  async function profileOf(u) {
+    if (!u || isFormatriceEmail(u.email)) return null;
+    try { const d = await fs.doc('users/' + u.uid).get(); return d.exists ? d.data() : null; } catch (e) { return null; }
+  }
+  const userObj = (u, profile) => (u ? { uid: u.uid, email: u.email, emailVerified: u.emailVerified, isFormatrice: isFormatriceEmail(u.email), profile: profile || null } : null);
+  const wrap = fn => async (...a) => { try { await ready(); return await fn(...a); } catch (e) { throw frError(e); } };
+  const tpRef = code => fs.collection('tps').doc(normCode(code));
+  const uid = () => { const u = auth.currentUser; if (!u) throw fail('auth', 'Vous n\'êtes pas connecté.'); return u.uid; };
+  const snapList = (snap) => snap.docs.map(d => Object.assign({ id: d.id }, conv(d.data({ serverTimestamps: 'estimate' }))));
+
+  return {
+    ready: async () => { try { await ready(); } catch (e) { throw frError(e); } },
+    onAuth(cb) {
+      let unsub = null, stopped = false;
+      ready().then(() => { if (!stopped) unsub = auth.onAuthStateChanged(async u => cb(userObj(u, await profileOf(u)))); }).catch(() => cb(null));
+      return () => { stopped = true; if (unsub) unsub(); };
+    },
+    currentUser() { return auth && auth.currentUser ? userObj(auth.currentUser) : null; },
+    registerStagiaire: wrap(async ({ prenom, nom, groupe, password }) => {
+      checkName(prenom, nom); checkPassword(password);
+      const id = identifiant(prenom, nom);
+      const cred = await auth.createUserWithEmailAndPassword(id + '@' + STUDENT_DOMAIN, password);
+      const profile = { prenom: cleanName(prenom), nom: cleanName(nom).toUpperCase(), groupe: cleanName(groupe), identifiant: id, role: 'stagiaire' };
+      await fs.doc('users/' + cred.user.uid).set(Object.assign({ createdAt: ts() }, profile));
+      try { await cred.user.updateProfile({ displayName: profile.prenom + ' ' + profile.nom }); } catch (e) { /* facultatif */ }
+      return userObj(cred.user, profile);
+    }),
+    loginStagiaire: wrap(async ({ prenom, nom, password }) => {
+      checkName(prenom, nom);
+      const cred = await auth.signInWithEmailAndPassword(identifiant(prenom, nom) + '@' + STUDENT_DOMAIN, password || '');
+      return userObj(cred.user, await profileOf(cred.user));
+    }),
+    registerFormatrice: wrap(async (email, password) => {
+      if (!isFormatriceEmail(email)) throw fail('form', 'Cette adresse n\'est pas celle déclarée dans algolab-config.js (formatriceEmail).');
+      checkPassword(password);
+      const cred = await auth.createUserWithEmailAndPassword(email.trim(), password);
+      await cred.user.sendEmailVerification();
+      return userObj(cred.user);
+    }),
+    loginFormatrice: wrap(async (email, password) => {
+      if (!isFormatriceEmail(email)) throw fail('form', 'Cette adresse n\'est pas celle de la formatrice déclarée dans algolab-config.js.');
+      const cred = await auth.signInWithEmailAndPassword(email.trim(), password || '');
+      return userObj(cred.user);
+    }),
+    refreshUser: wrap(async () => {
+      const u = auth.currentUser; if (!u) return null;
+      await u.reload(); await u.getIdToken(true);
+      return userObj(auth.currentUser);
+    }),
+    resendVerification: wrap(async () => { if (auth.currentUser) await auth.currentUser.sendEmailVerification(); }),
+    logout: wrap(async () => { await auth.signOut(); }),
+    getTP: wrap(async code => { const d = await tpRef(code).get(); return d.exists ? Object.assign({ code: d.id }, conv(d.data())) : null; }),
+    createTP: wrap(async tp => {
+      const ref = tpRef(tp.code);
+      const ex = await ref.get();
+      if (ex.exists) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
+      await ref.set({ titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', ouvert: true, createdAt: ts(), updatedAt: ts() });
+      return ref.id;
+    }),
+    updateTP: wrap(async (code, patch) => { await tpRef(code).update(Object.assign({}, patch, { updatedAt: ts() })); }),
+    watchTPs(cb, onErr) {
+      let un = null, stop = false;
+      ready().then(() => { if (!stop) un = fs.collection('tps').orderBy('createdAt', 'desc').onSnapshot(s => cb(snapList(s).map(t => Object.assign({ code: t.id }, t))), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
+      return () => { stop = true; if (un) un(); };
+    },
+    watchTP(code, cb, onErr) {
+      let un = null, stop = false;
+      ready().then(() => { if (!stop) un = tpRef(code).onSnapshot(d => cb(d.exists ? Object.assign({ code: d.id }, conv(d.data({ serverTimestamps: 'estimate' }))) : null), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
+      return () => { stop = true; if (un) un(); };
+    },
+    getMyParticipant: wrap(async code => { const d = await tpRef(code).collection('participants').doc(uid()).get(); return d.exists ? conv(d.data()) : null; }),
+    joinTP: wrap(async (code, data) => {
+      const ref = tpRef(code).collection('participants').doc(uid());
+      const ex = await ref.get();
+      const base = ex.exists ? {} : { joinedAt: ts() };
+      await ref.set(Object.assign(base, data, { uid: uid(), lastSeen: ts(), enLigne: true }), { merge: true });
+    }),
+    updateParticipant: wrap(async (code, patch) => {
+      const p = Object.assign({}, patch, { lastSeen: ts() });
+      if ('algo' in p) p.algoAt = ts();
+      if (p.rendu === true) p.renduAt = ts();
+      await tpRef(code).collection('participants').doc(uid()).set(p, { merge: true });
+    }),
+    logEvent: wrap(async (code, ev) => { await tpRef(code).collection('evenements').add(Object.assign({}, ev, { uid: uid(), at: ts() })); }),
+    watchParticipants(code, cb, onErr) {
+      let un = null, stop = false;
+      ready().then(() => { if (!stop) un = tpRef(code).collection('participants').onSnapshot(s => cb(snapList(s)), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
+      return () => { stop = true; if (un) un(); };
+    },
+    watchEvents(code, cb, onErr) {
+      let un = null, stop = false;
+      ready().then(() => { if (!stop) un = tpRef(code).collection('evenements').orderBy('at', 'desc').limit(400).onSnapshot(s => cb(snapList(s)), e => onErr && onErr(frError(e))); }).catch(e => onErr && onErr(frError(e)));
+      return () => { stop = true; if (un) un(); };
+    }
+  };
+}
+
+const impl = useFirebase ? FirebaseImpl() : DemoImpl();
+return Object.assign({ mode: useFirebase ? 'firebase' : 'demo', formatriceEmail, identifiant, normCode, cleanName, isFormatriceEmail }, impl);
+})();
+if (typeof module !== 'undefined') module.exports = AlgoBackend;
+
+</script>
+</head>
+<body>
+
+<div class="login" id="login" hidden>
+  <div class="login-card">
+    <div class="brand"><span class="mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H6M11 6.5 5.5 12l5.5 5.5"/></svg></span>AlgoLab</div>
+    <div><h1 id="lgTitle">Espace formatrice</h1><p id="lgSub">Suivez vos TP et recevez les alertes en direct.</p></div>
+    <p class="demo-note" id="lgDemo" hidden></p>
+    <form id="lgForm" novalidate>
+      <label>Adresse e-mail<input id="lgEmail" type="email" autocomplete="username" required></label>
+      <label>Mot de passe <span class="opt" id="lgPwHint"></span><input id="lgPw" type="password" autocomplete="current-password" required></label>
+      <p class="err" id="lgErr" hidden></p>
+      <button class="btn primary" id="lgSubmit" type="submit" style="height:40px">Se connecter</button>
+    </form>
+    <p style="font-size:13px"><span id="lgSwitchTxt">Première fois ?</span> <button class="linkbtn" id="lgSwitch" type="button">Créer le compte formatrice</button></p>
+    <div id="lgVerify" hidden style="display:flex;flex-direction:column;gap:10px">
+      <p>Un e-mail de vérification a été envoyé à <b id="lgVEmail"></b>. Cliquez sur le lien qu'il contient, puis revenez ici.</p>
+      <p class="err" id="lgVErr" hidden></p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="lgVDone" type="button">J'ai vérifié mon adresse</button><button class="btn" id="lgVResend" type="button">Renvoyer l'e-mail</button><button class="btn ghost" id="lgVOut" type="button">Se déconnecter</button></div>
+    </div>
+    <p class="credit">AlgoLab · © 2026 Wahiba BOUZYAN</p>
+  </div>
+</div>
+
+<div class="dash" id="dash" hidden>
+  <header class="top">
+    <span class="brand"><span class="mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H6M11 6.5 5.5 12l5.5 5.5"/></svg></span>AlgoLab</span>
+    <span class="sub">Espace formatrice</span>
+    <span class="chip-demo" id="demoChip" hidden title="Les données restent dans ce navigateur">Mode démo</span>
+    <span class="grow"></span>
+    <button class="btn sm" id="notifBtn" title="Notifications du navigateur pour chaque alerte"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span id="notifLbl">Notifications</span></button>
+    <button class="btn sm" id="soundBtn" title="Son à chaque alerte"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg><span>Son</span></button>
+    <span class="who" id="who"></span>
+    <button class="btn sm ghost" id="outBtn">Déconnexion</button>
+  </header>
+  <div class="layout">
+    <aside class="col tps">
+      <div class="col-h">Mes TP <span class="grow"></span><button class="btn sm primary" id="newTpBtn">Nouveau TP</button></div>
+      <div class="col-b" id="tpList"></div>
+    </aside>
+    <main class="main" id="main"></main>
+    <aside class="col feed">
+      <div class="col-h">Alertes en direct
+        <span class="filters"><button class="btn sm on" data-f="alertes">Alertes</button><button class="btn sm" data-f="tout">Tout</button></span>
+      </div>
+      <div class="col-b" id="feed"></div>
+    </aside>
+  </div>
+</div>
+
+<div class="modal" id="modal" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+const B = AlgoBackend;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const LS = { get(k, d) { try { const v = localStorage.getItem('algolab.f.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem('algolab.f.' + k, JSON.stringify(v)); } catch (e) { /* rien */ } } };
+const EV = {
+  collage_bloque: 'Collage externe bloqué', depot_bloque: 'Glisser-déposer bloqué', texte_ia: 'Texte typique d\'une IA',
+  insertion_massive: 'Gros bloc inséré d\'un coup', frappe_rapide: 'Frappe anormalement rapide', sortie_fenetre: 'A quitté la fenêtre AlgoLab',
+  import_fichier: 'Ouverture de fichier', connexion: 'A rejoint le TP', reconnexion: 'Reconnexion', rendu: 'TP rendu', quitte_tp: 'A quitté le TP'
+};
+const ONLINE_MS = 150000;
+const hhmm = t => (t ? new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '');
+const hhmmss = t => (t ? new Date(t).toLocaleTimeString('fr-FR') : '');
+function ago(t) {
+  if (!t) return '—';
+  const s = Math.round((Date.now() - t) / 1000);
+  if (s < 10) return 'à l\'instant'; if (s < 60) return `il y a ${s} s`;
+  if (s < 3600) return `il y a ${Math.floor(s / 60)} min`;
+  return `à ${hhmm(t)}`;
+}
+const F = {
+  user: null, tps: [], sel: LS.get('sel', null), parts: [], events: {}, known: {}, firstLoad: {}, watchers: {},
+  unPartsSel: null, unTPs: null, unseen: LS.get('unseen', {}), filter: 'alertes', sound: LS.get('sound', true), notif: LS.get('notif', false), audio: null
+};
+
+/* ---------- connexion ---------- */
+let lgMode = 'login';
+function showLogin(msg) {
+  $('#dash').hidden = true; $('#login').hidden = false; $('#lgVerify').hidden = true; $('#lgForm').hidden = false;
+  $('#lgSwitch').parentElement.hidden = false;
+  const demo = B.mode === 'demo';
+  $('#lgDemo').hidden = !demo;
+  if (demo) $('#lgDemo').innerHTML = `<b>Mode démo</b> : Firebase n'est pas encore configuré, les données restent dans ce navigateur. Adresse à utiliser : <b>${esc(B.formatriceEmail)}</b>. Ouvrez AlgoLab dans un autre onglet pour jouer le rôle d'un stagiaire.`;
+  if (!demo && (!B.formatriceEmail || /exemple\.com$/.test(B.formatriceEmail))) msg = 'Renseignez votre adresse dans algolab-config.js (formatriceEmail) avant de vous connecter.';
+  if (!$('#lgEmail').value && B.formatriceEmail && !/exemple\.com$/.test(B.formatriceEmail)) $('#lgEmail').value = B.formatriceEmail;
+  setLgMode(lgMode);
+  lgErr(msg || '');
+}
+function setLgMode(m) {
+  lgMode = m;
+  $('#lgTitle').textContent = m === 'login' ? 'Espace formatrice' : 'Créer le compte formatrice';
+  $('#lgSub').textContent = m === 'login' ? 'Suivez vos TP et recevez les alertes en direct.' : (B.mode === 'demo' ? 'Choisissez un mot de passe pour le mode démo.' : 'Une seule fois : un e-mail de vérification vous sera envoyé.');
+  $('#lgSubmit').textContent = m === 'login' ? 'Se connecter' : 'Créer le compte';
+  $('#lgPwHint').textContent = m === 'login' ? '' : '(6 caractères minimum)';
+  $('#lgPw').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+  $('#lgSwitchTxt').textContent = m === 'login' ? 'Première fois ?' : 'Déjà un compte ?';
+  $('#lgSwitch').textContent = m === 'login' ? 'Créer le compte formatrice' : 'Se connecter';
+}
+const lgErr = m => { $('#lgErr').textContent = m; $('#lgErr').hidden = !m; };
+$('#lgSwitch').addEventListener('click', () => { setLgMode(lgMode === 'login' ? 'register' : 'login'); lgErr(''); });
+$('#lgForm').addEventListener('submit', async e => {
+  e.preventDefault(); lgErr('');
+  const btn = $('#lgSubmit'); btn.disabled = true;
+  try {
+    await B.ready();
+    const u = lgMode === 'login' ? await B.loginFormatrice($('#lgEmail').value, $('#lgPw').value) : await B.registerFormatrice($('#lgEmail').value, $('#lgPw').value);
+    route(u);
+  } catch (err) { lgErr(err.message); }
+  btn.disabled = false;
+});
+function showVerify(u) {
+  $('#dash').hidden = true; $('#login').hidden = false;
+  $('#lgForm').hidden = true; $('#lgSwitch').parentElement.hidden = true; $('#lgDemo').hidden = true;
+  $('#lgTitle').textContent = 'Vérifiez votre adresse e-mail'; $('#lgSub').textContent = 'Dernière étape avant d\'accéder à vos TP.';
+  $('#lgVEmail').textContent = u.email; $('#lgVerify').hidden = false; $('#lgVErr').hidden = true;
+}
+$('#lgVDone').addEventListener('click', async () => {
+  try { const u = await B.refreshUser(); if (u && u.emailVerified) route(u); else { $('#lgVErr').textContent = 'L\'adresse n\'est pas encore vérifiée. Ouvrez le lien reçu par e-mail (pensez aux courriers indésirables).'; $('#lgVErr').hidden = false; } }
+  catch (e) { $('#lgVErr').textContent = e.message; $('#lgVErr').hidden = false; }
+});
+$('#lgVResend').addEventListener('click', async () => { try { await B.resendVerification(); toast({ cls: 'ok', title: 'E-mail renvoyé' }); } catch (e) { $('#lgVErr').textContent = e.message; $('#lgVErr').hidden = false; } });
+$('#lgVOut').addEventListener('click', async () => { await B.logout(); showLogin(); });
+$('#outBtn').addEventListener('click', async () => { stopAll(); await B.logout(); F.user = null; showLogin(); });
+
+function route(u) {
+  if (!u) { stopAll(); showLogin(); return; }
+  if (!u.isFormatrice) { B.logout(); stopAll(); showLogin('Ce compte est un compte stagiaire. Connectez-vous avec l\'adresse de la formatrice.'); return; }
+  if (B.mode === 'firebase' && !u.emailVerified) { showVerify(u); return; }
+  if (F.user && F.user.uid === u.uid && !$('#dash').hidden) return;
+  F.user = u; startDash();
+}
+
+/* ---------- tableau de bord ---------- */
+function startDash() {
+  $('#login').hidden = true; $('#dash').hidden = false;
+  $('#demoChip').hidden = B.mode !== 'demo';
+  $('#who').textContent = F.user.email;
+  renderToggles();
+  stopAll();
+  F.unTPs = B.watchTPs(list => { F.tps = list; if (!F.sel && list.length) F.sel = list[0].code; if (F.sel && !list.some(t => t.code === F.sel)) F.sel = list.length ? list[0].code : null; syncWatchers(); renderTPs(); renderMain(); }, err => toast({ cls: 'haute', title: 'Erreur de lecture des TP', body: err.message }));
+}
+function stopAll() {
+  if (F.unTPs) { F.unTPs(); F.unTPs = null; }
+  if (F.unPartsSel) { F.unPartsSel(); F.unPartsSel = null; }
+  for (const k in F.watchers) F.watchers[k]();
+  F.watchers = {}; F.parts = []; F.partsCode = null;
+}
+function syncWatchers() {
+  const want = new Set(F.tps.filter(t => t.ouvert).map(t => t.code));
+  if (F.sel) want.add(F.sel);
+  for (const code of Object.keys(F.watchers)) if (!want.has(code)) { F.watchers[code](); delete F.watchers[code]; }
+  for (const code of want) if (!F.watchers[code]) {
+    F.firstLoad[code] = true;
+    F.watchers[code] = B.watchEvents(code, list => onEvents(code, list), err => toast({ cls: 'haute', title: 'Erreur de lecture des alertes', body: err.message }));
+  }
+  if (F.partsCode !== F.sel) {
+    if (F.unPartsSel) F.unPartsSel();
+    F.parts = []; F.partsCode = F.sel;
+    F.unPartsSel = F.sel ? B.watchParticipants(F.sel, list => { F.parts = list; renderMain(); }, err => toast({ cls: 'haute', title: 'Erreur de lecture des stagiaires', body: err.message })) : null;
+  }
+}
+function onEvents(code, list) {
+  const known = F.known[code] || (F.known[code] = new Set());
+  const fresh = [];
+  for (const ev of list) if (!known.has(ev.id)) { known.add(ev.id); if (!F.firstLoad[code]) fresh.push(ev); }
+  F.firstLoad[code] = false;
+  F.events[code] = list;
+  if (fresh.length) {
+    fresh.reverse().forEach(ev => announce(code, ev));
+    F.fresh = new Set(fresh.map(e => e.id));
+  }
+  if (code === F.sel) { renderFeed(); renderMain(); }
+  renderTPs();
+}
+function announce(code, ev) {
+  const alertish = ev.gravite === 'haute' || ev.gravite === 'moyenne';
+  if (!alertish && ev.type !== 'rendu') return;
+  const tp = F.tps.find(t => t.code === code);
+  const who = `${ev.prenom || ''} ${ev.nom || ''}`.trim() || 'Stagiaire';
+  const title = `${who} · ${EV[ev.type] || ev.type}`;
+  if (alertish && (code !== F.sel || document.hidden)) { F.unseen[code] = (F.unseen[code] || 0) + 1; LS.set('unseen', F.unseen); }
+  toast({ cls: alertish ? ev.gravite : 'ok', title, body: (ev.message || '') + (tp && code !== F.sel ? ` — ${tp.titre}` : ''), onClick: () => { selectTP(code); openStudent(ev.uid); } });
+  if (alertish && F.sound) beep(ev.gravite === 'haute');
+  if (alertish && F.notif && 'Notification' in window && Notification.permission === 'granted' && (document.hidden || !document.hasFocus())) {
+    try { const n = new Notification(`AlgoLab · ${title}`, { body: ev.message || '', tag: ev.id }); n.onclick = () => { window.focus(); selectTP(code); openStudent(ev.uid); n.close(); }; } catch (e) { /* notifications indisponibles */ }
+  }
+  updateTitle();
+}
+function updateTitle() {
+  const n = Object.values(F.unseen).reduce((a, b) => a + b, 0);
+  document.title = (n ? `(${n}) ` : '') + 'Espace formatrice · AlgoLab';
+}
+function selectTP(code) {
+  F.sel = code; LS.set('sel', code);
+  F.unseen[code] = 0; LS.set('unseen', F.unseen); updateTitle();
+  syncWatchers(); renderTPs(); renderMain(); renderFeed();
+}
+
+function renderTPs() {
+  const box = $('#tpList');
+  if (!F.tps.length) { box.innerHTML = '<div class="empty"><b>Aucun TP pour l\'instant.</b><br>Cliquez sur « Nouveau TP » : vous obtiendrez un code à donner à vos stagiaires.</div>'; return; }
+  box.innerHTML = F.tps.map(t => `<button class="tpi${t.code === F.sel ? ' on' : ''}" data-code="${esc(t.code)}">
+    <b>${esc(t.titre)}</b>
+    <span class="l2"><span class="code">${esc(t.code)}</span>${t.groupe ? '· ' + esc(t.groupe) : ''}<span class="state${t.ouvert ? ' open' : ''}">${t.ouvert ? 'ouvert' : 'fermé'}</span></span>
+    ${F.unseen[t.code] ? `<span class="unseen">${F.unseen[t.code]}</span>` : ''}
+  </button>`).join('');
+}
+$('#tpList').addEventListener('click', e => { const b = e.target.closest('.tpi'); if (b) selectTP(b.dataset.code); });
+
+function statsFor(code) {
+  const evs = F.events[code] || [];
+  const by = {};
+  for (const ev of evs) {
+    const s = by[ev.uid] || (by[ev.uid] = { h: 0, m: 0, last: null });
+    if (ev.gravite === 'haute') s.h++; else if (ev.gravite === 'moyenne') s.m++; else continue;
+    if (!s.last || (ev.at || 0) > (s.last.at || 0)) s.last = ev;
+  }
+  return by;
+}
+const online = p => p.enLigne !== false && p.lastSeen && Date.now() - p.lastSeen < ONLINE_MS;
+function renderMain() {
+  const main = $('#main');
+  const tp = F.tps.find(t => t.code === F.sel);
+  if (!tp) {
+    main.innerHTML = `<div class="empty" style="max-width:520px;margin:40px auto"><b>Bienvenue dans votre espace formatrice.</b><br><br>1. Créez un TP avec « Nouveau TP ».<br>2. Donnez le code à vos stagiaires : dans AlgoLab, ils cliquent sur « Mode TP », créent leur compte et entrent le code.<br>3. Suivez ici leur travail et les alertes en direct.</div>`;
+    return;
+  }
+  const by = statsFor(tp.code);
+  const parts = F.partsCode === tp.code ? F.parts.slice() : [];
+  parts.sort((a, b) => ((by[b.uid] || {}).h || 0) - ((by[a.uid] || {}).h || 0) || (a.nom || '').localeCompare(b.nom || '') || (a.prenom || '').localeCompare(b.prenom || ''));
+  const nOn = parts.filter(online).length, nRendu = parts.filter(p => p.rendu).length;
+  const nH = Object.values(by).reduce((a, s) => a + s.h, 0);
+  const scroll = main.scrollTop;
+  main.innerHTML = `<div class="tp-head">
+      <div class="tp-h1"><h1>${esc(tp.titre)}</h1><span class="bigcode">${esc(tp.code)}</span><span class="state${tp.ouvert ? ' open' : ''}">${tp.ouvert ? 'ouvert aux stagiaires' : 'fermé'}</span></div>
+      <div class="tp-meta">${tp.groupe ? 'Groupe ' + esc(tp.groupe) + ' · ' : ''}créé le ${tp.createdAt ? new Date(tp.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) + ' à ' + hhmm(tp.createdAt) : '—'}</div>
+      <div class="tp-actions">
+        <button class="btn sm" id="aToggle">${tp.ouvert ? 'Fermer le TP' : 'Rouvrir le TP'}</button>
+        <button class="btn sm" id="aShow">Afficher le code en grand</button>
+        <button class="btn sm" id="aEdit">Modifier l'énoncé</button>
+        <button class="btn sm" id="aCsv">Exporter (CSV)</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="n">${parts.length}</span><span class="t">stagiaires inscrits</span></div>
+      <div class="stat ok"><span class="n">${nOn}</span><span class="t">en ligne</span></div>
+      <div class="stat"><span class="n">${nRendu}</span><span class="t">TP rendus</span></div>
+      <div class="stat alert"><span class="n">${nH}</span><span class="t">alertes importantes</span></div>
+    </div>
+    <div class="tablewrap">${parts.length ? `<table><thead><tr><th>Stagiaire</th><th>Statut</th><th>Alertes</th><th>Dernière alerte</th><th>Code</th><th>Activité</th></tr></thead><tbody>
+      ${parts.map(p => {
+        const s = by[p.uid] || { h: 0, m: 0, last: null };
+        const st = p.rendu ? `<span class="pill done">Rendu ${p.renduAt ? 'à ' + hhmm(p.renduAt) : ''}</span>` : online(p) ? '<span class="pill on">En ligne</span>' : '<span class="pill">Hors ligne</span>';
+        const lines = p.algo ? p.algo.split('\n').filter(l => l.trim()).length : 0;
+        return `<tr data-uid="${esc(p.uid)}" class="${s.h ? 'hot' : ''}">
+          <td class="nm"><b>${esc(p.nom)} ${esc(p.prenom)}</b><span>${esc(p.groupe || '')}</span></td>
+          <td>${st}</td>
+          <td><span class="cnt"><span class="c ${s.h ? 'h' : 'z'}" title="importantes">${s.h}</span><span class="c ${s.m ? 'm' : 'z'}" title="moyennes">${s.m}</span></span></td>
+          <td class="last">${s.last ? `<b>${esc(EV[s.last.type] || s.last.type)}</b> · <span class="time">${hhmm(s.last.at)}</span>` : '<span class="time">—</span>'}</td>
+          <td class="time">${lines} ligne${lines > 1 ? 's' : ''}</td>
+          <td class="time">${ago(p.lastSeen)}</td>
+        </tr>`;
+      }).join('')}</tbody></table>` : `<div class="empty">Aucun stagiaire n'a encore rejoint ce TP.<br>Donnez-leur le code <b class="mono">${esc(tp.code)}</b> : dans AlgoLab → <b>Mode TP</b> → créer un compte → entrer le code.</div>`}</div>`;
+  main.scrollTop = scroll;
+  $('#aToggle').onclick = async () => { try { await B.updateTP(tp.code, { ouvert: !tp.ouvert }); toast({ cls: 'ok', title: tp.ouvert ? 'TP fermé' : 'TP rouvert' }); } catch (e) { toast({ cls: 'haute', title: 'Action impossible', body: e.message }); } };
+  $('#aShow').onclick = () => projector(tp);
+  $('#aEdit').onclick = () => tpForm(tp);
+  $('#aCsv').onclick = () => exportCsv(tp, parts, by);
+  main.querySelectorAll('tbody tr').forEach(tr => tr.addEventListener('click', () => openStudent(tr.dataset.uid)));
+}
+
+function renderFeed() {
+  const box = $('#feed');
+  const evs = (F.events[F.sel] || []).filter(e => F.filter === 'tout' || e.gravite === 'haute' || e.gravite === 'moyenne');
+  if (!F.sel) { box.innerHTML = '<div class="empty">Les alertes du TP sélectionné apparaîtront ici en direct.</div>'; return; }
+  if (!evs.length) { box.innerHTML = `<div class="empty">${F.filter === 'tout' ? 'Aucune activité pour l\'instant.' : 'Aucune alerte pour l\'instant. Tout va bien.'}</div>`; return; }
+  const fresh = F.fresh || new Set();
+  box.innerHTML = evs.map(e => `<div class="ev ${esc(e.gravite)}${fresh.has(e.id) ? ' new' : ''}" data-uid="${esc(e.uid)}"><span class="bar"></span><div class="in">
+    <div class="l1"><b>${esc(e.nom || '')} ${esc(e.prenom || '')}</b><span class="time">${hhmmss(e.at)}</span></div>
+    <span class="lbl">${esc(EV[e.type] || e.type)}</span>
+    ${e.message ? `<span class="msg">${esc(e.message)}</span>` : ''}
+  </div></div>`).join('');
+  F.fresh = new Set();
+}
+$('#feed').addEventListener('click', e => { const d = e.target.closest('.ev'); if (d) openStudent(d.dataset.uid); });
+$$('.filters .btn').forEach(b => b.addEventListener('click', () => { F.filter = b.dataset.f; $$('.filters .btn').forEach(x => x.classList.toggle('on', x === b)); renderFeed(); }));
+setInterval(() => { if (!$('#dash').hidden && F.sel) renderMain(); }, 15000);
+
+/* ---------- fenêtres ---------- */
+function modal({ title, body, wide, actions, onOpen }) {
+  const box = $('#modal');
+  box.innerHTML = `<div class="mcard${wide ? ' wide' : ''}" role="dialog" aria-modal="true"><div class="mh"><h2>${title}</h2><button class="btn sm ghost" data-x>Fermer</button></div><div class="mb">${body}</div>${actions ? `<div class="mf">${actions}</div>` : ''}</div>`;
+  box.hidden = false;
+  const close = () => { box.hidden = true; box.innerHTML = ''; };
+  box.onclick = e => { if (e.target === box || e.target.closest('[data-x]')) close(); };
+  if (onOpen) onOpen(box, close);
+  return close;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modal').hidden) { $('#modal').hidden = true; $('#modal').innerHTML = ''; } });
+function genCode(titre) {
+  const base = (titre || 'TP').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]+/g, '').slice(0, 6) || 'TP';
+  return base + '-' + String(Math.floor(1000 + Math.random() * 9000));
+}
+function tpForm(tp) {
+  const edit = !!tp;
+  modal({
+    title: edit ? 'Modifier le TP' : 'Nouveau TP', wide: true,
+    body: `<form id="tpF" novalidate>
+      <label>Titre<input id="tTitre" value="${esc(edit ? tp.titre : '')}" placeholder="ex. Calcul du PGCD" required></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <label>Groupe <span class="opt">(facultatif)</span><input id="tGroupe" value="${esc(edit ? tp.groupe || '' : '')}" placeholder="ex. DEV101"></label>
+        <label>Code d'accès <span class="opt">${edit ? '(non modifiable)' : '(à donner aux stagiaires)'}</span><input id="tCode" class="code-in" value="${esc(edit ? tp.code : '')}" ${edit ? 'disabled' : ''} placeholder="généré automatiquement"></label>
+      </div>
+      <label>Énoncé <span class="opt">(affiché aux stagiaires dans AlgoLab)</span><textarea id="tEnonce" placeholder="Écrire un algorithme qui lit deux entiers positifs et affiche leur PGCD avec la méthode d'Euclide.">${esc(edit ? tp.enonce || '' : '')}</textarea></label>
+      <p class="err" id="tErr" hidden></p>
+    </form>`,
+    actions: `<button class="btn" data-x>Annuler</button><button class="btn primary" id="tSave">${edit ? 'Enregistrer' : 'Créer le TP'}</button>`,
+    onOpen(box, close) {
+      const code = $('#tCode');
+      if (!edit) { let touched = false; code.addEventListener('input', () => { touched = true; }); $('#tTitre').addEventListener('input', () => { if (!touched) code.value = genCode($('#tTitre').value); }); code.value = genCode(''); }
+      setTimeout(() => $('#tTitre').focus(), 30);
+      $('#tSave').onclick = async () => {
+        const err = m => { $('#tErr').textContent = m; $('#tErr').hidden = !m; };
+        const titre = $('#tTitre').value.trim();
+        if (titre.length < 3) return err('Donnez un titre au TP.');
+        const data = { titre, groupe: $('#tGroupe').value.trim(), enonce: $('#tEnonce').value };
+        $('#tSave').disabled = true;
+        try {
+          if (edit) { await B.updateTP(tp.code, data); toast({ cls: 'ok', title: 'TP mis à jour' }); }
+          else {
+            const c = B.normCode(code.value);
+            if (!/^[A-Z0-9-]{4,20}$/.test(c)) throw new Error('Le code doit contenir 4 à 20 lettres, chiffres ou tirets.');
+            await B.createTP(Object.assign({ code: c }, data));
+            selectTP(c); toast({ cls: 'ok', title: 'TP créé', body: 'Code à donner aux stagiaires : ' + c });
+            setTimeout(() => projector(Object.assign({ code: c }, data)), 50);
+          }
+          close();
+        } catch (e) { err(e.message); $('#tSave').disabled = false; }
+      };
+    }
+  });
+}
+$('#newTpBtn').addEventListener('click', () => tpForm(null));
+function appUrl() { try { return new URL('../app/', location.href).href; } catch (e) { return 'AlgoLab'; } }
+function projector(tp) {
+  modal({
+    title: esc(tp.titre), wide: true,
+    body: `<div class="proj"><p>Ouvrez AlgoLab, cliquez sur <b>Mode TP</b> et entrez le code :</p><div class="k">${esc(tp.code)}</div><p class="url">${esc(appUrl())}</p><p>Créez votre compte avec votre prénom et votre nom, puis commencez le TP.</p></div>`,
+    actions: `<button class="btn" id="pCopy">Copier le code</button><button class="btn primary" data-x>Fermer</button>`,
+    onOpen() { $('#pCopy').onclick = () => { try { navigator.clipboard.writeText(tp.code).then(() => toast({ cls: 'ok', title: 'Code copié' })); } catch (e) { /* rien */ } }; }
+  });
+}
+function openStudent(uid) {
+  const p = (F.partsCode === F.sel ? F.parts : []).find(x => x.uid === uid);
+  const evs = (F.events[F.sel] || []).filter(e => e.uid === uid);
+  const name = p ? `${p.nom} ${p.prenom}` : (evs[0] ? `${evs[0].nom} ${evs[0].prenom}` : 'Stagiaire');
+  const nAlert = evs.filter(e => e.gravite !== 'info').length;
+  let tab = nAlert ? 'signal' : 'code';
+  const codeHtml = () => p && p.algo ? `<pre class="codebox">${p.algo.split('\n').map((l, i) => `<span class="ln">${i + 1}</span>${esc(l)}`).join('\n')}</pre><p class="time">Dernière sauvegarde : ${p.algoAt ? hhmmss(p.algoAt) : '—'}${p.rendu ? ' · rendu à ' + hhmm(p.renduAt) : ' · pas encore rendu'}</p>` : '<p class="empty">Pas encore de code enregistré.</p>';
+  const tlHtml = () => evs.length ? `<div class="tl">${evs.map(e => `<div class="tli ${esc(e.gravite)}"><span class="tm">${hhmmss(e.at)}</span><span class="bar"></span><div><div class="lbl">${esc(EV[e.type] || e.type)}${e.horsLigne ? ' <span class="time">(envoyé après reconnexion)</span>' : ''}</div>${e.message ? `<div class="msg">${esc(e.message)}</div>` : ''}${e.extrait ? `<details><summary>Voir le texte concerné</summary><pre class="extrait">${esc(e.extrait)}</pre></details>` : ''}</div></div>`).join('')}</div>` : '<p class="empty">Aucun signalement.</p>';
+  modal({
+    title: esc(name) + (p && p.groupe ? ` <span class="time">· ${esc(p.groupe)}</span>` : ''), wide: true,
+    body: `<div class="tabs"><button data-t="signal">Signalements (${nAlert})</button><button data-t="code">Code</button></div><div id="sBody"></div>`,
+    actions: `<button class="btn" id="sCopy">Copier le code</button><button class="btn primary" data-x>Fermer</button>`,
+    onOpen(box) {
+      const draw = () => { box.querySelectorAll('[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === tab)); $('#sBody').innerHTML = tab === 'code' ? codeHtml() : tlHtml(); };
+      box.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { tab = b.dataset.t; draw(); }));
+      $('#sCopy').onclick = () => { if (p && p.algo) try { navigator.clipboard.writeText(p.algo).then(() => toast({ cls: 'ok', title: 'Code copié' })); } catch (e) { /* rien */ } };
+      draw();
+    }
+  });
+}
+function csvCell(v) { const s = String(v == null ? '' : v); return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function exportCsv(tp, parts, by) {
+  const rows = [['Nom', 'Prénom', 'Groupe', 'Statut', 'Rendu à', 'Alertes importantes', 'Alertes moyennes', 'Dernière alerte', 'Lignes de code']];
+  for (const p of parts) { const s = by[p.uid] || { h: 0, m: 0, last: null }; rows.push([p.nom, p.prenom, p.groupe, p.rendu ? 'Rendu' : online(p) ? 'En ligne' : 'Hors ligne', p.rendu ? hhmm(p.renduAt) : '', s.h, s.m, s.last ? (EV[s.last.type] || s.last.type) + ' ' + hhmm(s.last.at) : '', p.algo ? p.algo.split('\n').filter(l => l.trim()).length : 0]); }
+  rows.push([]); rows.push(['Journal des signalements']); rows.push(['Heure', 'Nom', 'Prénom', 'Gravité', 'Type', 'Détail']);
+  for (const e of (F.events[tp.code] || []).slice().reverse()) rows.push([hhmmss(e.at), e.nom, e.prenom, e.gravite, EV[e.type] || e.type, e.message || '']);
+  const csv = '﻿' + rows.map(r => r.map(csvCell).join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `AlgoLab-${tp.code}-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------- notifications ---------- */
+function toast({ cls, title, body, onClick }) {
+  const t = document.createElement('div'); t.className = 'toast ' + (cls || '');
+  t.innerHTML = `<b>${esc(title)}</b>${body ? `<span>${esc(body)}</span>` : ''}`;
+  t.addEventListener('click', () => { t.remove(); if (onClick) onClick(); });
+  const box = $('#toasts'); box.appendChild(t);
+  while (box.children.length > 5) box.firstElementChild.remove();
+  setTimeout(() => t.remove(), cls === 'haute' ? 12000 : 6000);
+}
+function beep(strong) {
+  try {
+    F.audio = F.audio || new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = F.audio; if (ctx.state === 'suspended') ctx.resume();
+    const tones = strong ? [880, 660] : [660];
+    tones.forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.value = f; o.type = 'sine';
+      const t0 = ctx.currentTime + i * 0.18;
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.16);
+      o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + 0.17);
+    });
+  } catch (e) { /* son indisponible */ }
+}
+function renderToggles() {
+  const perm = 'Notification' in window ? Notification.permission : 'denied';
+  $('#notifBtn').classList.toggle('on', F.notif && perm === 'granted');
+  $('#notifLbl').textContent = F.notif && perm === 'granted' ? 'Notifications activées' : 'Activer les notifications';
+  $('#soundBtn').classList.toggle('on', F.sound);
+}
+$('#notifBtn').addEventListener('click', async () => {
+  if (!('Notification' in window)) { toast({ cls: 'moyenne', title: 'Notifications non prises en charge par ce navigateur' }); return; }
+  if (F.notif && Notification.permission === 'granted') { F.notif = false; }
+  else {
+    let p = Notification.permission;
+    if (p === 'default') { try { p = await Notification.requestPermission(); } catch (e) { p = 'denied'; } }
+    if (p !== 'granted') { toast({ cls: 'moyenne', title: 'Notifications bloquées', body: 'Autorisez les notifications pour ce site dans les réglages du navigateur.' }); F.notif = false; }
+    else { F.notif = true; toast({ cls: 'ok', title: 'Notifications activées', body: 'Vous serez prévenue même si cet onglet est en arrière-plan.' }); }
+  }
+  LS.set('notif', F.notif); renderToggles();
+});
+$('#soundBtn').addEventListener('click', () => { F.sound = !F.sound; LS.set('sound', F.sound); renderToggles(); if (F.sound) beep(false); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && F.sel) { F.unseen[F.sel] = 0; LS.set('unseen', F.unseen); updateTitle(); renderTPs(); } });
+
+/* ---------- démarrage ---------- */
+B.ready().then(() => B.onAuth(route)).catch(e => showLogin(e.message));
+})();
+</script>
+</body>
+</html>
