@@ -74,6 +74,8 @@ svg{display:block;flex:none}
 form{display:flex;flex-direction:column;gap:12px;margin:0}
 label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--muted)}
 label .opt{font-weight:400;color:var(--faint)}
+label.check{flex-direction:row;align-items:center;gap:8px;font-weight:500;color:var(--fg);flex-wrap:wrap}
+label.check input{width:16px;height:16px;padding:0;accent-color:var(--accent)}
 input,textarea,select{border:1px solid var(--line);background:var(--win);border-radius:7px;padding:0 11px;height:38px;font-size:14px;outline:0;min-width:0}
 textarea{height:auto;min-height:150px;padding:10px 11px;line-height:1.55;resize:vertical}
 input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--sel)}
@@ -350,12 +352,13 @@ function DemoImpl() {
     },
     async refreshUser() { return userObj(getSession()); },
     async resendVerification() { },
+    async resetPassword() { throw fail('form', 'En mode démo, il n\'y a pas d\'e-mail : effacez les données du navigateur pour recommencer.'); },
     async logout() { setSession(null); notifyAuth(); },
     async getTP(code) { me(); const t = db().tps[normCode(code)]; return t ? Object.assign({ code: normCode(code) }, t) : null; },
     async createTP(tp) {
       needF(); const d = db(); const code = normCode(tp.code);
       if (d.tps[code]) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
-      d.tps[code] = { titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', ouvert: true, createdAt: Date.now(), updatedAt: Date.now() };
+      d.tps[code] = { titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', exemples: !!tp.exemples, ouvert: true, createdAt: Date.now(), updatedAt: Date.now() };
       write(d); return code;
     },
     async updateTP(code, patch) { needF(); const d = db(); code = normCode(code); if (!d.tps[code]) throw fail('not-found', 'TP introuvable.'); Object.assign(d.tps[code], patch, { updatedAt: Date.now() }); write(d); },
@@ -466,8 +469,17 @@ function FirebaseImpl() {
     }),
     loginFormatrice: wrap(async (email, password) => {
       if (!isFormatriceEmail(email)) throw fail('form', 'Cette adresse n\'est pas celle de la formatrice déclarée dans algolab-config.js.');
-      const cred = await auth.signInWithEmailAndPassword(email.trim(), password || '');
+      let cred;
+      try { cred = await auth.signInWithEmailAndPassword(email.trim(), password || ''); }
+      catch (e) {
+        if (/invalid-credential|invalid-login|wrong-password|user-not-found/.test(e.code || '')) { const x = fail(e.code, 'Adresse ou mot de passe incorrect. Première connexion ? Cliquez d\'abord sur « Créer le compte formatrice ». Mot de passe oublié ? Utilisez le lien sous le formulaire.'); x.fr = true; throw x; }
+        throw e;
+      }
       return userObj(cred.user);
+    }),
+    resetPassword: wrap(async email => {
+      if (!isFormatriceEmail(email)) throw fail('form', 'Indiquez l\'adresse de la formatrice.');
+      await auth.sendPasswordResetEmail(email.trim());
     }),
     refreshUser: wrap(async () => {
       const u = auth.currentUser; if (!u) return null;
@@ -481,7 +493,7 @@ function FirebaseImpl() {
       const ref = tpRef(tp.code);
       const ex = await ref.get();
       if (ex.exists) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
-      await ref.set({ titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', ouvert: true, createdAt: ts(), updatedAt: ts() });
+      await ref.set({ titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', exemples: !!tp.exemples, ouvert: true, createdAt: ts(), updatedAt: ts() });
       return ref.id;
     }),
     updateTP: wrap(async (code, patch) => { await tpRef(code).update(Object.assign({}, patch, { updatedAt: ts() })); }),
@@ -542,7 +554,8 @@ if (typeof module !== 'undefined') module.exports = AlgoBackend;
       <p class="err" id="lgErr" hidden></p>
       <button class="btn primary" id="lgSubmit" type="submit" style="height:40px">Se connecter</button>
     </form>
-    <p style="font-size:13px"><span id="lgSwitchTxt">Première fois ?</span> <button class="linkbtn" id="lgSwitch" type="button">Créer le compte formatrice</button></p>
+    <p style="font-size:13px"><span id="lgSwitchTxt">Première fois ?</span> <button class="linkbtn" id="lgSwitch" type="button">Créer le compte formatrice</button><span id="lgForgotWrap"> · <button class="linkbtn" id="lgForgot" type="button">Mot de passe oublié ?</button></span></p>
+    <p class="demo-note" id="lgInfo" hidden></p>
     <div id="lgVerify" hidden style="display:flex;flex-direction:column;gap:10px">
       <p>Un e-mail de vérification a été envoyé à <b id="lgVEmail"></b>. Cliquez sur le lien qu'il contient, puis revenez ici.</p>
       <p class="err" id="lgVErr" hidden></p>
@@ -631,7 +644,16 @@ function setLgMode(m) {
   $('#lgPw').autocomplete = m === 'login' ? 'current-password' : 'new-password';
   $('#lgSwitchTxt').textContent = m === 'login' ? 'Première fois ?' : 'Déjà un compte ?';
   $('#lgSwitch').textContent = m === 'login' ? 'Créer le compte formatrice' : 'Se connecter';
+  $('#lgForgotWrap').hidden = m !== 'login';
 }
+$('#lgForgot').addEventListener('click', async () => {
+  lgErr(''); $('#lgInfo').hidden = true;
+  try {
+    await B.ready(); await B.resetPassword($('#lgEmail').value);
+    $('#lgInfo').textContent = `Un e-mail pour choisir un nouveau mot de passe a été envoyé à ${$('#lgEmail').value.trim()} (pensez aux courriers indésirables).`;
+    $('#lgInfo').hidden = false;
+  } catch (e) { lgErr(e.message); }
+});
 const lgErr = m => { $('#lgErr').textContent = m; $('#lgErr').hidden = !m; };
 $('#lgSwitch').addEventListener('click', () => { setLgMode(lgMode === 'login' ? 'register' : 'login'); lgErr(''); });
 $('#lgForm').addEventListener('submit', async e => {
@@ -769,7 +791,7 @@ function renderMain() {
   const scroll = main.scrollTop;
   main.innerHTML = `<div class="tp-head">
       <div class="tp-h1"><h1>${esc(tp.titre)}</h1><span class="bigcode">${esc(tp.code)}</span><span class="state${tp.ouvert ? ' open' : ''}">${tp.ouvert ? 'ouvert aux stagiaires' : 'fermé'}</span></div>
-      <div class="tp-meta">${tp.groupe ? 'Groupe ' + esc(tp.groupe) + ' · ' : ''}créé le ${tp.createdAt ? new Date(tp.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) + ' à ' + hhmm(tp.createdAt) : '—'}</div>
+      <div class="tp-meta">${tp.exemples ? 'Exemples autorisés · ' : 'Fichier du TP uniquement · '}${tp.groupe ? 'Groupe ' + esc(tp.groupe) + ' · ' : ''}créé le ${tp.createdAt ? new Date(tp.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) + ' à ' + hhmm(tp.createdAt) : '—'}</div>
       <div class="tp-actions">
         <button class="btn sm" id="aToggle">${tp.ouvert ? 'Fermer le TP' : 'Rouvrir le TP'}</button>
         <button class="btn sm" id="aShow">Afficher le code en grand</button>
@@ -847,6 +869,7 @@ function tpForm(tp) {
         <label>Groupe <span class="opt">(facultatif)</span><input id="tGroupe" value="${esc(edit ? tp.groupe || '' : '')}" placeholder="ex. DEV101"></label>
         <label>Code d'accès <span class="opt">${edit ? '(non modifiable)' : '(à donner aux stagiaires)'}</span><input id="tCode" class="code-in" value="${esc(edit ? tp.code : '')}" ${edit ? 'disabled' : ''} placeholder="généré automatiquement"></label>
       </div>
+      <label class="check"><input type="checkbox" id="tEx" ${edit && tp.exemples ? 'checked' : ''}> Autoriser les exemples d'AlgoLab pendant ce TP <span class="opt">(sinon, seul le fichier du TP est visible)</span></label>
       <label>Énoncé <span class="opt">(affiché aux stagiaires dans AlgoLab)</span><textarea id="tEnonce" placeholder="Écrire un algorithme qui lit deux entiers positifs et affiche leur PGCD avec la méthode d'Euclide.">${esc(edit ? tp.enonce || '' : '')}</textarea></label>
       <p class="err" id="tErr" hidden></p>
     </form>`,
@@ -859,7 +882,7 @@ function tpForm(tp) {
         const err = m => { $('#tErr').textContent = m; $('#tErr').hidden = !m; };
         const titre = $('#tTitre').value.trim();
         if (titre.length < 3) return err('Donnez un titre au TP.');
-        const data = { titre, groupe: $('#tGroupe').value.trim(), enonce: $('#tEnonce').value };
+        const data = { titre, groupe: $('#tGroupe').value.trim(), enonce: $('#tEnonce').value, exemples: $('#tEx').checked };
         $('#tSave').disabled = true;
         try {
           if (edit) { await B.updateTP(tp.code, data); toast({ cls: 'ok', title: 'TP mis à jour' }); }

@@ -432,6 +432,7 @@ svg{display:block;flex:none}
 .md-rules li b{color:var(--fg)}
 .md-enonce{white-space:pre-wrap;font-size:13.5px;line-height:1.6;padding:10px 12px;border-radius:7px;background:var(--pane);border:1px solid var(--line);max-height:46vh;overflow:auto}
 .md-warn{color:var(--amber);font-weight:600}
+.tp-hidden-note{font-style:italic}
 @media (max-width:760px){.tp-who,.tp-chip{display:none}.md-row{grid-template-columns:1fr}}
 
 /* ---------- responsive ---------- */
@@ -738,12 +739,13 @@ function DemoImpl() {
     },
     async refreshUser() { return userObj(getSession()); },
     async resendVerification() { },
+    async resetPassword() { throw fail('form', 'En mode démo, il n\'y a pas d\'e-mail : effacez les données du navigateur pour recommencer.'); },
     async logout() { setSession(null); notifyAuth(); },
     async getTP(code) { me(); const t = db().tps[normCode(code)]; return t ? Object.assign({ code: normCode(code) }, t) : null; },
     async createTP(tp) {
       needF(); const d = db(); const code = normCode(tp.code);
       if (d.tps[code]) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
-      d.tps[code] = { titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', ouvert: true, createdAt: Date.now(), updatedAt: Date.now() };
+      d.tps[code] = { titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', exemples: !!tp.exemples, ouvert: true, createdAt: Date.now(), updatedAt: Date.now() };
       write(d); return code;
     },
     async updateTP(code, patch) { needF(); const d = db(); code = normCode(code); if (!d.tps[code]) throw fail('not-found', 'TP introuvable.'); Object.assign(d.tps[code], patch, { updatedAt: Date.now() }); write(d); },
@@ -854,8 +856,17 @@ function FirebaseImpl() {
     }),
     loginFormatrice: wrap(async (email, password) => {
       if (!isFormatriceEmail(email)) throw fail('form', 'Cette adresse n\'est pas celle de la formatrice déclarée dans algolab-config.js.');
-      const cred = await auth.signInWithEmailAndPassword(email.trim(), password || '');
+      let cred;
+      try { cred = await auth.signInWithEmailAndPassword(email.trim(), password || ''); }
+      catch (e) {
+        if (/invalid-credential|invalid-login|wrong-password|user-not-found/.test(e.code || '')) { const x = fail(e.code, 'Adresse ou mot de passe incorrect. Première connexion ? Cliquez d\'abord sur « Créer le compte formatrice ». Mot de passe oublié ? Utilisez le lien sous le formulaire.'); x.fr = true; throw x; }
+        throw e;
+      }
       return userObj(cred.user);
+    }),
+    resetPassword: wrap(async email => {
+      if (!isFormatriceEmail(email)) throw fail('form', 'Indiquez l\'adresse de la formatrice.');
+      await auth.sendPasswordResetEmail(email.trim());
     }),
     refreshUser: wrap(async () => {
       const u = auth.currentUser; if (!u) return null;
@@ -869,7 +880,7 @@ function FirebaseImpl() {
       const ref = tpRef(tp.code);
       const ex = await ref.get();
       if (ex.exists) throw fail('exists', 'Ce code est déjà utilisé par un autre TP.');
-      await ref.set({ titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', ouvert: true, createdAt: ts(), updatedAt: ts() });
+      await ref.set({ titre: tp.titre, enonce: tp.enonce || '', groupe: tp.groupe || '', exemples: !!tp.exemples, ouvert: true, createdAt: ts(), updatedAt: ts() });
       return ref.id;
     }),
     updateTP: wrap(async (code, patch) => { await tpRef(code).update(Object.assign({}, patch, { updatedAt: ts() })); }),
@@ -2870,6 +2881,7 @@ function uniqueName(base) {
   return n;
 }
 function newFile(name, content, rename) {
+  if (TP.active) { toast('Pendant le TP, on ne peut pas créer de nouveau fichier : travaillez dans le fichier du TP.'); return null; }
   const f = { id: 'u' + Date.now() + Math.random().toString(36).slice(2, 6), name: uniqueName(name || 'NouvelAlgorithme.algo'), content: content ?? ALGO_STARTER.replace('MonAlgorithme', 'NouvelAlgorithme'), bps: [] };
   files.unshift(f); saveFiles();
   openFile(f.id);
@@ -2878,6 +2890,7 @@ function newFile(name, content, rename) {
 }
 function saveCopy() {
   const f = cur(); if (!f) return;
+  if (TP.active && f.ex) { toast('Pendant le TP, on ne peut pas copier un exemple dans un nouveau fichier.'); return; }
   if (!f.ex) { saveFiles(); toast('Enregistré dans Mes algorithmes'); return; }
   const content = f.content;
   f.content = f.orig;
@@ -2888,6 +2901,7 @@ function saveCopy() {
   toast(`Copie enregistrée : ${nf.name}`);
 }
 function openFile(id) {
+  if (!tpCanOpen(id)) return;
   storeView();
   if (!S.tabs.includes(id)) S.tabs.push(id);
   S.active = id; saveTabs(); loadActive(); renderAll();
@@ -2895,6 +2909,7 @@ function openFile(id) {
 }
 function closeTab(id) {
   if (S.running && id === S.active) return toast('Arrêtez l\'exécution avant de fermer ce fichier');
+  if (TP.active && id === TP.fileId) return toast('Le fichier du TP reste ouvert pendant toute la durée du TP');
   storeView();
   const i = S.tabs.indexOf(id); if (i < 0) return;
   S.tabs.splice(i, 1);
@@ -2933,10 +2948,13 @@ function fileRow(f) {
   return `<div class="row${act}" data-id="${f.id}" title="${esc(f.name)}"><span class="fi">A</span><span class="rn">${esc(f.name.replace(/\.algo$/, ''))}</span>${acts}</div>`;
 }
 function renderExplorer() {
-  $('#userFiles').innerHTML = files.length ? files.map(fileRow).join('') : '<div class="empty-note">Aucun algorithme pour l\'instant.</div>';
+  const mine = files.filter(tpVisible);
+  $('#userFiles').innerHTML = (mine.length ? mine.map(fileRow).join('') : '<div class="empty-note">Aucun algorithme pour l\'instant.</div>')
+    + (TP.active && mine.length < files.length ? '<div class="empty-note tp-hidden-note">Vos autres algorithmes sont masqués pendant le TP.</div>' : '');
   let h = '', g = null;
-  for (const f of EX) { if (f.group !== g) { g = f.group; h += `<div class="tg-sub">${esc(g)}</div>`; } h += fileRow(f); }
+  for (const f of EX.filter(tpVisible)) { if (f.group !== g) { g = f.group; h += `<div class="tg-sub">${esc(g)}</div>`; } h += fileRow(f); }
   $('#exFiles').innerHTML = h;
+  $('#tgEx').hidden = TP.active && !h;
   const ri = $('#renameIn');
   if (ri) {
     ri.focus(); ri.setSelectionRange(0, ri.value.replace(/\.algo$/, '').length);
@@ -3866,6 +3884,32 @@ const normTxt = s => String(s || '').replace(/\r\n?/g, '\n').split('\n').map(l =
 const fmtDur = ms => { const s = Math.round(ms / 1000); return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, '0')} s`; };
 const hhmm = t => new Date(t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 const tpFile = () => (TP.fileId ? files.find(f => f.id === TP.fileId) : null);
+const tpExemples = () => !!(TP.tp && TP.tp.exemples);
+/* pendant le TP, seul le fichier du TP est visible (et les exemples si la formatrice les autorise) */
+function tpVisible(f) {
+  if (!TP.active || !f) return true;
+  if (f.id === TP.fileId) return true;
+  return !!f.ex && tpExemples();
+}
+function tpCanOpen(id) {
+  if (!TP.active) return true;
+  const f = byId(id);
+  if (f && tpVisible(f)) return true;
+  toast(f && f.ex ? 'Les exemples ne sont pas autorisés pendant ce TP.' : 'Pendant le TP, seul le fichier du TP est accessible.');
+  return false;
+}
+function tpLockTabs(prev) {
+  if (!TP.prevTabs) TP.prevTabs = (prev || S.tabs).filter(id => id !== TP.fileId);
+  S.tabs = S.tabs.filter(id => id === TP.fileId || (byId(id) && byId(id).ex && tpExemples()));
+  if (TP.fileId && byId(TP.fileId) && !S.tabs.includes(TP.fileId)) S.tabs.unshift(TP.fileId);
+  if (!S.tabs.includes(S.active)) S.active = S.tabs[0] || null;
+}
+function tpUnlockTabs() {
+  const prev = (TP.prevTabs || []).filter(id => byId(id) && !S.tabs.includes(id));
+  S.tabs = S.tabs.concat(prev);
+  TP.prevTabs = null;
+  saveTabs();
+}
 
 /* ----- fenêtre modale ----- */
 function modal({ title, body, tone, actions, wide, onOpen, closable = true }) {
@@ -3966,7 +4010,8 @@ function rulesModal(tp) {
     body: `<div class="md-rules">
       <p class="md-lead">Ce TP est <b>surveillé</b>. Pendant toute sa durée :</p>
       <ul>
-        <li><b>Le copier-coller depuis l'extérieur d'AlgoLab est bloqué</b> (ChatGPT, Claude, sites web, documents…). Copier-coller à l'intérieur de l'éditeur reste possible.</li>
+        <li><b>Seul le fichier du TP est accessible.</b> Vos autres algorithmes${tp.exemples ? '' : ' et les exemples'} sont masqués jusqu'à la fin du TP, et on ne peut pas créer de nouveau fichier.</li>
+        <li><b>Le copier-coller n'est possible qu'à l'intérieur du fichier du TP.</b> Tout texte venant d'ailleurs (ChatGPT, Claude, sites web, documents, autres fichiers…) est bloqué.</li>
         <li>Le glisser-déposer et l'ouverture de fichiers sont désactivés.</li>
         <li>Votre formatrice est prévenue si vous quittez la fenêtre AlgoLab, si un gros bloc de texte apparaît d'un coup, ou si le code contient des éléments typiques d'une IA.</li>
         <li>Votre code est enregistré automatiquement et visible par votre formatrice.</li>
@@ -3980,7 +4025,7 @@ function rulesModal(tp) {
 /* ----- démarrage / reprise du TP ----- */
 async function startTP(tp, resumed) {
   const p = TP.user.profile || {};
-  TP.code = tp.code; TP.tp = tp; TP.closed = false; TP.aiFlagged = new Set(); TP.lastFlag = {};
+  TP.code = tp.code; TP.tp = tp; TP.closed = false; TP.aiFlagged = new Set(); TP.lastFlag = {}; TP.clips = [];
   let mine = null;
   try { mine = await B.getMyParticipant(tp.code); } catch (e) { mine = null; }
   let saved = null; try { saved = JSON.parse(localStorage.getItem(TP_KEY) || 'null'); } catch (e) { saved = null; }
@@ -3994,9 +4039,11 @@ async function startTP(tp, resumed) {
   TP.rendu = !!(mine && mine.rendu); TP.renduAt = mine && mine.renduAt || 0;
   TP.startedAt = mine && mine.joinedAt ? mine.joinedAt : Date.now();
   TP.nbSignal = 0; TP.lastSaved = mine && mine.algo || ''; TP.lastWrite = Date.now();
-  try { localStorage.setItem(TP_KEY, JSON.stringify({ code: tp.code, fileId: f.id, uid: TP.user.uid })); } catch (e) { /* stockage indisponible */ }
+  const prevTabs = TP.prevTabs || (saved && saved.code === tp.code && saved.prevTabs) || S.tabs.slice();
   TP.active = true;
   app.dataset.tp = '1';
+  TP.prevTabs = null; tpLockTabs(prevTabs);
+  try { localStorage.setItem(TP_KEY, JSON.stringify({ code: tp.code, fileId: f.id, uid: TP.user.uid, prevTabs: TP.prevTabs })); } catch (e) { /* stockage indisponible */ }
   openFile(f.id);
   renderTPBar();
   try {
@@ -4008,7 +4055,9 @@ async function startTP(tp, resumed) {
   TP.unsubTP = B.watchTP(tp.code, t => {
     if (!t) return;
     const wasOpen = !TP.closed;
+    const exChanged = !!t.exemples !== tpExemples();
     TP.tp = t; TP.closed = !t.ouvert;
+    if (exChanged) { tpLockTabs(); loadActive(); renderAll(); }
     if (wasOpen && TP.closed) modal({ title: 'TP fermé', tone: 'warn', body: '<p>Votre formatrice a fermé ce TP. Votre dernier code enregistré est celui qu\'elle verra.</p>', actions: [{ label: 'D\'accord', cls: 'primary' }] });
     renderTPBar();
   }, () => { });
@@ -4022,6 +4071,8 @@ async function tpResume() {
   if (!saved || !saved.code || !B) return;
   TP.active = true; TP.code = saved.code; TP.fileId = saved.fileId; app.dataset.tp = '1';
   TP.tp = { titre: 'Reconnexion…', code: saved.code };
+  TP.prevTabs = null; tpLockTabs(saved.prevTabs || S.tabs.slice());
+  loadActive(); renderAll();
   renderTPBar();
   try {
     await B.ready();
@@ -4041,7 +4092,9 @@ function stopTP(silent) {
   clearInterval(TP.loop); clearInterval(TP.clock);
   if (TP.unsubTP) { TP.unsubTP(); TP.unsubTP = null; }
   try { localStorage.removeItem(TP_KEY); } catch (e) { /* rien */ }
-  TP.code = null; TP.tp = null; TP.fileId = null;
+  tpUnlockTabs();
+  TP.code = null; TP.tp = null; TP.fileId = null; TP.clips = [];
+  loadActive(); renderAll();
   renderTPBar();
   if (!silent) toast('Vous avez quitté le mode TP');
 }
@@ -4154,19 +4207,23 @@ function flag(type, gravite, message, opt = {}) {
 }
 const blockModal = (title, html) => modal({ title, tone: 'err', body: html, actions: [{ label: 'Compris', cls: 'primary' }] });
 
-/* ----- copier-coller : seul le contenu venant d'AlgoLab est accepté ----- */
-function noteInternal(text) { const t = normTxt(text); if (!t) return; TP.clips.push(t); if (TP.clips.length > 60) TP.clips.shift(); }
+/* ----- copier-coller : seul le texte copié dans le fichier du TP est accepté ----- */
+function noteInternal(text) {
+  if (!TP.active || !cur() || !tpVisible(cur())) return;
+  const t = normTxt(text); if (!t) return; TP.clips.push(t); if (TP.clips.length > 60) TP.clips.shift();
+}
 function selectionText() {
   const a = document.activeElement;
   if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT') && typeof a.selectionStart === 'number') return a.value.slice(a.selectionStart, a.selectionEnd);
   return String(window.getSelection ? window.getSelection() : '');
 }
-['copy', 'cut'].forEach(t => document.addEventListener(t, () => noteInternal(selectionText()), true));
+['copy', 'cut'].forEach(t => document.addEventListener(t, () => { if (document.activeElement === ta) noteInternal(selectionText()); }, true));
 function isInternal(text) {
   const t = normTxt(text); if (!t) return true;
   if (TP.clips.includes(t)) return true;
   const flat = t.replace(/\s+/g, ' ');
-  return all().some(f => f.content.replace(/\s+/g, ' ').includes(flat));
+  const allowed = [tpFile()].concat(tpExemples() ? EX : []).filter(Boolean);
+  return allowed.some(f => f.content.replace(/\s+/g, ' ').includes(flat));
 }
 ta.addEventListener('paste', e => {
   if (!TP.active) return;
@@ -4176,9 +4233,10 @@ ta.addEventListener('paste', e => {
   const marks = aiMarkers(text);
   const n = text.length;
   flag('collage_bloque', marks.length || n >= 40 ? 'haute' : 'moyenne',
-    `Collage bloqué : ${n} caractère${n > 1 ? 's' : ''} venant de l'extérieur d'AlgoLab${marks.length ? ' (style IA : ' + marks.join(', ') + ')' : ''}`,
+    `Collage bloqué : ${n} caractère${n > 1 ? 's' : ''} venant de l'extérieur du fichier du TP${marks.length ? ' (style IA : ' + marks.join(', ') + ')' : ''}`,
     { extrait: text, details: { longueur: n, marqueurs: marks }, key: String(n), throttle: 4000 });
-  blockModal('Copier-coller interdit pendant le TP', `<p>Le texte que vous avez essayé de coller vient de l'<b>extérieur d'AlgoLab</b> (site, IA, document…). Il n'a pas été collé.</p>
+  blockModal('Copier-coller interdit pendant le TP', `<p>Le texte que vous avez essayé de coller ne vient pas du <b>fichier du TP</b> (site, IA, document, autre fichier…). Il n'a pas été collé.</p>
+    <p>Pendant le TP, seul le texte copié dans le fichier du TP peut être collé.</p>
     ${marks.length ? `<p class="md-warn">Ce texte contient des éléments typiques d'une IA : ${esc(marks.join(', '))}.</p>` : ''}
     <p>Cette tentative a été <b>enregistrée et signalée à votre formatrice</b>. Écrivez l'algorithme vous-même.</p>`);
 }, true);

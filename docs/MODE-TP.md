@@ -13,7 +13,9 @@ formatrice suit tout en direct depuis l'**espace formatrice**.
 
 **Bloqué pendant le TP (avec un message d'erreur au stagiaire) :**
 
-- le collage de texte venant de l'extérieur d'AlgoLab (ChatGPT, Claude, sites
+- l'accès aux autres fichiers : seul le fichier du TP est visible (les exemples
+  seulement si la formatrice les autorise), pas de nouveau fichier ;
+- le collage de texte venant de l'extérieur du fichier du TP (ChatGPT, Claude, sites
   web, documents…). Copier-coller *à l'intérieur* de l'éditeur reste permis ;
 - le glisser-déposer de texte ;
 - l'ouverture d'un fichier depuis l'ordinateur ;

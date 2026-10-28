@@ -1,0 +1,50 @@
+{
+  "name": "algolab",
+  "productName": "AlgoLab",
+  "version": "1.1.0",
+  "description": "Éditeur de pseudo-code français avec exécution pas à pas expliquée et mode TP surveillé",
+  "author": "Wahiba BOUZYAN",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "prepare-app": "node scripts/copier-app.js",
+    "start": "npm run prepare-app && electron .",
+    "build": "npm run prepare-app && electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "31.7.7",
+    "electron-builder": "24.13.3"
+  },
+  "build": {
+    "appId": "ma.wahiba.algolab",
+    "productName": "AlgoLab",
+    "copyright": "© 2026 Wahiba BOUZYAN",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "www/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AlgoLab",
+      "artifactName": "AlgoLab-Setup-${version}.${ext}"
+    },
+    "publish": null
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wahiba275/ALGO_LAB.git"
+  }
+}
