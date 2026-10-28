@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// Règles de sécurité Firestore pour AlgoLab (mode TP).
+// Remplacez VOTRE.ADRESSE@exemple.com par l'adresse de la formatrice
+// (la même que formatriceEmail dans algolab-config.js), puis publiez.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function connecte() {
+      return request.auth != null;
+    }
+    function formatrice() {
+      return connecte()
+        && request.auth.token.email == 'ouahibabouzyan@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+    function tpOuvert(code) {
+      return get(/databases/$(database)/documents/tps/$(code)).data.ouvert == true;
+    }
+
+    // Profil des stagiaires : chacun écrit le sien, la formatrice lit tout.
+    match /users/{uid} {
+      allow read: if formatrice() || (connecte() && request.auth.uid == uid);
+      allow create, update: if connecte() && request.auth.uid == uid
+        && request.resource.data.role == 'stagiaire';
+    }
+
+    // TP : un stagiaire peut lire un TP s'il connaît son code,
+    // mais ne peut pas lister les TP. Seule la formatrice les gère.
+    match /tps/{code} {
+      allow get: if connecte();
+      allow list, create, update, delete: if formatrice();
+
+      // Travail de chaque stagiaire (code, statut, rendu).
+      match /participants/{uid} {
+        allow read: if formatrice() || (connecte() && request.auth.uid == uid);
+        allow create, update: if connecte() && request.auth.uid == uid && tpOuvert(code);
+        allow delete: if formatrice();
+      }
+
+      // Signalements : un stagiaire peut seulement en ajouter (jamais lire,
+      // modifier ni effacer). La formatrice lit tout.
+      match /evenements/{id} {
+        allow read, delete: if formatrice();
+        allow create: if connecte() && request.resource.data.uid == request.auth.uid;
+      }
+    }
+  }
+}
